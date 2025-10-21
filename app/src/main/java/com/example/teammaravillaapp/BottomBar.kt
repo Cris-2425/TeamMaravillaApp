@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp
 
+import android.util.Log
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
@@ -17,11 +18,11 @@ fun BottomBar(
 ) {
     NavigationBar {
         NavigationBarItem(
-            selected = BotonOpciones.INICIO,
+            selected = botonSeleccionado == BotonOpciones.INICIO,
             onClick = {
-                Log.e("Barra inferior", "Ir a inicio."),
-            icon = 
-            }
+                Log.e("Barra inferior", "Ir a inicio.")
+            },
+            icon =
         )
     }
     }
