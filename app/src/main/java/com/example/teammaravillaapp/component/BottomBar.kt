@@ -1,6 +1,12 @@
 package com.example.teammaravillaapp.component
 
 import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -22,9 +28,9 @@ fun BottomBar(
     NavigationBar {
         NavigationBarItem(
             selected = botonSeleccionado == BotonOpciones.INICIO,
-            onClick = {
-                Log.e("Barra inferior", "Ir al inicio")
-                botonInicio()
+                onClick = {
+                    Log.e("Barra inferior", "Ir al inicio")
+                    botonInicio()
             },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
         )

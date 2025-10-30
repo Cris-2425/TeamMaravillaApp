@@ -23,7 +23,7 @@ class CardInfo(
     var subtitle: String
 )
 @Composable
-fun Card(cardInfo: CardInfo, modifier: Modifier) {
+fun Card(cardInfo: CardInfo, modifier: Modifier = Modifier) {
     Card(modifier = Modifier.size(width = 240.dp, 100.dp)) {
         Row(modifier = Modifier) {
             Image (

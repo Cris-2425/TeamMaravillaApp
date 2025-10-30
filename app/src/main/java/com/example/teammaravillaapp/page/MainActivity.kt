@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.component
+package com.example.teammaravillaapp.page
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,6 +16,8 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.component.Card
+import com.example.teammaravillaapp.component.DrawerContent
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,11 +35,17 @@ class MainActivity : ComponentActivity() {
                     drawerState = drawerState,
                     drawerContent = {
                         ModalDrawerSheet {
-                                DrawerContent()
+                            DrawerContent()
                             }
                     }
                 ) {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        //PaginaInicio()
+                        //PaginaLogin()
+                        
+
+                        //PaginaRecetas()
+
                         Greeting(
                             name = "Android",
                             modifier = Modifier.padding(innerPadding)
