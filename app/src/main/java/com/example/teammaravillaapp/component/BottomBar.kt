@@ -1,12 +1,6 @@
-package com.example.teammaravillaapp
+package com.example.teammaravillaapp.component
 
 import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -69,10 +63,43 @@ fun BottomBar(
     }
 }
 
+
 @Preview
 @Composable
-fun PreviewBottomBar() {
+fun PreviewBottomBarInicio() {
     MaterialTheme {
         BottomBar( botonSeleccionado = BotonOpciones.INICIO)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarPerfil() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.PERFIL)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarCamara() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.CAMARA)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarRecetas() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.RECETAS)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarSalir() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.SALIR)
     }
 }

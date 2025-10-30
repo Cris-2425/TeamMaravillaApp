@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp
+package com.example.teammaravillaapp.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +43,16 @@ fun DrawerContent() {
     )
     Text(
         text = "Opciones",
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                // Handle click
+                scope.launch { drawerState.close() }
+            }
+            .padding(16.dp)
+    )
+    Text(
+        text = "Salir",
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
