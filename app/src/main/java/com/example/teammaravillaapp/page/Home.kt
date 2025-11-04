@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.Card
 import com.example.teammaravillaapp.component.CardInfo
 import com.example.teammaravillaapp.component.CardTitleText
-
+// Revisar Imagen al iniciar antes de menu
 @Composable
 fun Inicio(cards: List<CardInfo>, modifier: Modifier, pageTitle: String) {
     CardTitleText(pageTitle)
