@@ -39,9 +39,6 @@ fun Card(cardInfo: CardInfo, modifier: Modifier = Modifier) {
     }
 }
 
-
-
-
 @Composable
 fun CardTitleText(title: String) {
     Text(text = title,
