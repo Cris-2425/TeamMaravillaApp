@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp
+package com.example.teammaravillaapp.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +11,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -51,4 +52,20 @@ fun DrawerContent() {
             }
             .padding(16.dp)
     )
+    Text(
+        text = "Salir",
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                // Handle click
+                scope.launch { drawerState.close() }
+            }
+            .padding(16.dp)
+    )
+}
+
+@Preview
+@Composable
+fun PreviewDrawerContent() {
+    DrawerContent()
 }

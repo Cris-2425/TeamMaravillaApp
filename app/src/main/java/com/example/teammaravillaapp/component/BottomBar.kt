@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp
+package com.example.teammaravillaapp.component
 
 import android.util.Log
 import androidx.compose.material.icons.Icons
@@ -28,9 +28,9 @@ fun BottomBar(
     NavigationBar {
         NavigationBarItem(
             selected = botonSeleccionado == BotonOpciones.INICIO,
-            onClick = {
-                Log.e("Barra inferior", "Ir al inicio")
-                botonInicio()
+                onClick = {
+                    Log.e("Barra inferior", "Ir al inicio")
+                    botonInicio()
             },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
         )
@@ -69,10 +69,43 @@ fun BottomBar(
     }
 }
 
+
 @Preview
 @Composable
-fun PreviewBottomBar() {
+fun PreviewBottomBarInicio() {
     MaterialTheme {
         BottomBar( botonSeleccionado = BotonOpciones.INICIO)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarPerfil() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.PERFIL)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarCamara() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.CAMARA)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarRecetas() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.RECETAS)
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBottomBarSalir() {
+    MaterialTheme {
+        BottomBar( botonSeleccionado = BotonOpciones.SALIR)
     }
 }
