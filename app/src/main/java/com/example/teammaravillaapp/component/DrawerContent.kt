@@ -2,20 +2,21 @@ package com.example.teammaravillaapp.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 @Composable
-fun DrawerContent() {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
+fun DrawerContent(
+    onNotificaciones: () -> Unit = {},
+    onCompartir: () -> Unit = {},
+    onOpciones: () -> Unit = {},
+    onSalir: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -27,44 +28,36 @@ fun DrawerContent() {
             text = "Notificaciones",
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    scope.launch { drawerState.close() }
-                }
+                .clickable { onNotificaciones() }
                 .padding(16.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.secondary
         )
 
         Text(
             text = "Compartir lista",
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    scope.launch { drawerState.close() }
-                }
+                .clickable { onCompartir() }
                 .padding(16.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.secondary
         )
 
         Text(
             text = "Opciones",
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    scope.launch { drawerState.close() }
-                }
+                .clickable { onOpciones() }
                 .padding(16.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.secondary
         )
 
         Text(
             text = "Salir",
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    scope.launch { drawerState.close() }
-                }
+                .clickable { onSalir() }
                 .padding(16.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -72,5 +65,7 @@ fun DrawerContent() {
 @Preview
 @Composable
 fun PreviewDrawerContent() {
-    DrawerContent()
+    TeamMaravillaAppTheme {
+        DrawerContent()
+    }
 }

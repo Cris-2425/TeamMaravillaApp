@@ -8,9 +8,9 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,9 +41,9 @@ fun TopBar(
 @Preview
 @Composable
 fun PreviewTopBarInicio() {
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         TopBar(
-            "Lista de la compra"
+            "Team Maravilla"
         )
     }
 }

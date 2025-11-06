@@ -8,11 +8,11 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 enum class BotonOpciones { INICIO, PERFIL, CAMARA, RECETAS, SALIR }
 
@@ -28,9 +28,9 @@ fun BottomBar(
     NavigationBar {
         NavigationBarItem(
             selected = botonSeleccionado == BotonOpciones.INICIO,
-                onClick = {
-                    Log.e("Barra inferior", "Ir al inicio")
-                    botonInicio()
+            onClick = {
+                -            Log.e("Barra inferior", "Ir al inicio")
+                botonInicio()
             },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
         )
@@ -38,7 +38,7 @@ fun BottomBar(
             selected = botonSeleccionado == BotonOpciones.PERFIL,
             onClick = {
                 Log.e("Barra inferior", "Ir al perfil")
-                botonPerfil
+                botonPerfil()
             },
             icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Perfil") }
         )
@@ -69,11 +69,10 @@ fun BottomBar(
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewBottomBarInicio() {
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         BottomBar( botonSeleccionado = BotonOpciones.INICIO)
     }
 }
@@ -81,7 +80,7 @@ fun PreviewBottomBarInicio() {
 @Preview
 @Composable
 fun PreviewBottomBarPerfil() {
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         BottomBar( botonSeleccionado = BotonOpciones.PERFIL)
     }
 }
@@ -89,7 +88,7 @@ fun PreviewBottomBarPerfil() {
 @Preview
 @Composable
 fun PreviewBottomBarCamara() {
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         BottomBar( botonSeleccionado = BotonOpciones.CAMARA)
     }
 }
@@ -97,7 +96,7 @@ fun PreviewBottomBarCamara() {
 @Preview
 @Composable
 fun PreviewBottomBarRecetas() {
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         BottomBar( botonSeleccionado = BotonOpciones.RECETAS)
     }
 }
@@ -105,7 +104,7 @@ fun PreviewBottomBarRecetas() {
 @Preview
 @Composable
 fun PreviewBottomBarSalir() {
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         BottomBar( botonSeleccionado = BotonOpciones.SALIR)
     }
 }
