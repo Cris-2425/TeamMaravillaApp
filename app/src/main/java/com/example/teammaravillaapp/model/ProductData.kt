@@ -1,7 +1,7 @@
 package com.example.teammaravillaapp.model
 
 import com.example.teammaravillaapp.R
-/*
+
 val allProducts = listOf(
 
     Product("Manzana", imageRes = R.drawable.manzana, category = ProductCategory.FRUITS),
@@ -63,6 +63,7 @@ val allProducts = listOf(
     Product("Pan", imageRes = R.drawable.pan, category = ProductCategory.BAKERY),
     Product("Bollo", imageRes = R.drawable.bollo, category = ProductCategory.BAKERY),
     Product("Barra", imageRes = R.drawable.barra, category = ProductCategory.BAKERY),
+    /*
     Product("Baguette", imageRes = R.drawable.baguette, category = ProductCategory.BAKERY),
     Product("Pan de molde", imageRes = R.drawable.pan_molde, category = ProductCategory.BAKERY),
     Product("Croissant", imageRes = R.drawable.croissant, category = ProductCategory.BAKERY),
@@ -96,5 +97,6 @@ val allProducts = listOf(
     Product("Pasta", imageRes = R.drawable.pasta, category = ProductCategory.PASTA),
 
     Product("Arroz", imageRes = R.drawable.arroz, category = ProductCategory.RICE)
+
+     */
 )
-*/
