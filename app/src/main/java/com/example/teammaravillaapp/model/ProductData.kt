@@ -1,0 +1,100 @@
+package com.example.teammaravillaapp.model
+
+import com.example.teammaravillaapp.R
+/*
+val allProducts = listOf(
+
+    Product("Manzana", imageRes = R.drawable.manzana, category = ProductCategory.FRUITS),
+    Product("Plátano", imageRes = R.drawable.platano, category = ProductCategory.FRUITS),
+    Product("Naranja", imageRes = R.drawable.naranja, category = ProductCategory.FRUITS),
+    Product("Pera", imageRes = R.drawable.pera, category = ProductCategory.FRUITS),
+    Product("Fresa", imageRes = R.drawable.fresa, category = ProductCategory.FRUITS),
+    Product("Kiwi", imageRes = R.drawable.kiwi, category = ProductCategory.FRUITS),
+    Product("Mango", imageRes = R.drawable.mango, category = ProductCategory.FRUITS),
+    Product("Uva", imageRes = R.drawable.uva, category = ProductCategory.FRUITS),
+    Product("Melón", imageRes = R.drawable.melon, category = ProductCategory.FRUITS),
+    Product("Sandía", imageRes = R.drawable.sandia, category = ProductCategory.FRUITS),
+
+    Product("Zanahoria", imageRes = R.drawable.zanahoria, category = ProductCategory.VEGETABLES),
+    Product("Lechuga", imageRes = R.drawable.lechuga, category = ProductCategory.VEGETABLES),
+    Product("Tomate", imageRes = R.drawable.tomate, category = ProductCategory.VEGETABLES),
+    Product("Cebolla", imageRes = R.drawable.cebolla, category = ProductCategory.VEGETABLES),
+    Product("Pimiento", imageRes = R.drawable.pimiento, category = ProductCategory.VEGETABLES),
+    Product("Patata", imageRes = R.drawable.patata, category = ProductCategory.VEGETABLES),
+    Product("Calabacín", imageRes = R.drawable.calabacin, category = ProductCategory.VEGETABLES),
+    Product("Pepino", imageRes = R.drawable.pepino, category = ProductCategory.VEGETABLES),
+    Product("Ajo", imageRes = R.drawable.ajo, category = ProductCategory.VEGETABLES),
+    Product("Brócoli", imageRes = R.drawable.brocoli, category = ProductCategory.VEGETABLES),
+
+    Product("Pollo", imageRes = R.drawable.pollo, category = ProductCategory.MEAT),
+    Product("Ternera", imageRes = R.drawable.ternera, category = ProductCategory.MEAT),
+    Product("Cerdo", imageRes = R.drawable.cerdo, category = ProductCategory.MEAT),
+    Product("Pavo", imageRes = R.drawable.pavo, category = ProductCategory.MEAT),
+    Product("Cordero", imageRes = R.drawable.cordero, category = ProductCategory.MEAT),
+    Product("Jamón", imageRes = R.drawable.jamon, category = ProductCategory.MEAT),
+    Product("Chorizo", imageRes = R.drawable.chorizo, category = ProductCategory.MEAT),
+    Product("Salchicha", imageRes = R.drawable.salchicha, category = ProductCategory.MEAT),
+    Product("Albóndigas", imageRes = R.drawable.albondigas, category = ProductCategory.MEAT),
+    Product("Carne picada", imageRes = R.drawable.carne_picada, category = ProductCategory.MEAT),
+
+
+    Product("Atún", imageRes = R.drawable.atun, category = ProductCategory.FISH),
+    Product("Salmón", imageRes = R.drawable.salmon, category = ProductCategory.FISH),
+    Product("Merluza", imageRes = R.drawable.merluza, category = ProductCategory.FISH),
+    Product("Bacalao", imageRes = R.drawable.bacalao, category = ProductCategory.FISH),
+    Product("Sardina", imageRes = R.drawable.sardina, category = ProductCategory.FISH),
+    Product("Calamares", imageRes = R.drawable.calamares, category = ProductCategory.FISH),
+    Product("Gambas", imageRes = R.drawable.gambas, category = ProductCategory.FISH),
+    Product("Mejillón", imageRes = R.drawable.mejillon, category = ProductCategory.FISH),
+    Product("Bonito", imageRes = R.drawable.bonito, category = ProductCategory.FISH),
+    Product("Lubina", imageRes = R.drawable.lubina, category = ProductCategory.FISH),
+
+    Product("Leche", imageRes = R.drawable.leche, category = ProductCategory.DAIRY),
+    Product("Yogur", imageRes = R.drawable.yogur, category = ProductCategory.DAIRY),
+    Product("Queso", imageRes = R.drawable.queso, category = ProductCategory.DAIRY),
+    Product("Mantequilla", imageRes = R.drawable.mantequilla, category = ProductCategory.DAIRY),
+    Product("Kéfir", imageRes = R.drawable.kefir, category = ProductCategory.DAIRY),
+    Product("Nata", imageRes = R.drawable.nata, category = ProductCategory.DAIRY),
+    Product("Requesón", imageRes = R.drawable.requeson, category = ProductCategory.DAIRY),
+    Product("Cuajada", imageRes = R.drawable.cuajada, category = ProductCategory.DAIRY),
+    Product("Batido", imageRes = R.drawable.batido, category = ProductCategory.DAIRY),
+    Product("Petit", imageRes = R.drawable.petit, category = ProductCategory.DAIRY),
+
+    Product("Pan", imageRes = R.drawable.pan, category = ProductCategory.BAKERY),
+    Product("Bollo", imageRes = R.drawable.bollo, category = ProductCategory.BAKERY),
+    Product("Barra", imageRes = R.drawable.barra, category = ProductCategory.BAKERY),
+    Product("Baguette", imageRes = R.drawable.baguette, category = ProductCategory.BAKERY),
+    Product("Pan de molde", imageRes = R.drawable.pan_molde, category = ProductCategory.BAKERY),
+    Product("Croissant", imageRes = R.drawable.croissant, category = ProductCategory.BAKERY),
+    Product("Donut", imageRes = R.drawable.donut, category = ProductCategory.BAKERY),
+    Product("Napolitana", imageRes = R.drawable.napolitana, category = ProductCategory.BAKERY),
+    Product("Torta", imageRes = R.drawable.torta, category = ProductCategory.BAKERY),
+    Product("Empanada", imageRes = R.drawable.empanada, category = ProductCategory.BAKERY),
+
+    Product("Detergente", imageRes = R.drawable.detergente, category = ProductCategory.CLEANING),
+    Product("Suavizante", imageRes = R.drawable.suavizante, category = ProductCategory.CLEANING),
+    Product("Lejía", imageRes = R.drawable.lejia, category = ProductCategory.CLEANING),
+    Product("Lavavajillas", imageRes = R.drawable.lavavajillas, category = ProductCategory.CLEANING),
+    Product("Multiusos", imageRes = R.drawable.multiusos, category = ProductCategory.CLEANING),
+    Product("Bayetas", imageRes = R.drawable.bayetas, category = ProductCategory.CLEANING),
+    Product("Estropajo", imageRes = R.drawable.estropajo, category = ProductCategory.CLEANING),
+    Product("Ambientador", imageRes = R.drawable.ambientador, category = ProductCategory.CLEANING),
+    Product("Papel cocina", imageRes = R.drawable.papel_cocina, category = ProductCategory.CLEANING),
+    Product("Papel higiénico", imageRes = R.drawable.papel_higienico, category = ProductCategory.CLEANING),
+
+    Product("Monster", imageRes = R.drawable.monster, category = ProductCategory.DRINKS),
+    Product("Agua", imageRes = R.drawable.agua, category = ProductCategory.DRINKS),
+    Product("Coca-Cola", imageRes = R.drawable.cocacola, category = ProductCategory.DRINKS),
+    Product("Nestea", imageRes = R.drawable.nestea, category = ProductCategory.DRINKS),
+    Product("Zumo", imageRes = R.drawable.zumo, category = ProductCategory.DRINKS),
+    Product("Aquarius", imageRes = R.drawable.aquarius, category = ProductCategory.DRINKS),
+    Product("Vino blanco", imageRes = R.drawable.vino_blanco, category = ProductCategory.DRINKS),
+    Product("Vino tinto", imageRes = R.drawable.vino_tinto, category = ProductCategory.DRINKS),
+    Product("Café", imageRes = R.drawable.cafe, category = ProductCategory.DRINKS),
+    Product("Té", imageRes = R.drawable.te, category = ProductCategory.DRINKS),
+
+    Product("Pasta", imageRes = R.drawable.pasta, category = ProductCategory.PASTA),
+
+    Product("Arroz", imageRes = R.drawable.arroz, category = ProductCategory.RICE)
+)
+*/
