@@ -1,6 +1,5 @@
 package com.example.teammaravillaapp.page
 
-import ProductBubble
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -8,18 +7,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.teammaravillaapp.model.Product
+import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.component.Title
+import com.example.teammaravillaapp.model.*
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ListDetail() {
-    Box(Modifier
+
+    val productosLista = listOf(Leche, Huevo, Pan, Arroz, Cafe)
+    val usadosRecientemente = listOf(Harina, Yogur, Atun, Queso)
+    val frutasYVerduras = listOf(Manzana, Zanahoria, Lechuga, Tomate)
+    val carneYPescado = listOf(Pollo, Ternera, Atun, Salmon)
+    val otros = listOf(Aceite, Azucar, PapelCocina, Detergente)
+
+    Box(
+        Modifier
         .fillMaxSize()
     ) {
 
@@ -34,10 +42,11 @@ fun ListDetail() {
 
             Title("Nombre lista")
 
-            Row(Modifier
-                .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start) {
-
+            Row(
+                Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
                 Surface(
                     shape = MaterialTheme.shapes.large,
                     color = MaterialTheme.colorScheme.secondary,
@@ -52,7 +61,8 @@ fun ListDetail() {
                 }
             }
 
-            Text("Productos en la lista: ",
+            Text(
+                "Productos en la lista:",
                 style = MaterialTheme.typography.titleSmall)
 
             Surface(
@@ -67,19 +77,14 @@ fun ListDetail() {
                         .fillMaxWidth()
                         .padding(12.dp)
                 ) {
-                    listOf(
-                        "Leche",
-                        "Huevos",
-                        "Pan",
-                        "Arroz",
-                        "Café"
-                    ).forEach {
-                        ProductBubble(Product(it))
+                    productosLista.forEach {
+                        ProductBubble(it)
                     }
                 }
             }
 
-            Text("Usados recientemente",
+            Text(
+                "Usados recientemente",
                 style = MaterialTheme.typography.titleSmall)
 
             Surface(
@@ -94,68 +99,48 @@ fun ListDetail() {
                         .fillMaxWidth()
                         .padding(12.dp)
                 ) {
-                    listOf(
-                        "Harina",
-                        "Yogur",
-                        "Atún",
-                        "Queso"
-                    ).forEach {
-                        ProductBubble(Product(it))
+                    usadosRecientemente.forEach {
+                        ProductBubble(it)
                     }
                 }
             }
 
             Text("Frutas y vegetales",
-                style = MaterialTheme.typography.titleSmall
-            )
+                style = MaterialTheme.typography.titleSmall)
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                listOf(
-                    "Manzana",
-                    "Zanahoria",
-                    "Lechuga",
-                    "Tomate"
-                ).forEach {
-                    ProductBubble(Product(it))
+                frutasYVerduras.forEach {
+                    ProductBubble(it)
                 }
             }
 
-            Text("Carne y pescado",
-                style = MaterialTheme.typography.titleSmall
-            )
+            Text(
+                "Carne y pescado",
+                style = MaterialTheme.typography.titleSmall)
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                listOf(
-                    "Pollo",
-                    "Ternera",
-                    "Atún",
-                    "Salmón")
-                    .forEach {
-                        ProductBubble(Product(it))
-                    }
+            )
+            {
+                carneYPescado.forEach {
+                    ProductBubble(it)
+                }
             }
 
-            Text("Otros",
-                style = MaterialTheme.typography.titleSmall
-            )
+            Text(
+                "Otros",
+                style = MaterialTheme.typography.titleSmall)
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                listOf(
-                    "Aceite",
-                    "Sal",
-                    "Papel",
-                    "Detergente"
-                ).forEach {
-                    ProductBubble(Product(it))
+                otros.forEach {
+                    ProductBubble(it)
                 }
             }
 
@@ -166,6 +151,7 @@ fun ListDetail() {
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
+
                 Text(
                     "Buscador dinámico",
                     modifier = Modifier.align(Alignment.Center),
@@ -174,9 +160,8 @@ fun ListDetail() {
             }
         }
 
-        Box(
-            Modifier
-                .align(Alignment.BottomStart)
+        Box(Modifier
+            .align(Alignment.BottomStart)
         ) {
             BackButton()
         }

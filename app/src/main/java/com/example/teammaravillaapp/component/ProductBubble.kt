@@ -1,4 +1,8 @@
+package com.example.teammaravillaapp.component
+
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,22 +20,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.model.*
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun ProductBubble(
     product: Product,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.secondary,
         contentColor = MaterialTheme.colorScheme.onSecondary,
-        modifier = modifier.size(72.dp)
+        modifier = modifier
+            .size(72.dp)
+            .clickable {
+            Log.e(TAG_GLOBAL, "Producto: ${product.name}")
+        }
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
             if (product.imageRes != null) {
+
                 Image(
                     painter = painterResource(id = product.imageRes),
                     contentDescription = product.name,
@@ -41,11 +54,13 @@ fun ProductBubble(
                         .clip(CircleShape)
                 )
             } else {
+
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(6.dp)
+                    modifier = Modifier
+                        .padding(6.dp)
                 )
             }
         }
@@ -56,6 +71,6 @@ fun ProductBubble(
 @Composable
 fun PreviewProductBubble() {
     TeamMaravillaAppTheme {
-        ProductBubble(Product("Manzana"))
+        ProductBubble(Manzana)
     }
 }

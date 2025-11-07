@@ -1,8 +1,10 @@
 package com.example.teammaravillaapp.page
 
-import ProductBubble
+import android.util.Log
+import com.example.teammaravillaapp.component.ProductBubble
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -19,10 +21,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -68,7 +70,8 @@ fun RecipesDetail(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(160.dp)
-                        .clip(RoundedCornerShape(20.dp)),
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable { Log.e(TAG_GLOBAL, "Receta cover click: ${recipe.title}") },
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -90,6 +93,17 @@ fun RecipesDetail(
 
             Spacer(Modifier.height(34.dp))
 
+            Text(
+                text = "Ingredientes",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(34.dp))
+
             FlowRow(
                 maxItemsInEachRow = 3,
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
@@ -98,7 +112,14 @@ fun RecipesDetail(
                     .fillMaxWidth()
             ) {
                 recipe.products.forEach {
-                    ProductBubble(Product(it.name))
+                    Box(
+                        modifier = Modifier
+                            .clickable {
+                            Log.e(TAG_GLOBAL, "Ingrediente click: ${it.name}")
+                        }
+                    ) {
+                        ProductBubble(it)
+                    }
                 }
             }
 

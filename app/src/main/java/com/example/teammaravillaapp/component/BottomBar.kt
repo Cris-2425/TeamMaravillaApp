@@ -12,57 +12,57 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.model.optionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-
-enum class BotonOpciones { INICIO, PERFIL, CAMARA, RECETAS, SALIR }
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun BottomBar(
-    botonSeleccionado: BotonOpciones,
-    botonInicio: () -> Unit = {},
-    botonPerfil: () -> Unit = {},
-    botonCamara: () -> Unit = {},
-    botonRecetas: () -> Unit = {},
-    botonSalir: () -> Unit = {}
+    selectedButton: optionButton,
+    homeButton: () -> Unit = {},
+    profileButton: () -> Unit = {},
+    cameraButton: () -> Unit = {},
+    recipesButton: () -> Unit = {},
+    exitButton: () -> Unit = {}
 ) {
     NavigationBar {
         NavigationBarItem(
-            selected = botonSeleccionado == BotonOpciones.INICIO,
+            selected = selectedButton == optionButton.HOME,
             onClick = {
-                -            Log.e("Barra inferior", "Ir al inicio")
-                botonInicio()
+                Log.e(TAG_GLOBAL, "Ir al inicio")
+                homeButton()
             },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") }
         )
         NavigationBarItem(
-            selected = botonSeleccionado == BotonOpciones.PERFIL,
+            selected = selectedButton == optionButton.PROFILE,
             onClick = {
-                Log.e("Barra inferior", "Ir al perfil")
-                botonPerfil()
+                Log.e(TAG_GLOBAL, "Ir al perfil")
+                profileButton()
             },
             icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Perfil") }
         )
         NavigationBarItem(
-            selected = botonSeleccionado == BotonOpciones.CAMARA,
+            selected = selectedButton == optionButton.CAMERA,
             onClick = {
-                Log.e("Barra inferior", "Ir a la cámara")
-                botonCamara()
+                Log.e(TAG_GLOBAL, "Ir a la cámara")
+                cameraButton()
             },
             icon = { Icon(Icons.Default.AddCircle, contentDescription = "Cámara") }
         )
         NavigationBarItem(
-            selected = botonSeleccionado == BotonOpciones.RECETAS,
+            selected = selectedButton == optionButton.RECIPES,
             onClick = {
-                Log.e("Barra inferior", "Ir a recetas")
-                botonRecetas()
+                Log.e(TAG_GLOBAL, "Ir a recetas")
+                recipesButton()
             },
             icon = { Icon(Icons.Default.Create, contentDescription = "Recetas") }
         )
         NavigationBarItem(
-            selected = botonSeleccionado == BotonOpciones.SALIR,
+            selected = selectedButton == optionButton.EXIT,
             onClick = {
-                Log.e("Barra inferior", "Salir de la aplicación")
-                botonSalir()
+                Log.e(TAG_GLOBAL, "Salir de la aplicación")
+                exitButton()
             },
             icon = { Icon(Icons.Default.Close, contentDescription = "Salir") }
         )
@@ -71,9 +71,9 @@ fun BottomBar(
 
 @Preview
 @Composable
-fun PreviewBottomBarInicio() {
+fun PreviewBottomBarHome() {
     TeamMaravillaAppTheme {
-        BottomBar( botonSeleccionado = BotonOpciones.INICIO)
+        BottomBar( selectedButton = optionButton.HOME)
     }
 }
 
@@ -81,30 +81,30 @@ fun PreviewBottomBarInicio() {
 @Composable
 fun PreviewBottomBarPerfil() {
     TeamMaravillaAppTheme {
-        BottomBar( botonSeleccionado = BotonOpciones.PERFIL)
+        BottomBar( selectedButton = optionButton.PROFILE)
     }
 }
 
 @Preview
 @Composable
-fun PreviewBottomBarCamara() {
+fun PreviewBottomBarCamera() {
     TeamMaravillaAppTheme {
-        BottomBar( botonSeleccionado = BotonOpciones.CAMARA)
+        BottomBar( selectedButton = optionButton.CAMERA)
     }
 }
 
 @Preview
 @Composable
-fun PreviewBottomBarRecetas() {
+fun PreviewBottomBarRecipes() {
     TeamMaravillaAppTheme {
-        BottomBar( botonSeleccionado = BotonOpciones.RECETAS)
+        BottomBar( selectedButton = optionButton.RECIPES)
     }
 }
 
 @Preview
 @Composable
-fun PreviewBottomBarSalir() {
+fun PreviewBottomBarExit() {
     TeamMaravillaAppTheme {
-        BottomBar( botonSeleccionado = BotonOpciones.SALIR)
+        BottomBar( selectedButton = optionButton.EXIT)
     }
 }
