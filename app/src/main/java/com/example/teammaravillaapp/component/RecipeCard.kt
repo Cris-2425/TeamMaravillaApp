@@ -1,5 +1,10 @@
+package com.example.teammaravillaapp.component
+
+import android.R.attr.onClick
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -14,22 +19,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
-fun RecipeCard(recipe: Recipe) {
+fun RecipeCard(
+    recipe: Recipe,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+
     Surface(
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.secondary,
         contentColor = MaterialTheme.colorScheme.onSecondary,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                Log.e(TAG_GLOBAL, "RecipeCard → click en '${recipe.title}'")
+                onClick()
+            }
     ) {
-
-        Column(Modifier
+        Column(
+            Modifier
             .padding(14.dp)) {
 
             Surface(
@@ -48,48 +62,51 @@ fun RecipeCard(recipe: Recipe) {
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer (Modifier.height(12.dp))
 
             if (recipe.imageRes != null) {
-                Image(
-                    painter = painterResource(id = recipe.imageRes),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(14.dp)),
-                    contentScale = ContentScale.Crop
+
+            Image(
+                painter = painterResource(id = recipe.imageRes),
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .clip(RoundedCornerShape(14.dp)),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Text(
+                    "Foto Receta",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-
-            } else {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Foto Receta",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer (Modifier.height(12.dp))
 
-            FlowRow(
+            FlowRow (
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
-                recipe.products.forEach {
-                    ProductBubble(Product(it.name))
-                }
+
+            recipe.products.forEach {
+                ProductBubble(it)
             }
+        }
         }
     }
 }
@@ -98,6 +115,6 @@ fun RecipeCard(recipe: Recipe) {
 @Composable
 fun PreviewRecipeCard() {
     TeamMaravillaAppTheme {
-        RecipeCard(recipe = RecipeData.recipes.first())
+        RecipeCard(RecipeData.recipes.first())
     }
 }

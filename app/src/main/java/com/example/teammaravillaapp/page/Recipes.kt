@@ -1,7 +1,7 @@
 package com.example.teammaravillaapp.page
 
-import FilterRecipes
-import RecipeCard
+import com.example.teammaravillaapp.component.FilterRecipes
+import com.example.teammaravillaapp.component.RecipeCard
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items

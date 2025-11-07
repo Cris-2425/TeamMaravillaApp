@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.*
+import com.example.teammaravillaapp.model.optionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import kotlinx.coroutines.launch
 
@@ -32,10 +33,10 @@ fun Home() {
         drawerState = drawerState,
         drawerContent = {
             DrawerContent(
-                onNotificaciones = { scope.launch { drawerState.close() } },
-                onCompartir = { scope.launch { drawerState.close() } },
-                onOpciones = { scope.launch { drawerState.close() } },
-                onSalir = { scope.launch { drawerState.close() } }
+                onNotifications = { scope.launch { drawerState.close() } },
+                onShare = { scope.launch { drawerState.close() } },
+                onOptions = { scope.launch { drawerState.close() } },
+                onExit = { scope.launch { drawerState.close() } }
             )
         }
     ) {
@@ -52,7 +53,7 @@ fun Home() {
             },
             bottomBar = {
                 BottomBar(
-                    botonSeleccionado = BotonOpciones.INICIO
+                    selectedButton = optionButton.HOME
                 )
             },
             floatingActionButton = {

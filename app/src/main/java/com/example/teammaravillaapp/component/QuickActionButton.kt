@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.component
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 data class QuickActionData(
     val icon: ImageVector,
@@ -33,14 +35,21 @@ fun QuickActionButton(
     onClick: () -> Unit = {}
 ) {
     Column(
-        modifier = modifier.width(72.dp),
+        modifier = modifier
+            .width(72.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ElevatedCard(
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .clickable(enabled = quickActionButtonData.enabled, onClick = onClick)
+                .clickable(
+                    enabled = quickActionButtonData.enabled,
+                    onClick = {
+                        Log.e(TAG_GLOBAL, "QuickActionButton → click en '${quickActionButtonData.label}'")
+                        onClick()
+                    }
+                )
         ) {
             Box(
                 modifier = Modifier
@@ -56,6 +65,7 @@ fun QuickActionButton(
             }
         }
         Spacer(Modifier.height(6.dp))
+
         Text(
             text = quickActionButtonData.label,
             color = MaterialTheme.colorScheme.primary,
