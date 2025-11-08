@@ -2,7 +2,11 @@ package com.example.teammaravillaapp.model
 
 import com.example.teammaravillaapp.R
 
+/**
+ * Datos de ejemplo de listas sugeridas para el flujo de creación.
+ */
 object SuggestedListData {
+    /** Conjunto fijo de sugerencias básicas. */
     val items: List<SuggestedList> =
         listOf(
             SuggestedList("Compra semanal", R.drawable.fondo_farmacia),

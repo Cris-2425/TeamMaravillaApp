@@ -2,8 +2,20 @@ package com.example.teammaravillaapp.model
 
 import com.example.teammaravillaapp.R
 
+/**
+ * Catálogo de productos y utilidades rápidas de acceso/agrupación.
+ *
+ * - [allProducts] contiene todos los productos “disponibles”.
+ * - [byName] permite resolver un `Product` por nombre en O(1).
+ * - [byCategory] agrupa los productos por [ProductCategory].
+ * - [recentUsed] lista de acceso rápido para “Usados recientemente”.
+ *
+ * Nota: los nombres de [Product.name] se usan como “clave natural”.
+ * Si cambias el nombre en `allProducts`, actualiza cualquier alias/uso.
+ */
 object ProductData {
 
+    /** Listado único de productos del catálogo. */
     val allProducts: List<Product> = listOf(
         // Frutas
         Product("Manzana", R.drawable.manzana, ProductCategory.FRUITS),
@@ -101,9 +113,11 @@ object ProductData {
         Product("Café", R.drawable.cafe, ProductCategory.DRINKS),
         Product("Té", R.drawable.te, ProductCategory.DRINKS),
 
+        // Secos
         Product("Pasta", R.drawable.pasta, ProductCategory.PASTA),
         Product("Arroz", R.drawable.arroz, ProductCategory.RICE),
 
+        // Otros
         Product("Aceite", R.drawable.aceite, ProductCategory.OTHER),
         Product("Azúcar", R.drawable.azucar, ProductCategory.OTHER),
         Product("Harina", R.drawable.harina, ProductCategory.OTHER),
@@ -112,14 +126,33 @@ object ProductData {
         Product("Huevo", R.drawable.huevo, ProductCategory.OTHER),
     )
 
-    val byName = allProducts.associateBy { it.name }
+    /**
+     * Índice de búsqueda rápida por nombre de producto.
+     * Evita recorrer listas para obtener un producto concreto.
+     */
+    val byName: Map<String, Product> = allProducts.associateBy { it.name }
 
+    /**
+     * Devuelve el [Product] con ese nombre o lanza excepción si no existe.
+     *
+     * Útil para inicializar alias/constantes (ver `ProductAliases.kt`)
+     * y para construir listas de trabajo sin nullables.
+     *
+     * @throws IllegalArgumentException si el nombre no está en [allProducts].
+     */
     fun product(name: String): Product =
         requireNotNull(byName[name]) { "No existe el nombre: '$name' en la lista de productos. " }
 
+    /**
+     * Agrupación de productos por categoría para pintar secciones en UI.
+     */
     val byCategory: Map<ProductCategory, List<Product>> =
         allProducts.groupBy { it.category }
 
+    /**
+     * Lista de acceso rápido para la sección “Usados recientemente”.
+     * Puedes reordenar o sustituir estos elementos según tu preferencia.
+     */
     val recentUsed: List<Product> = listOf(
         product("Harina"),
         product("Yogur"),

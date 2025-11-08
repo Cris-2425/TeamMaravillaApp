@@ -6,14 +6,16 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Barra superior reutilizable para la pantalla de creación de listas.
+ * TopBar para **crear lista** con acciones de Cancelar/Guardar.
  *
- * @param onCancel Acción al pulsar "Cancelar".
- * @param onSave Acción al pulsar "Guardar".
- * @param saveEnabled Indica si el botón "Guardar" debe estar activo.
+ * @param onCancel callback al pulsar “Cancelar”.
+ * @param onSave callback al pulsar “Guardar”.
+ * @param saveEnabled habilita o deshabilita el botón Guardar.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,30 +25,32 @@ fun CreateListTopBar(
     saveEnabled: Boolean = true
 ) {
     CenterAlignedTopAppBar(
-        title = {
-            Title("Crear Lista")
-                },
+        title = { Title("Crear Lista") },
         navigationIcon = {
             Button(
                 onClick = {
-                    Log.e(TAG_GLOBAL, "CreateListTopBar -> Cancelar")
+                    Log.e(TAG_GLOBAL, "CreateListTopBar → Cancelar")
                     onCancel()
                 },
                 enabled = true
-            ) {
-                Text("Cancelar")
-            }
+            ) { Text("Cancelar") }
         },
         actions = {
             Button(
                 onClick = {
-                    Log.e(TAG_GLOBAL, "CreateListTopBar -> Guardar")
+                    Log.e(TAG_GLOBAL, "CreateListTopBar → Guardar")
                     onSave()
                 },
                 enabled = saveEnabled
-            ) {
-                Text("Guardar")
-            }
+            ) { Text("Guardar") }
         }
     )
+}
+
+@Preview
+@Composable
+fun PreviewCreateListTopBar() {
+    TeamMaravillaAppTheme {
+        CreateListTopBar()
+    }
 }

@@ -40,6 +40,25 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 import com.example.teammaravillaapp.data.FakeUserRecipes
 
+/**
+ * Tarjeta de receta reutilizable.
+ *
+ * Muestra:
+ * - Cabecera con el **título** y un **botón de favorito** (Mis Recetas).
+ * - Imagen (o placeholder si no hay imagen).
+ * - Sección **"Ingredientes"** con los productos como burbujas.
+ *
+ * Acciones:
+ * - **Tap** sobre la tarjeta → [onClick].
+ * - **Tap** sobre el corazón → añade/quita de *Mis Recetas* en [FakeUserRecipes].
+ *
+ * Notas de estado:
+ * - `isMine` se inicializa leyendo el repositorio en memoria. No persiste entre sesiones (MVP).
+ *
+ * @param recipe Receta a renderizar.
+ * @param modifier Modificador de Jetpack Compose para ajustar tamaño/espaciados/… desde fuera.
+ * @param onClick Acción al pulsar la tarjeta completa (navegar a detalle, etc.).
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipeCard(
@@ -47,6 +66,10 @@ fun RecipeCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    /**
+     * Estado local que refleja si la receta está en "Mis Recetas".
+     * Se recalcula cuando cambia el título de la receta.
+     */
     val isMine = remember(recipe.title) { mutableStateOf(FakeUserRecipes.contains(recipe)) }
 
     Surface(
@@ -56,13 +79,13 @@ fun RecipeCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                Log.e(TAG_GLOBAL, "RecipeCard → click en '${recipe.title}'")
+                Log.e(TAG_GLOBAL, "Click en '${recipe.title}'")
                 onClick()
             }
     ) {
         Column(Modifier.padding(14.dp)) {
 
-            // --- Cabecera con título e icono de favorito ---
+            /** Cabecera con título e icono de favorito */
             Surface(
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.surface,
@@ -85,6 +108,7 @@ fun RecipeCard(
                         textAlign = TextAlign.Center
                     )
 
+                    /** Botón de favorito: añade o elimina del repositorio en memoria */
                     IconButton(onClick = {
                         if (isMine.value) {
                             FakeUserRecipes.remove(recipe)
@@ -113,7 +137,6 @@ fun RecipeCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // --- Imagen o placeholder ---
             if (recipe.imageRes != null) {
                 Image(
                     painter = painterResource(id = recipe.imageRes),
@@ -143,7 +166,6 @@ fun RecipeCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // --- Texto “Ingredientes” antes de los productos ---
             Text(
                 text = "Ingredientes",
                 style = MaterialTheme.typography.titleSmall,
@@ -152,7 +174,6 @@ fun RecipeCard(
 
             Spacer(Modifier.height(6.dp))
 
-            // --- Productos / ingredientes ---
             if (recipe.products.isEmpty()) {
                 Text(
                     text = "Sin ingredientes",

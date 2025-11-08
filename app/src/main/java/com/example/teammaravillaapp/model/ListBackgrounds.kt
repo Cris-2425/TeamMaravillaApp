@@ -3,8 +3,23 @@ package com.example.teammaravillaapp.model
 import androidx.annotation.DrawableRes
 import com.example.teammaravillaapp.R
 
+/**
+ * Resolve de recursos para los fondos de lista.
+ *
+ * Centraliza el mapeo enum → drawable para no repetir
+ * `when` por toda la app y tener un “single source of truth”.
+ */
 object ListBackgrounds {
 
+    /**
+     * Devuelve el drawable del fondo asociado a [label].
+     *
+     * Si [label] es `null` o no coincide con ningún caso, se devuelve
+     * un fondo por defecto para que la UI nunca quede en blanco.
+     *
+     * @param label fondo elegido por el usuario (enum) o `null`.
+     * @return id de recurso drawable siempre válido.
+     */
     @DrawableRes
     fun getBackgroundRes(label: ListBackground?): Int = when (label) {
         ListBackground.FONDO1 -> R.drawable.fondo_farmacia

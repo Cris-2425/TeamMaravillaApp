@@ -3,9 +3,9 @@ package com.example.teammaravillaapp.model
 /**
  * Lista creada por el usuario.
  *
- * @property name Nombre visible de la lista.
- * @property background Fondo elegido.
- * @property products Productos incluidos en la lista.
+ * @property name nombre visible de la lista.
+ * @property background fondo elegido (enum).
+ * @property products productos actualmente incluidos en la lista.
  */
 data class UserList(
     val name: String,

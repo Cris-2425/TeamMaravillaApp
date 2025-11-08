@@ -23,11 +23,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.model.ListBackground
 import com.example.teammaravillaapp.model.ListBackgrounds
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Tarjeta individual de un **fondo** seleccionable.
+ *
+ * @param selected si está seleccionado (pinta borde grueso + check).
+ * @param bg fondo representado.
+ * @param onClick acción al pulsar.
+ */
 @Composable
 fun BackgroundTile(
     selected: Boolean = false,
@@ -43,18 +52,12 @@ fun BackgroundTile(
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.background)
             .border(
-                width = if (selected)
-
-                    2.dp else 1.dp,
-
-                color = if (selected)
-
-                    MaterialTheme.colorScheme.primary
-
-                else
-
-                    MaterialTheme.colorScheme.secondary,
-
+                width =
+                    if (selected) 2.dp
+                    else 1.dp,
+                color =
+                    if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.secondary,
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable {
@@ -62,20 +65,18 @@ fun BackgroundTile(
                 onClick()
             },
         contentAlignment = Alignment.Center
-
     ) {
         Image(
             painter = painterResource(id = imageRes),
-            contentDescription = "",
-            modifier = Modifier
-                .matchParentSize(),
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.Crop
         )
 
         if (selected) {
             Icon(
                 Icons.Default.Check,
-                contentDescription = "",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -85,9 +86,21 @@ fun BackgroundTile(
                     .padding(3.dp)
             )
         }
+
         Text(
             text = bg.name,
             color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBackgroundTile() {
+    TeamMaravillaAppTheme {
+        BackgroundTile(
+            selected = true,
+            bg = ListBackground.FONDO1
         )
     }
 }

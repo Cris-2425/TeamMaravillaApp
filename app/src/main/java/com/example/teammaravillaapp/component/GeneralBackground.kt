@@ -1,8 +1,8 @@
 package com.example.teammaravillaapp.component
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -18,9 +18,12 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 /**
  * Fondo general de la app.
  *
- * @param bgRes     Imagen opcional para usar como fondo. Si es null, se usa el fondo por defecto.
- * @param overlayColor Color del velo para mejorar contraste con el contenido.
- * @param overlayAlpha Opacidad del velo (0f = sin velo).
+ * `Box` de pantalla, para que el resto del
+ * contenido se pinte encima.
+ *
+ * @param bgRes imagen opcional (si `null`, usa fondo por defecto).
+ * @param overlayColor velo para contraste.
+ * @param overlayAlpha opacidad del velo (0f = sin velo).
  */
 @Composable
 fun GeneralBackground(
@@ -29,7 +32,6 @@ fun GeneralBackground(
     overlayAlpha: Float = 0.3f
 ) {
     Box(Modifier.fillMaxSize()) {
-
         val backgroundRes = bgRes ?: R.drawable.background_app_final
 
         Image(
@@ -51,6 +53,8 @@ fun GeneralBackground(
 
 @Preview
 @Composable
-private fun PreviewGeneralBackground() {
-    TeamMaravillaAppTheme { GeneralBackground() }
+fun PreviewGeneralBackground() {
+    TeamMaravillaAppTheme {
+        GeneralBackground()
+    }
 }

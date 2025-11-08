@@ -14,6 +14,12 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Botón flotante de **volver atrás**.
+ *
+ *
+ * @param onClick acción al pulsar (navegar hacia atrás, cerrar panel, etc.).
+ */
 @Composable
 fun BackButton(
     onClick: () -> Unit = {}
@@ -25,8 +31,7 @@ fun BackButton(
         },
         containerColor = MaterialTheme.colorScheme.secondary,
         contentColor = MaterialTheme.colorScheme.onSecondary,
-        modifier = Modifier
-            .padding(start = 16.dp, bottom = 120.dp)
+        modifier = Modifier.padding(start = 16.dp, bottom = 120.dp)
     ) {
         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
     }

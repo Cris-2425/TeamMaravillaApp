@@ -15,6 +15,11 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Chip de filtro para **Recetas**.
+ *
+ * El estado `selected` lo gestiona la pantalla; aquí solo pintamos y disparamos `onClick`.
+ */
 @Composable
 fun FilterRecipes(
     text: String,
@@ -24,14 +29,12 @@ fun FilterRecipes(
 ) {
     Surface(
         shape = CircleShape,
-        color = if (selected)
-            MaterialTheme.colorScheme.secondary
-        else
-            MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = if (selected)
-            MaterialTheme.colorScheme.onSecondary
-        else
-            MaterialTheme.colorScheme.onSecondaryContainer,
+        color =
+            if (selected) MaterialTheme.colorScheme.secondary
+            else MaterialTheme.colorScheme.secondaryContainer,
+        contentColor =
+            if (selected) MaterialTheme.colorScheme.onSecondary
+            else MaterialTheme.colorScheme.onSecondaryContainer,
         modifier = modifier.clickable {
             Log.e(TAG_GLOBAL, "FilterRecipes → Pulsado '$text' (selected=$selected)")
             onClick()
@@ -48,7 +51,7 @@ fun FilterRecipes(
 
 @Preview
 @Composable
-fun PreviewFilterRecipes() {
+private fun PreviewFilterRecipes() {
     TeamMaravillaAppTheme {
         FilterRecipes(
             text = "Recetillas",

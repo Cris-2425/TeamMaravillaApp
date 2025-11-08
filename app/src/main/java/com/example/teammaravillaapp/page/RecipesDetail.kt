@@ -25,9 +25,21 @@ import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * # Pantalla: **Detalle de receta**
+ *
+ * Muestra una receta concreta con:
+ * - Título dentro de una pill.
+ * - Imagen (o placeholder) clickable.
+ * - Sección de “Ingredientes” con `ProductBubble`.
+ *
+ * @param recipe Receta a visualizar.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RecipesDetail(recipe: Recipe) {
+fun RecipesDetail(
+    recipe: Recipe
+) {
     Box(Modifier.fillMaxSize()) {
 
         GeneralBackground()
@@ -37,7 +49,6 @@ fun RecipesDetail(recipe: Recipe) {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-
             Spacer(Modifier.height(16.dp))
 
             Surface(
@@ -66,7 +77,7 @@ fun RecipesDetail(recipe: Recipe) {
                         .height(160.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .clickable {
-                            Log.e(TAG_GLOBAL, "RecipesDetail → Imagen pulsada: '${recipe.title}'")
+                            Log.e(TAG_GLOBAL, "Imagen pulsada: '${recipe.title}'")
                         },
                     contentScale = ContentScale.Crop
                 )
@@ -108,11 +119,9 @@ fun RecipesDetail(recipe: Recipe) {
                 recipe.products.forEach {
                     Box(
                         modifier = Modifier.clickable {
-                            Log.e(TAG_GLOBAL, "RecipesDetail → Ingrediente pulsado: ${it.name}")
+                            Log.e(TAG_GLOBAL, "Ingrediente pulsado: ${it.name}")
                         }
-                    ) {
-                        ProductBubble(it)
-                    }
+                    ) { ProductBubble(it) }
                 }
             }
 
@@ -120,9 +129,7 @@ fun RecipesDetail(recipe: Recipe) {
         }
 
         Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton(
-                onClick = { Log.e(TAG_GLOBAL, "RecipesDetail → BackButton pulsado") }
-            )
+            BackButton(onClick = { Log.e(TAG_GLOBAL, "Volver atrás.") })
         }
     }
 }

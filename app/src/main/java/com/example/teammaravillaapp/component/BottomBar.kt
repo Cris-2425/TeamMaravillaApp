@@ -16,6 +16,13 @@ import com.example.teammaravillaapp.model.optionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Barra de navegación inferior.
+ *
+ * Solo gestiona **UI + callbacks**.
+ *
+ * @param selectedButton botón activo.
+ */
 @Composable
 fun BottomBar(
     selectedButton: optionButton,
@@ -73,15 +80,15 @@ fun BottomBar(
 @Composable
 fun PreviewBottomBarHome() {
     TeamMaravillaAppTheme {
-        BottomBar( selectedButton = optionButton.HOME)
+        BottomBar(selectedButton = optionButton.HOME)
     }
 }
 
 @Preview
 @Composable
-fun PreviewBottomBarPerfil() {
+fun PreviewBottomBarProfile() {
     TeamMaravillaAppTheme {
-        BottomBar( selectedButton = optionButton.PROFILE)
+        BottomBar(selectedButton = optionButton.PROFILE)
     }
 }
 
@@ -89,7 +96,7 @@ fun PreviewBottomBarPerfil() {
 @Composable
 fun PreviewBottomBarCamera() {
     TeamMaravillaAppTheme {
-        BottomBar( selectedButton = optionButton.CAMERA)
+        BottomBar(selectedButton = optionButton.CAMERA)
     }
 }
 
@@ -97,7 +104,7 @@ fun PreviewBottomBarCamera() {
 @Composable
 fun PreviewBottomBarRecipes() {
     TeamMaravillaAppTheme {
-        BottomBar( selectedButton = optionButton.RECIPES)
+        BottomBar(selectedButton = optionButton.RECIPES)
     }
 }
 
@@ -105,6 +112,6 @@ fun PreviewBottomBarRecipes() {
 @Composable
 fun PreviewBottomBarExit() {
     TeamMaravillaAppTheme {
-        BottomBar( selectedButton = optionButton.EXIT)
+        BottomBar(selectedButton = optionButton.EXIT)
     }
 }
