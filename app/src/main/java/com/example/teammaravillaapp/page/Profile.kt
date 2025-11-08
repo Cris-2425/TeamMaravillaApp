@@ -1,7 +1,9 @@
 package com.example.teammaravillaapp.page
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,23 +19,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
+import com.example.teammaravillaapp.component.OptionsGrid
+import com.example.teammaravillaapp.component.ProfileImage
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun Profile() {
-    Box(
-        Modifier.fillMaxSize()
-    )
-    {
+    Box(Modifier.fillMaxSize()) {
+
         GeneralBackground()
 
         ProfileContent()
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-        ) {
-            BackButton()
+        Box(modifier = Modifier.align(Alignment.BottomStart)) {
+            BackButton(onClick = { Log.e(TAG_GLOBAL, "Profile → BackButton") })
         }
     }
 }
@@ -48,7 +48,12 @@ fun ProfileContent() {
     ) {
         Spacer(Modifier.height(44.dp))
 
-        ProfileImage(imageRes = null)
+        ProfileImage(
+            imageRes = null,
+            modifier = Modifier.clickable {
+                Log.e(TAG_GLOBAL, "Profile → Click en imagen de perfil (placeholder)")
+            }
+        )
 
         Spacer(Modifier.height(30.dp))
 
@@ -70,81 +75,6 @@ fun ProfileContent() {
                 "Opción 6"
             )
         )
-    }
-}
-
-@Composable
-fun ProfileImage(
-    imageRes: Int? = null,
-    modifier: Modifier = Modifier
-) {
-    if (imageRes != null) {
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = "Foto de perfil",
-            modifier = modifier
-                .size(110.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        Box(
-            modifier = modifier
-                .size(110.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "Foto de perfil",
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun OptionsGrid(
-    options: List<String>
-) {
-    FlowRow(
-        maxItemsInEachRow = 3,
-        horizontalArrangement = Arrangement.spacedBy(
-            16.dp,
-            Alignment.CenterHorizontally
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        options.forEach {
-            OptionBubble(it)
-        }
-    }
-}
-
-@Composable
-fun OptionBubble(
-    label: String
-) {
-    Surface(
-        modifier = Modifier.size(90.dp),
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-    ) {
-        Box(
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
-        }
     }
 }
 

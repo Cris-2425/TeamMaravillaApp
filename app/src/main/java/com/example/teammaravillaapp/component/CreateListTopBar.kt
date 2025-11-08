@@ -8,8 +8,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-@Composable
+/**
+ * Barra superior reutilizable para la pantalla de creación de listas.
+ *
+ * @param onCancel Acción al pulsar "Cancelar".
+ * @param onSave Acción al pulsar "Guardar".
+ * @param saveEnabled Indica si el botón "Guardar" debe estar activo.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun CreateListTopBar(
     onCancel: () -> Unit = {},
     onSave: () -> Unit = {},
@@ -20,9 +27,7 @@ fun CreateListTopBar(
             Title("Crear Lista")
                 },
         navigationIcon = {
-
             Button(
-
                 onClick = {
                     Log.e(TAG_GLOBAL, "CreateListTopBar -> Cancelar")
                     onCancel()

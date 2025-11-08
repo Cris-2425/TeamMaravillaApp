@@ -1,26 +1,25 @@
 package com.example.teammaravillaapp.page
 
 import android.util.Log
-import com.example.teammaravillaapp.component.ProductBubble
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
+import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
@@ -28,13 +27,8 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RecipesDetail(
-    recipe: Recipe
-) {
-    Box(
-        Modifier
-            .fillMaxSize()
-    ) {
+fun RecipesDetail(recipe: Recipe) {
+    Box(Modifier.fillMaxSize()) {
 
         GeneralBackground()
 
@@ -52,7 +46,7 @@ fun RecipesDetail(
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 Text(
-                    recipe.title,
+                    text = recipe.title,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 10.dp),
@@ -66,12 +60,14 @@ fun RecipesDetail(
             if (recipe.imageRes != null) {
                 Image(
                     painter = painterResource(recipe.imageRes),
-                    contentDescription = "",
+                    contentDescription = "Imagen de receta",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(160.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .clickable { Log.e(TAG_GLOBAL, "Receta cover click: ${recipe.title}") },
+                        .clickable {
+                            Log.e(TAG_GLOBAL, "RecipesDetail → Imagen pulsada: '${recipe.title}'")
+                        },
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -98,8 +94,7 @@ fun RecipesDetail(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(Modifier.height(34.dp))
@@ -108,14 +103,12 @@ fun RecipesDetail(
                 maxItemsInEachRow = 3,
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 recipe.products.forEach {
                     Box(
-                        modifier = Modifier
-                            .clickable {
-                            Log.e(TAG_GLOBAL, "Ingrediente click: ${it.name}")
+                        modifier = Modifier.clickable {
+                            Log.e(TAG_GLOBAL, "RecipesDetail → Ingrediente pulsado: ${it.name}")
                         }
                     ) {
                         ProductBubble(it)
@@ -126,11 +119,10 @@ fun RecipesDetail(
             Spacer(Modifier.height(96.dp))
         }
 
-        Box(
-            Modifier
-                .align(Alignment.BottomStart)
-        ) {
-            BackButton()
+        Box(Modifier.align(Alignment.BottomStart)) {
+            BackButton(
+                onClick = { Log.e(TAG_GLOBAL, "RecipesDetail → BackButton pulsado") }
+            )
         }
     }
 }

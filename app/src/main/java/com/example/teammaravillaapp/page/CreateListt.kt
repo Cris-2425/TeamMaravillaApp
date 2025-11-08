@@ -3,12 +3,8 @@ package com.example.teammaravillaapp.page
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,9 +13,12 @@ import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.BackgroundGrid
 import com.example.teammaravillaapp.component.CreateListTopBar
 import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.component.ListBackgrounds
 import com.example.teammaravillaapp.component.SuggestedListSection
+import com.example.teammaravillaapp.data.FakeUserLists
+import com.example.teammaravillaapp.model.ListBackground
+import com.example.teammaravillaapp.model.ListBackgrounds
 import com.example.teammaravillaapp.model.SuggestedListData
+import com.example.teammaravillaapp.model.UserList
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
@@ -45,7 +44,7 @@ fun CreateListt() {
 @Composable
 fun CreateListContent() {
     var name by rememberSaveable { mutableStateOf("") }
-    var selectedBackground by rememberSaveable { mutableStateOf(ListBackgrounds.Fondo1) }
+    var selectedBackground by rememberSaveable { mutableStateOf(ListBackground.FONDO1) }
     val backgroundRes = ListBackgrounds.getBackgroundRes(selectedBackground)
 
     Box(
@@ -59,7 +58,24 @@ fun CreateListContent() {
                 .fillMaxSize()
         ) {
 
-            CreateListTopBar()
+            CreateListTopBar(
+                onCancel = {
+                    Log.e(TAG_GLOBAL, "Cancelar pulsado")
+                },
+                onSave = {
+                    val newList = UserList(
+                        name = name
+                            .ifBlank { "Nueva lista" },
+                        background = selectedBackground,
+                        products = emptyList()
+                    )
+                    val id = FakeUserLists.add(newList)
+
+                    Log.e(TAG_GLOBAL, "Lista guardada: id=$id, name='${newList.name}'")
+                },
+                saveEnabled = name
+                    .isNotBlank()
+            )
 
             Column(
                 Modifier
@@ -93,9 +109,10 @@ fun CreateListContent() {
                 Spacer(Modifier.height(8.dp))
 
                 BackgroundGrid(
-                    selectedLabel = selectedBackground,
-                    onSelect = {
-                        chosen -> selectedBackground = chosen
+                    selectedBg = selectedBackground,
+                    onSelect = { chosen ->
+                        selectedBackground = chosen
+                        Log.e(TAG_GLOBAL, "Fondo elegido: $chosen")
                     }
                 )
 
@@ -108,7 +125,9 @@ fun CreateListContent() {
 
                 Spacer(Modifier.height(8.dp))
 
-                SuggestedListSection(items = SuggestedListData.items) {
+                SuggestedListSection(
+                    items = SuggestedListData.items
+                ) {
                     name = it.name
                     Log.e(TAG_GLOBAL, "Lista sugerida pulsada: '${it.name}'")
                 }

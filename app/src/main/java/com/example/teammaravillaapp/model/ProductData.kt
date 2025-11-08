@@ -116,4 +116,16 @@ object ProductData {
 
     fun product(name: String): Product =
         requireNotNull(byName[name]) { "No existe el nombre: '$name' en la lista de productos. " }
+
+    val byCategory: Map<ProductCategory, List<Product>> =
+        allProducts.groupBy { it.category }
+
+    val recentUsed: List<Product> = listOf(
+        product("Harina"),
+        product("Yogur"),
+        product("Atún"),
+        product("Queso"),
+        product("Lechuga"),
+        product("Café")
+    )
 }
