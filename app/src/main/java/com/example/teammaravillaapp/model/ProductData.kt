@@ -115,5 +115,5 @@ object ProductData {
     val byName = allProducts.associateBy { it.name }
 
     fun product(name: String): Product =
-        requireNotNull(byName[name]) { "Falta '$name' en allProducts de ProductData" }
+        requireNotNull(byName[name]) { "No existe el nombre: '$name' en la lista de productos. " }
 }

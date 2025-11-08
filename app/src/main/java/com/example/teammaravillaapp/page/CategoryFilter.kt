@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.page
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun CategoryFilter(
@@ -50,12 +52,19 @@ fun CategoryFilter(
             ) {
 
                 TextButton(
-                    onClick = onCancel
+                    onClick = {
+                        Log.e(TAG_GLOBAL, "Cancelar")
+                        onCancel()
+                    }
                 ) {
                     Text("Cancelar")
                 }
+
                 TextButton(
-                    onClick = { onSave(visibility) }
+                    onClick = {
+                        Log.e(TAG_GLOBAL, "Guardar: $visibility")
+                        onSave(visibility)
+                    }
                 ) {
                     Text("Guardar")
                 }
@@ -73,7 +82,7 @@ fun CategoryFilter(
 
             Spacer(Modifier.height(12.dp))
 
-            // Esta parte la copié porque no sabía como ponerlo
+            // Esta parte la copié porque no sabía como ponerlo y quería dejarlo puesto
             AnimatedVisibility(visible = panelVisible) {
                 Column(
                     Modifier
@@ -98,8 +107,10 @@ fun CategoryFilter(
                             Switch(
                                 checked = isOn,
                                 onCheckedChange = { checked ->
-                                    visibility =
-                                        visibility.toMutableMap().apply { this[label] = checked }
+                                    Log.e(TAG_GLOBAL, "'$label' = $checked")
+                                    visibility = visibility
+                                        .toMutableMap()
+                                        .apply { this[label] = checked }
                                 }
                             )
                         }
