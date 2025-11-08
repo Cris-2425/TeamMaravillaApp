@@ -96,14 +96,66 @@ El proyecto sigue una estructura **modular y organizada por capas**, inspirada e
 ## 🧑‍💻 Autores
 
 **Desarrolladores:** Cristian R, Rolando O.
-**Instituto:** IES Teis — 2º DAM  
 **Asignatura:** Programación Multimedia y Dispositivos Móviles  
 
 ---
 
-## 📸 Capturas (opcional)
+## 📸 Capturas de Pantallas
 
-> 
+### 🏠 Pantalla de Inicio (Home)
+Permite acceder a las listas recientes, crear nuevas listas y consultar favoritos o historial.
+![Home](imagenes/home.png)
+
+---
+
+### 🛍️ Crear Lista (CreateListt)
+Pantalla para crear una nueva lista de compra, elegir su fondo y usar plantillas sugeridas.
+![CreateListt](imagenes/create_list.png)
+
+---
+
+### 📋 Detalle de Lista (ListDetail)
+Visualiza y gestiona los productos de una lista concreta.  
+Permite añadir o quitar elementos fácilmente.
+![ListDetail](imagenes/list_detail.png)
+
+---
+
+### 🧮 Filtrar Categorías (CategoryFilter)
+Permite activar o desactivar categorías de productos visibles dentro de la app.
+![CategoryFilter](imagenes/category_filter.png)
+
+---
+
+### 🎨 Estilo de Vista (ListViewTypes)
+Selecciona entre diferentes estilos de presentación: lista, mosaico u otros.
+![ListViewTypes](imagenes/list_view_types.png)
+
+---
+
+### 🍳 Recetas (Recipes)
+Explora recetas disponibles y marca tus favoritas.  
+Muestra imagen e ingredientes de cada una.
+![Recipes](imagenes/recipes.png)
+
+---
+
+### 🍽️ Detalle de Receta (RecipesDetail)
+Visualiza una receta concreta con todos sus ingredientes listados de forma visual.
+![RecipesDetail](imagenes/recipes_detail.png)
+
+---
+
+### 👤 Perfil (Profile)
+Pantalla de usuario con opciones de configuración o accesos rápidos personales.
+![Profile](imagenes/profile.png)
+
+---
+
+### 🔐 Login / Registro (Login)
+Formulario para introducir usuario y contraseña.  
+Interfaz simple y coherente con el resto del diseño.
+![Login](imagenes/login.png)
 
 ---
 
