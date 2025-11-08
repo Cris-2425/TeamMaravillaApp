@@ -1,7 +1,9 @@
 package com.example.teammaravillaapp.model
 
+import androidx.annotation.DrawableRes
+
 data class Product(
     val name: String,
-    val imageRes: Int? = null,
+    @DrawableRes val imageRes: Int? = null,
     val category: ProductCategory = ProductCategory.OTHER
 )

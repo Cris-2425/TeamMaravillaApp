@@ -26,6 +26,7 @@ fun ListDetail() {
     val carneYPescado = listOf(Pollo, Ternera, Atun, Salmon)
     val otros = listOf(Aceite, Azucar, PapelCocina, Detergente)
 
+
     Box(
         Modifier
         .fillMaxSize()
