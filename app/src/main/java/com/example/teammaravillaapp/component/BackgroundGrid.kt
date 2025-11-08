@@ -6,28 +6,33 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.model.ListBackground
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Cuadrícula de selección de **fondos** (4 opciones).
+ *
+ * No hace scroll por sí sola; si la pantalla es larga, mete este
+ * componente dentro de un `LazyColumn`/`Column.verticalScroll(...)`.
+ *
+ * @param selectedBg fondo actualmente seleccionado.
+ * @param onSelect callback con el fondo elegido.
+ */
 @Composable
 fun BackgroundGrid(
     selectedBg: ListBackground = ListBackground.FONDO1,
     onSelect: (ListBackground) -> Unit = {}
 ) {
-
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-    )
-    {
-
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Column(
-            Modifier
-                .weight(1f),
+            Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             BackgroundTile(
                 selected = selectedBg == ListBackground.FONDO1,
                 bg = ListBackground.FONDO1,
@@ -44,24 +49,27 @@ fun BackgroundGrid(
             )
         }
         Column(
-            Modifier
-                .weight(1f),
+            Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             BackgroundTile(
                 selected = selectedBg == ListBackground.FONDO2,
                 bg = ListBackground.FONDO2,
-                onClick = {
-                    onSelect(ListBackground.FONDO2)
-                }
+                onClick = { onSelect(ListBackground.FONDO2) }
             )
             BackgroundTile(
                 selected = selectedBg == ListBackground.FONDO4,
                 bg = ListBackground.FONDO4,
-                onClick = {
-                    onSelect(ListBackground.FONDO4)
-                }
+                onClick = { onSelect(ListBackground.FONDO4) }
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewBackgroundGrid() {
+    TeamMaravillaAppTheme {
+        BackgroundGrid()
     }
 }

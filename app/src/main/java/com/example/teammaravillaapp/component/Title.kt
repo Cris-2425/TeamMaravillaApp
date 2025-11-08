@@ -16,8 +16,15 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Título reutilizable. Si el texto es **"Team Maravilla"**, añade el logo.
+ *
+ * @param texto contenido del título.
+ */
 @Composable
-fun Title(texto: String) {
+fun Title(
+    texto: String
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         if (texto == "Team Maravilla") {
             Image(
@@ -30,7 +37,6 @@ fun Title(texto: String) {
         }
         Text(
             text = texto,
-            modifier = Modifier,
             color = MaterialTheme.colorScheme.primary,
             fontSize = MaterialTheme.typography.titleLarge.fontSize,
             fontWeight = MaterialTheme.typography.titleLarge.fontWeight,

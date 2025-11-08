@@ -1,20 +1,12 @@
 package com.example.teammaravillaapp.page
 
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.BackButton
@@ -24,6 +16,12 @@ import com.example.teammaravillaapp.component.ProfileImage
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * # Pantalla: **Perfil**
+ *
+ * Muestra el perfil del usuario: imagen, nombre y un grid de opciones rápidas.
+ * Por ahora, es estática (placeholder) y los clicks generan logs.
+ */
 @Composable
 fun Profile() {
     Box(Modifier.fillMaxSize()) {
@@ -32,12 +30,21 @@ fun Profile() {
 
         ProfileContent()
 
-        Box(modifier = Modifier.align(Alignment.BottomStart)) {
-            BackButton(onClick = { Log.e(TAG_GLOBAL, "Profile → BackButton") })
+        Box(Modifier.align(Alignment.BottomStart)) {
+            BackButton(onClick = {
+                Log.e(TAG_GLOBAL, "Profile → BackButton")
+            }
+            )
         }
     }
 }
 
+/**
+ * Contenido interno del perfil:
+ * - Imagen (o placeholder) clickable.
+ * - Nombre del usuario.
+ * - Cuadrícula de opciones (placeholders).
+ */
 @Composable
 fun ProfileContent() {
     Column(
@@ -51,7 +58,7 @@ fun ProfileContent() {
         ProfileImage(
             imageRes = null,
             modifier = Modifier.clickable {
-                Log.e(TAG_GLOBAL, "Profile → Click en imagen de perfil (placeholder)")
+                Log.e(TAG_GLOBAL, "Click en la imagen de perfil.")
             }
         )
 
@@ -67,12 +74,8 @@ fun ProfileContent() {
 
         OptionsGrid(
             options = listOf(
-                "Opción 1",
-                "Opción 2",
-                "Opción 3",
-                "Opción 4",
-                "Opción 5",
-                "Opción 6"
+                "Opción 1", "Opción 2", "Opción 3",
+                "Opción 4", "Opción 5", "Opción 6"
             )
         )
     }

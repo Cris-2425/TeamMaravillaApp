@@ -35,7 +35,9 @@ fun Login() {
         ) {
 
             Spacer(Modifier.height(28.dp))
+
             Title("Registrarse")
+
             Spacer(Modifier.height(160.dp))
 
             Surface(
@@ -54,7 +56,7 @@ fun Login() {
                         value = user,
                         onValueChange = {
                             user = it
-                            Log.e(TAG_GLOBAL, "Login → usuario cambió a: '$it'")
+                            Log.e(TAG_GLOBAL, "El usuario cambió a: '$it'")
                         },
                         placeholder = { Text("Usuario") },
                         modifier = Modifier
@@ -69,7 +71,7 @@ fun Login() {
                         value = pass,
                         onValueChange = {
                             pass = it
-                            Log.e(TAG_GLOBAL, "Login → contraseña cambió (longitud=${it.length})")
+                            Log.e(TAG_GLOBAL, "La contraseña cambió a longitud: ${it.length})")
                         },
                         placeholder = { Text("Contraseña") },
                         modifier = Modifier
@@ -83,8 +85,7 @@ fun Login() {
 
                     Button(
                         onClick = {
-                            Log.e(TAG_GLOBAL, "Login → Entrar (user='$user', passLen=${pass.length})")
-                            // Aquí iría tu lógica real de login en el futuro
+                            Log.e(TAG_GLOBAL, "Entrar: '$user', longitud: ${pass.length}")
                         },
                         enabled = user.isNotBlank() && pass.isNotBlank()
                     ) {
@@ -95,7 +96,10 @@ fun Login() {
         }
 
         Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton(onClick = { Log.e(TAG_GLOBAL, "Login → BackButton") })
+            BackButton(onClick = {
+                Log.e(TAG_GLOBAL, "Login → BackButton")
+            }
+            )
         }
     }
 }

@@ -20,11 +20,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.teammaravillaapp.model.*
+import com.example.teammaravillaapp.model.Manzana
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Burbuja circular de **producto** (imagen o texto).
+ *
+ * No gestiona estado; se usa como célula reutilizable en listas/categorías.
+ *
+ * @param product modelo visual (nombre/imagen).
+ */
 @Composable
 fun ProductBubble(
     product: Product,
@@ -37,14 +44,11 @@ fun ProductBubble(
         modifier = modifier
             .size(72.dp)
             .clickable {
-            Log.e(TAG_GLOBAL, "Producto: ${product.name}")
-        }
+                Log.e(TAG_GLOBAL, "Producto: ${product.name}")
+            }
     ) {
-        Box(
-            contentAlignment = Alignment.Center
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             if (product.imageRes != null) {
-
                 Image(
                     painter = painterResource(id = product.imageRes),
                     contentDescription = product.name,
@@ -54,13 +58,11 @@ fun ProductBubble(
                         .clip(CircleShape)
                 )
             } else {
-
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(6.dp)
+                    modifier = Modifier.padding(6.dp)
                 )
             }
         }

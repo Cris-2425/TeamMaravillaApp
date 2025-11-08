@@ -14,11 +14,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.*
+import com.example.teammaravillaapp.model.CardInfo
+import com.example.teammaravillaapp.model.QuickActionData
+import com.example.teammaravillaapp.model.SearchFieldData
 import com.example.teammaravillaapp.model.optionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 import kotlinx.coroutines.launch
 
+/**
+ * Pantalla **Home**.
+ *
+ * Estructura base:
+ * - **Drawer** lateral con [DrawerContent] para acciones globales.
+ * - **Scaffold** con [TopBar], [BottomBar] y FAB.
+ * - Buscador, acciones rápidas y un bloque de “listas recientes”.
+ *
+ * No hay navegación ni lógica de negocio; todos los eventos hacen `Log.e`
+ * para depurar desde Logcat.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home() {
@@ -28,8 +42,8 @@ fun Home() {
 
     val quickActions = listOf(
         QuickActionData(Icons.Default.ShoppingCart, "Nueva lista"),
-        QuickActionData(Icons.Default.Favorite,   "Favoritos"),
-        QuickActionData(Icons.Default.Create,     "Historial")
+        QuickActionData(Icons.Default.Favorite, "Favoritos"),
+        QuickActionData(Icons.Default.Create, "Historial")
     )
 
     ModalNavigationDrawer(
@@ -37,20 +51,28 @@ fun Home() {
         drawerContent = {
             DrawerContent(
                 onNotifications = {
-                    Log.e(TAG_GLOBAL, "Home → Drawer: Notificaciones")
-                    scope.launch { drawerState.close() }
+                    Log.e(TAG_GLOBAL, "Home -> Drawer: Notificaciones")
+                    scope.launch {
+                        drawerState.close()
+                    }
                 },
                 onShare = {
-                    Log.e(TAG_GLOBAL, "Home → Drawer: Compartir lista")
-                    scope.launch { drawerState.close() }
+                    Log.e(TAG_GLOBAL, "Home -> Drawer: Compartir lista")
+                    scope.launch {
+                        drawerState.close()
+                    }
                 },
                 onOptions = {
-                    Log.e(TAG_GLOBAL, "Home → Drawer: Opciones")
-                    scope.launch { drawerState.close() }
+                    Log.e(TAG_GLOBAL, "Home -> Drawer: Opciones")
+                    scope.launch {
+                        drawerState.close()
+                    }
                 },
                 onExit = {
-                    Log.e(TAG_GLOBAL, "Home → Drawer: Salir")
-                    scope.launch { drawerState.close() }
+                    Log.e(TAG_GLOBAL, "Home -> Drawer: Salir")
+                    scope.launch {
+                        drawerState.close()
+                    }
                 }
             )
         }
@@ -60,14 +82,16 @@ fun Home() {
                 TopBar(
                     title = "Team Maravilla",
                     onMenuClick = {
-                        Log.e(TAG_GLOBAL, "Home → TopBar: abrir menú")
-                        scope.launch { drawerState.open() }
+                        Log.e(TAG_GLOBAL, "Home -> TopBar: Abrir menú")
+                        scope.launch {
+                            drawerState.open()
+                        }
                     },
                     onSearchClick = {
-                        Log.e(TAG_GLOBAL, "Home → TopBar: buscar")
+                        Log.e(TAG_GLOBAL, "Home -> TopBar: Buscar")
                     },
                     onMoreClick = {
-                        Log.e(TAG_GLOBAL, "Home → TopBar: más opciones")
+                        Log.e(TAG_GLOBAL, "Home -> TopBar: Más opciones")
                     }
                 )
             },
@@ -81,9 +105,7 @@ fun Home() {
                     },
                     containerColor = MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.onSecondary
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Añadir")
-                }
+                ) { Icon(Icons.Default.Add, contentDescription = "Añadir") }
             }
         ) { innerPadding ->
 
@@ -107,13 +129,17 @@ fun Home() {
                         searchData = SearchFieldData(search, "Buscar producto o lista"),
                         onValueChange = {
                             search = it
-                            Log.e(TAG_GLOBAL, "Home → SearchField: '$it'")
+                            Log.e(TAG_GLOBAL, "Home -> SearchField: '$it'")
                         }
                     )
 
                     Spacer(Modifier.height(20.dp))
 
-                    Text("Acciones rápidas", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Acciones rápidas",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
                     Spacer(Modifier.height(8.dp))
 
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -121,7 +147,7 @@ fun Home() {
                             QuickActionButton(
                                 quickActionButtonData = qa,
                                 onClick = {
-                                    Log.e(TAG_GLOBAL, "Home → QuickAction: ${qa.label}")
+                                    Log.e(TAG_GLOBAL, "Home -> QuickAction: ${qa.label}")
                                 }
                             )
                         }
@@ -129,7 +155,11 @@ fun Home() {
 
                     Spacer(Modifier.height(24.dp))
 
-                    Text("Listas recientes", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Listas recientes",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
                     Spacer(Modifier.height(8.dp))
 
                     Column(

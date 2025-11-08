@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -12,21 +14,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
+import com.example.teammaravillaapp.model.QuickActionData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-data class QuickActionData(
-    val icon: ImageVector,
-    val label: String,
-    val enabled: Boolean = true
-)
+/**
+ * Botón compacto de **acción rápida** (icono redondo + etiqueta).
+ *
+ * @param quickActionButtonData datos visuales + enabled.
+ * @param onClick callback al pulsar.
+ */
+
 
 @Composable
 fun QuickActionButton(
@@ -35,18 +36,16 @@ fun QuickActionButton(
     onClick: () -> Unit = {}
 ) {
     Column(
-        modifier = modifier
-            .width(72.dp),
+        modifier = modifier.width(72.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ElevatedCard(
             modifier = Modifier
                 .size(56.dp)
-                .clip(CircleShape)
                 .clickable(
                     enabled = quickActionButtonData.enabled,
                     onClick = {
-                        Log.e(TAG_GLOBAL, "QuickActionButton → click en '${quickActionButtonData.label}'")
+                        Log.e(TAG_GLOBAL, "Click en '${quickActionButtonData.label}'")
                         onClick()
                     }
                 )
@@ -54,8 +53,7 @@ fun QuickActionButton(
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -65,7 +63,6 @@ fun QuickActionButton(
             }
         }
         Spacer(Modifier.height(6.dp))
-
         Text(
             text = quickActionButtonData.label,
             color = MaterialTheme.colorScheme.primary,
@@ -81,8 +78,7 @@ fun QuickActionButton(
 fun PreviewQuickActionButton() {
     TeamMaravillaAppTheme {
         QuickActionButton(
-            QuickActionData(
-                Icons.Default.ShoppingCart, "Nueva lista")
+            QuickActionData(icon = Icons.Default.ShoppingCart, label = "Nueva lista")
         )
     }
 }

@@ -2,8 +2,15 @@ package com.example.teammaravillaapp.model
 
 import com.example.teammaravillaapp.R
 
+/**
+ * Datos de ejemplo para la sección de Recetas.
+ *
+ * Se apoya en los alias de `ProductAliases.kt` para
+ * construir ingredientes tipados sin errores de nombre.
+ */
 object RecipeData {
 
+    /** Listado de recetas de muestra para UI. */
     val recipes = listOf(
         Recipe(
             title = "Tortilla de Patata",

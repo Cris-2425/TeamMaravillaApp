@@ -17,8 +17,21 @@ import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.model.ListStyle
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
-// import com.example.teammaravillaapp.data.FakeUserPrefs // si lo tienes
 
+/**
+ * # Pantalla: **Tipos de vista de lista**
+ *
+ * Permite al usuario elegir el estilo visual preferido para mostrar sus listas.
+ * Los tres estilos disponibles son:
+ * - [ListStyle.LISTA] → formato clásico vertical.
+ * - [ListStyle.MOSAIC] → formato cuadrícula.
+ * - [ListStyle.ETC] → experimental o alternativo.
+ *
+ * @param selected Estilo actualmente seleccionado.
+ * @param onSelect Callback con el estilo seleccionado.
+ * @param onCancel Acción al pulsar “Cancelar”.
+ * @param onSave Acción al pulsar “Guardar”.
+ */
 @Composable
 fun ListViewTypes(
     selected: ListStyle = ListStyle.LISTA,
@@ -29,50 +42,28 @@ fun ListViewTypes(
     var current by rememberSaveable { mutableStateOf(selected) }
 
     Box(Modifier.fillMaxSize()) {
-
-        // Fondo detrás
         GeneralBackground(overlayAlpha = 0.15f)
 
-        // Contenido encima
         Column(
-            Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+            Modifier.fillMaxSize().padding(16.dp)
         ) {
-
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(
-                    onClick = {
-                        Log.e(TAG_GLOBAL, "ListViewTypes → Cancelar (estilo actual: $current)")
-                        onCancel()
-                    }
-                ) { Text("Cancelar") }
-
+                TextButton(onClick = { onCancel() }) { Text("Cancelar") }
                 Title("Filtrar Aspecto")
-
-                TextButton(
-                    onClick = {
-                        Log.e(TAG_GLOBAL, "ListViewTypes → Guardar: $current")
-                        // FakeUserPrefs.setListStyle(current)
-                        onSelect(current)
-                        onSave()
-                    }
-                ) { Text("Guardar") }
+                TextButton(onClick = { onSelect(current); onSave() }) { Text("Guardar") }
             }
 
-            Spacer(Modifier.height(12.dp))
-
+            Spacer(Modifier.height(24.dp))
             Text(
                 "Aspecto de la lista",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
-
             Spacer(Modifier.height(24.dp))
 
             Row(
@@ -80,38 +71,20 @@ fun ListViewTypes(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CircularOption(
-                    label = "Lista",
-                    selected = current == ListStyle.LISTA,
-                    onClick = {
-                        current = ListStyle.LISTA
-                        Log.e(TAG_GLOBAL, "ListViewTypes → Seleccionado LISTA")
-                    }
-                )
-                CircularOption(
-                    label = "Mosaic",
-                    selected = current == ListStyle.MOSAIC,
-                    onClick = {
-                        current = ListStyle.MOSAIC
-                        Log.e(TAG_GLOBAL, "ListViewTypes → Seleccionado MOSAIC")
-                    }
-                )
-                CircularOption(
-                    label = "Etc",
-                    selected = current == ListStyle.ETC,
-                    onClick = {
-                        current = ListStyle.ETC
-                        Log.e(TAG_GLOBAL, "ListViewTypes → Seleccionado ETC")
-                    }
-                )
+                CircularOption("Lista", current == ListStyle.LISTA) {
+                    current = ListStyle.LISTA
+                }
+                CircularOption("Mosaic", current == ListStyle.MOSAIC) {
+                    current = ListStyle.MOSAIC
+                }
+                CircularOption("Etc", current == ListStyle.ETC) {
+                    current = ListStyle.ETC
+                }
             }
         }
 
         Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton {
-                Log.e(TAG_GLOBAL, "ListViewTypes → BackButton")
-                onCancel()
-            }
+            BackButton(onClick = onCancel)
         }
     }
 }

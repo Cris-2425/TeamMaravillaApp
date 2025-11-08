@@ -22,59 +22,57 @@ import com.example.teammaravillaapp.model.UserList
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Contenedor de la pantalla de **creación de lista**.
+ *
+ * Coloca el contenido y el botón de volver reutilizable.
+ */
 @Composable
 fun CreateListt() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
-
         CreateListContent()
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-        ) {
-
+        Box(modifier = Modifier.align(Alignment.BottomStart)) {
             BackButton()
         }
     }
 }
 
+/**
+ * Contenido principal de **Crear Lista**.
+ *
+ * - Campo de nombre.
+ * - Selección de fondo a través de [BackgroundGrid].
+ * - Sugerencias rápidas con [SuggestedListSection].
+ * - TopBar con acciones de cancelar/guardar usando [CreateListTopBar].
+ *
+ * Al pulsar **Guardar**, añade una nueva [UserList] a [FakeUserLists].
+ */
 @Composable
 fun CreateListContent() {
     var name by rememberSaveable { mutableStateOf("") }
     var selectedBackground by rememberSaveable { mutableStateOf(ListBackground.FONDO1) }
     val backgroundRes = ListBackgrounds.getBackgroundRes(selectedBackground)
 
-    Box(
-        Modifier
-            .fillMaxSize()
-    ) {
+    Box(Modifier.fillMaxSize()) {
         GeneralBackground(backgroundRes)
 
-        Column(
-            Modifier
-                .fillMaxSize()
-        ) {
+        Column(Modifier.fillMaxSize()) {
 
             CreateListTopBar(
-                onCancel = {
-                    Log.e(TAG_GLOBAL, "Cancelar pulsado")
-                },
+                onCancel = { Log.e(TAG_GLOBAL, "Crear Lista → Cancelar") },
                 onSave = {
                     val newList = UserList(
-                        name = name
-                            .ifBlank { "Nueva lista" },
+                        name = name.ifBlank { "Nueva lista" },
                         background = selectedBackground,
                         products = emptyList()
                     )
                     val id = FakeUserLists.add(newList)
-
-                    Log.e(TAG_GLOBAL, "Lista guardada: id=$id, name='${newList.name}'")
+                    Log.e(TAG_GLOBAL, "Crear Lista → Guardada: id=$id, name='${newList.name}'")
                 },
-                saveEnabled = name
-                    .isNotBlank()
+                saveEnabled = name.isNotBlank()
             )
 
             Column(
@@ -82,20 +80,16 @@ fun CreateListContent() {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-
                 Spacer(Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
                         name = it
-                        Log.e(TAG_GLOBAL, "Nombre lista cambió a: '$it'")
+                        Log.e(TAG_GLOBAL, "Nueva lista con nombre: '$it'")
                     },
-                    placeholder = {
-                        Text("Nombre lista")
-                                  },
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    placeholder = { Text("Nombre lista") },
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
@@ -125,21 +119,16 @@ fun CreateListContent() {
 
                 Spacer(Modifier.height(8.dp))
 
-                SuggestedListSection(
-                    items = SuggestedListData.items
-                ) {
-                    name = it.name
-                    Log.e(TAG_GLOBAL, "Lista sugerida pulsada: '${it.name}'")
+                SuggestedListSection(items = SuggestedListData.items) { picked ->
+                    name = picked.name
+                    Log.e(TAG_GLOBAL, "Lista sugerida: '${picked.name}'")
                 }
 
                 Spacer(Modifier.height(24.dp))
             }
         }
 
-        Box(
-            Modifier
-                .align(Alignment.BottomStart)
-        ) {
+        Box(Modifier.align(Alignment.BottomStart)) {
             BackButton()
         }
     }

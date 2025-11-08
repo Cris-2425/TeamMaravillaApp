@@ -14,6 +14,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * AppBar superior centrada con **menú**, **buscar** y **más**.
+ *
+ * @param title texto a mostrar (puede ser “Team Maravilla” para ver logo en Title()).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
@@ -23,35 +28,30 @@ fun TopBar(
     onMoreClick: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
-        title = {
-            Title(title)
-                },
+        title = { Title(title) },
         navigationIcon = {
-            IconButton(
-                onClick = {
-                    Log.e(TAG_GLOBAL, "TopBar → clic en 'Menú'")
-                    onMenuClick()
-                }
+            IconButton(onClick = {
+                Log.e(TAG_GLOBAL, "Click en 'Menú'")
+                onMenuClick()
+            }
             ) {
                 Icon(Icons.Default.Menu, contentDescription = "Menu")
             }
         },
         actions = {
-            IconButton(
-                onClick = {
-                    Log.e(TAG_GLOBAL, "TopBar → clic en 'Buscar'")
-                    onSearchClick()
-                }
+            IconButton(onClick = {
+                Log.e(TAG_GLOBAL, "Click en 'Buscar'")
+                onSearchClick()
+            }
             ) {
                 Icon(Icons.Default.Search, contentDescription = "Search")
             }
-            IconButton(
-                onClick = {
-                    Log.e(TAG_GLOBAL, "TopBar → clic en 'Más opciones'")
-                    onMoreClick()
-                }
+            IconButton(onClick = {
+                Log.e(TAG_GLOBAL, "Click en 'Más opciones'")
+                onMoreClick()
+            }
             ) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More")
+                Icon(Icons.Default.MoreVert, contentDescription = "Más")
             }
         }
     )
@@ -59,7 +59,7 @@ fun TopBar(
 
 @Preview
 @Composable
-fun PreviewTopBarInicio() {
+fun PreviewTopBar() {
     TeamMaravillaAppTheme {
         TopBar("Team Maravilla")
     }

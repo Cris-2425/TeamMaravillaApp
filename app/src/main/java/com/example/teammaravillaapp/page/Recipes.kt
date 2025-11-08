@@ -1,14 +1,7 @@
 package com.example.teammaravillaapp.page
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
@@ -26,42 +19,68 @@ import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * # Pantalla: **Recetas**
+ *
+ * Lista de recetas con un filtro simple:
+ * - **Todos**: muestra [recipes].
+ * - **Mis Recetas**: muestra las guardadas en [FakeUserRecipes].
+ *
+ * El componente `FilterRecipes` se usa como pill, y el cambio de filtro
+ * se resuelve externamente con `Box(clickable { ... })` para no tocar tu componente.
+ *
+ * @param recipes Fuente por defecto (recetas base de la app).
+ */
 @Composable
 fun Recipes(
     recipes: List<Recipe> = RecipeData.recipes
 ) {
     var showMine by remember { mutableStateOf(false) }
 
-    // Fuente de datos visible según filtro
     val allRecipes = recipes
     val myRecipes = FakeUserRecipes.all()
-    val visible = if (showMine) myRecipes else allRecipes
+    val visible =
+        if (showMine) myRecipes
+        else allRecipes
 
     Box(Modifier.fillMaxSize()) {
-
         GeneralBackground()
 
-        androidx.compose.foundation.layout.Column(
+        Column(
             Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(20.dp))
 
-            Title(if (showMine) "Mis Recetas" else "Recetas")
-
+            Title(
+                if (showMine) "Mis Recetas"
+                else "Recetas"
+            )
             Spacer(Modifier.height(16.dp))
 
-            // No modifico tu FilterRecipes: lo envuelvo en un clickable
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(Modifier.clickable { showMine = false }) {
-                    FilterRecipes(text = "Todos", selected = !showMine)
+                Box(Modifier
+                    .clickable {
+                        showMine = false
+                    }
+                ) {
+                    FilterRecipes(
+                        text = "Todos",
+                        selected = !showMine
+                    )
                 }
-                Box(Modifier.clickable { showMine = true }) {
-                    FilterRecipes(text = "Mis Recetas", selected = showMine)
+                Box(Modifier
+                    .clickable {
+                        showMine = true
+                    }
+                ) {
+                    FilterRecipes(
+                        text = "Mis Recetas",
+                        selected = showMine)
                 }
             }
 

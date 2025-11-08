@@ -1,4 +1,3 @@
-// com.example.teammaravillaapp.page.CategoryFilter
 package com.example.teammaravillaapp.page
 
 import android.util.Log
@@ -18,6 +17,18 @@ import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Pantalla de **filtro por categorías**.
+ *
+ * Muestra una lista de conmutadores (uno por [ProductCategory]) para
+ * decidir qué categorías se ven en otras pantallas (por ejemplo, en ListDetail).
+ * El estado inicial viene de [FakeUserPrefs.getCategoryVisibility] y al guardar
+ * se persiste con [FakeUserPrefs.setCategoryVisibility].
+ *
+ * @param initialVisibility Mapa opcional con la visibilidad inicial por categoría.
+ * @param onCancel Acción al pulsar "Cancelar".
+ * @param onSave Callback con el mapa final de visibilidades tras pulsar "Guardar".
+ */
 @Composable
 fun CategoryFilter(
     initialVisibility: Map<ProductCategory, Boolean> = FakeUserPrefs.getCategoryVisibility(),
@@ -25,14 +36,15 @@ fun CategoryFilter(
     onSave: (Map<ProductCategory, Boolean>) -> Unit = {}
 ) {
     val categories = ProductCategory.entries
-    var toggles by rememberSaveable { mutableStateOf(categories.map { initialVisibility[it] ?: true }) }
+
+    var toggles by rememberSaveable {
+        mutableStateOf(categories.map { initialVisibility[it] ?: true })
+    }
 
     Box(Modifier.fillMaxSize()) {
 
-        // 1) Fondo al fondo del Box
-        GeneralBackground() // si quieres menos oscurecido: GeneralBackground(overlayAlpha = 0.15f)
+        GeneralBackground()
 
-        // 2) Contenido encima
         Column(
             Modifier
                 .fillMaxSize()
@@ -56,7 +68,7 @@ fun CategoryFilter(
                     onClick = {
                         val result = categories.zip(toggles).toMap()
                         FakeUserPrefs.setCategoryVisibility(result)
-                        Log.e(TAG_GLOBAL, "CategoryFilter → Guardar: $result")
+                        Log.e(TAG_GLOBAL, "Guardar: $result")
                         onSave(result)
                     }
                 ) { Text("Guardar") }
@@ -64,7 +76,10 @@ fun CategoryFilter(
 
             Spacer(Modifier.height(12.dp))
 
-            Text("Aspecto de la lista", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Aspecto de la lista",
+                style = MaterialTheme.typography.titleMedium
+            )
 
             Spacer(Modifier.height(12.dp))
 
@@ -79,7 +94,7 @@ fun CategoryFilter(
                         checked = toggles[index],
                         onCheckedChange = { checked ->
                             toggles = toggles.toMutableList().also { it[index] = checked }
-                            Log.e(TAG_GLOBAL, "CategoryFilter → ${cat.name} = $checked")
+                            Log.e(TAG_GLOBAL, "Filtro: ${cat.name} = $checked")
                         }
                     )
                 }
@@ -93,9 +108,10 @@ fun CategoryFilter(
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewCategoryFilter() {
-    TeamMaravillaAppTheme { CategoryFilter() }
+    TeamMaravillaAppTheme {
+        CategoryFilter()
+    }
 }
