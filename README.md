@@ -24,41 +24,39 @@ Su objetivo es ofrecer una experiencia moderna y visual para gestionar listas de
 
 ## 🧩 Estructura del Proyecto
 
+```plaintext
 com.example.teammaravillaapp
 │
 ├── data/ → Repositorios en memoria ("Fake DB")
-│ ├── FakeUserLists.kt
-│ ├── FakeUserRecipes.kt
-│ └── FakeUserPrefs.kt
+│   ├── FakeUserLists.kt
+│   ├── FakeUserRecipes.kt
+│   └── FakeUserPrefs.kt
 │
 ├── model/ → Modelos de datos y enums
-│ ├── Product.kt, ProductCategory.kt, ProductData.kt
-│ ├── Recipe.kt, RecipeData.kt
-│ ├── UserList.kt, ListBackgrounds.kt
-│ ├── QuickActionData.kt, CardInfo.kt, SearchFieldData.kt
+│   ├── Product.kt, ProductCategory.kt, ProductData.kt
+│   ├── Recipe.kt, RecipeData.kt
+│   ├── UserList.kt, ListBackgrounds.kt
+│   ├── QuickActionData.kt, CardInfo.kt, SearchFieldData.kt
 │
 ├── component/ → Componentes reutilizables de Compose
-│ ├── ListCard, ProductBubble, RecipeCard
-│ ├── QuickActionButton, BackButton, BottomBar, etc.
+│   ├── ListCard, ProductBubble, RecipeCard
+│   ├── QuickActionButton, BackButton, BottomBar, etc.
 │
 ├── page/ → Pantallas principales de la app
-│ ├── Home.kt
-│ ├── CreateListt.kt
-│ ├── ListDetail.kt
-│ ├── Recipes.kt, RecipesDetail.kt
-│ ├── Profile.kt, Login.kt
-│ ├── CategoryFilter.kt, ListViewTypes.kt
+│   ├── Home.kt
+│   ├── CreateListt.kt
+│   ├── ListDetail.kt
+│   ├── Recipes.kt, RecipesDetail.kt
+│   ├── Profile.kt, Login.kt
+│   ├── CategoryFilter.kt, ListViewTypes.kt
 │
 ├── ui/theme/ → Colores, tipografías y estilos (Compose Theme)
 │
 ├── util/ → Constantes globales y utilidades
-│ └── TAG_GLOBAL.kt
+│   └── TAG_GLOBAL.kt
 │
 └── MainActivity.kt → Punto de entrada principal
-
-yaml
-Copy code
-
+```
 ---
 
 ## 🎨 Tecnologías Utilizadas
