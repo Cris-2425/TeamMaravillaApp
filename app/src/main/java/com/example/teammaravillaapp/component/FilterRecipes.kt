@@ -19,32 +19,28 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
 fun FilterRecipes(
     text: String,
     selected: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Surface(
         shape = CircleShape,
         color = if (selected)
-
             MaterialTheme.colorScheme.secondary
-
         else
             MaterialTheme.colorScheme.secondaryContainer,
-
         contentColor = if (selected)
-
             MaterialTheme.colorScheme.onSecondary
-
         else
             MaterialTheme.colorScheme.onSecondaryContainer,
         modifier = modifier.clickable {
-            Log.e(TAG_GLOBAL, "$text (selected=$selected)")
+            Log.e(TAG_GLOBAL, "FilterRecipes → Pulsado '$text' (selected=$selected)")
+            onClick()
         }
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             textAlign = TextAlign.Center
         )
     }

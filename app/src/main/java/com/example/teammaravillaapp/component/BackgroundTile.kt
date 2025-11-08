@@ -24,22 +24,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.model.ListBackground
+import com.example.teammaravillaapp.model.ListBackgrounds
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun BackgroundTile(
     selected: Boolean = false,
-    label: String,
+    bg: ListBackground,
     onClick: () -> Unit = {}
 ) {
-    val imageRes = when (label) {
-        "Fondo1" -> R.drawable.fondo_farmacia
-        "Fondo2" -> R.drawable.fondo_bbq
-        "Fondo3" -> R.drawable.fondo_desayuno
-        "Fondo4" -> R.drawable.fondo_limpieza
-        else -> null
-    }
+    val imageRes = ListBackgrounds.getBackgroundRes(bg)
+
     Box(
         modifier = Modifier
             .height(76.dp)
@@ -62,21 +58,20 @@ fun BackgroundTile(
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable {
-                Log.e(TAG_GLOBAL, "Fondo pulsado: $label (selected=$selected)")
+                Log.e(TAG_GLOBAL, "Fondo pulsado: $bg (selected=$selected)")
                 onClick()
             },
         contentAlignment = Alignment.Center
 
     ) {
-        if (imageRes != null) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = "",
-                modifier = Modifier
-                    .matchParentSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = "",
+            modifier = Modifier
+                .matchParentSize(),
+            contentScale = ContentScale.Crop
+        )
+
         if (selected) {
             Icon(
                 Icons.Default.Check,
@@ -91,7 +86,7 @@ fun BackgroundTile(
             )
         }
         Text(
-            label,
+            text = bg.name,
             color = MaterialTheme.colorScheme.onBackground
         )
     }

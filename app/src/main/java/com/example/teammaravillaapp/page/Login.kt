@@ -1,24 +1,29 @@
 package com.example.teammaravillaapp.page
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun Login() {
-    Box(
-        Modifier.fillMaxSize()
-    ) {
+    var user by rememberSaveable { mutableStateOf("") }
+    var pass by rememberSaveable { mutableStateOf("") }
+
+    Box(Modifier.fillMaxSize()) {
 
         GeneralBackground()
 
@@ -30,11 +35,8 @@ fun Login() {
         ) {
 
             Spacer(Modifier.height(28.dp))
-
             Title("Registrarse")
-
             Spacer(Modifier.height(160.dp))
-
 
             Surface(
                 shape = RoundedCornerShape(24.dp),
@@ -49,34 +51,51 @@ fun Login() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
+                        value = user,
+                        onValueChange = {
+                            user = it
+                            Log.e(TAG_GLOBAL, "Login → usuario cambió a: '$it'")
+                        },
                         placeholder = { Text("Usuario") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp)),
                         singleLine = true
                     )
+
                     Spacer(Modifier.height(12.dp))
 
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
+                        value = pass,
+                        onValueChange = {
+                            pass = it
+                            Log.e(TAG_GLOBAL, "Login → contraseña cambió (longitud=${it.length})")
+                        },
                         placeholder = { Text("Contraseña") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp)),
                         singleLine = true,
+                        visualTransformation = PasswordVisualTransformation()
                     )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            Log.e(TAG_GLOBAL, "Login → Entrar (user='$user', passLen=${pass.length})")
+                            // Aquí iría tu lógica real de login en el futuro
+                        },
+                        enabled = user.isNotBlank() && pass.isNotBlank()
+                    ) {
+                        Text("Entrar")
+                    }
                 }
             }
         }
 
-        Box(
-            Modifier
-                .align(Alignment.BottomStart)
-        ) {
-            BackButton()
+        Box(Modifier.align(Alignment.BottomStart)) {
+            BackButton(onClick = { Log.e(TAG_GLOBAL, "Login → BackButton") })
         }
     }
 }

@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.model.ListBackground
 
 @Composable
 fun BackgroundGrid(
-    selectedLabel: String = "Fondo1",
-    onSelect: (String) -> Unit = {}
+    selectedBg: ListBackground = ListBackground.FONDO1,
+    onSelect: (ListBackground) -> Unit = {}
 ) {
 
     Row(
@@ -28,17 +29,17 @@ fun BackgroundGrid(
         ) {
 
             BackgroundTile(
-                selected = selectedLabel == "Fondo1",
-                label = "Fondo1",
+                selected = selectedBg == ListBackground.FONDO1,
+                bg = ListBackground.FONDO1,
                 onClick = {
-                    onSelect("Fondo1")
+                    onSelect(ListBackground.FONDO1)
                 }
             )
             BackgroundTile(
-                selected = selectedLabel == "Fondo3",
-                label = "Fondo3",
+                selected = selectedBg == ListBackground.FONDO3,
+                bg = ListBackground.FONDO3,
                 onClick = {
-                    onSelect("Fondo3")
+                    onSelect(ListBackground.FONDO3)
                 }
             )
         }
@@ -48,17 +49,17 @@ fun BackgroundGrid(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             BackgroundTile(
-                selected = selectedLabel == "Fondo2",
-                label = "Fondo2",
+                selected = selectedBg == ListBackground.FONDO2,
+                bg = ListBackground.FONDO2,
                 onClick = {
-                    onSelect("Fondo2")
+                    onSelect(ListBackground.FONDO2)
                 }
             )
             BackgroundTile(
-                selected = selectedLabel == "Fondo4",
-                label = "Fondo4",
+                selected = selectedBg == ListBackground.FONDO4,
+                bg = ListBackground.FONDO4,
                 onClick = {
-                    onSelect("Fondo4")
+                    onSelect(ListBackground.FONDO4)
                 }
             )
         }
