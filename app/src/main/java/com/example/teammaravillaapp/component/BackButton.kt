@@ -9,16 +9,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Botón flotante de **volver atrás**.
+ * Botón flotante de volver atrás.
  *
- *
- * @param onClick acción al pulsar (navegar hacia atrás, cerrar panel, etc.).
+ * @param onClick acción al pulsar (usualmente navController.navigateUp()).
  */
 @Composable
 fun BackButton(
@@ -26,14 +27,17 @@ fun BackButton(
 ) {
     FloatingActionButton(
         onClick = {
-            Log.e(TAG_GLOBAL, "Volver atrás")
+            Log.d(TAG_GLOBAL, "Volver atrás")
             onClick()
         },
         containerColor = MaterialTheme.colorScheme.secondary,
         contentColor = MaterialTheme.colorScheme.onSecondary,
         modifier = Modifier.padding(start = 16.dp, bottom = 120.dp)
     ) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = stringResource(R.string.back_button_content_description)
+        )
     }
 }
 

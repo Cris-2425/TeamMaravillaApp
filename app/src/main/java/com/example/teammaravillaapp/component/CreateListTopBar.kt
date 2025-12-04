@@ -6,7 +6,9 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
@@ -25,24 +27,30 @@ fun CreateListTopBar(
     saveEnabled: Boolean = true
 ) {
     CenterAlignedTopAppBar(
-        title = { Title("Crear Lista") },
+        title = {
+            Title(texto = stringResource(R.string.create_list_topbar_title))
+        },
         navigationIcon = {
             Button(
                 onClick = {
-                    Log.e(TAG_GLOBAL, "CreateListTopBar → Cancelar")
+                    Log.d(TAG_GLOBAL, "CreateListTopBar → Cancelar")
                     onCancel()
                 },
                 enabled = true
-            ) { Text("Cancelar") }
+            ) {
+                Text(stringResource(R.string.create_list_cancel))
+            }
         },
         actions = {
             Button(
                 onClick = {
-                    Log.e(TAG_GLOBAL, "CreateListTopBar → Guardar")
+                    Log.d(TAG_GLOBAL, "CreateListTopBar → Guardar")
                     onSave()
                 },
                 enabled = saveEnabled
-            ) { Text("Guardar") }
+            ) {
+                Text(stringResource(R.string.create_list_save))
+            }
         }
     )
 }

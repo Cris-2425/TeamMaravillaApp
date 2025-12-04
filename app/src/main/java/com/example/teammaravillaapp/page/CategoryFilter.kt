@@ -2,13 +2,18 @@ package com.example.teammaravillaapp.page
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
@@ -22,6 +27,7 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
  *
  * Muestra una lista de conmutadores (uno por [ProductCategory]) para
  * decidir qué categorías se ven en otras pantallas (por ejemplo, en ListDetail).
+ *
  * El estado inicial viene de [FakeUserPrefs.getCategoryVisibility] y al guardar
  * se persiste con [FakeUserPrefs.setCategoryVisibility].
  *
@@ -50,6 +56,7 @@ fun CategoryFilter(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Top bar simple: Cancelar - Título - Guardar
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -57,27 +64,31 @@ fun CategoryFilter(
             ) {
                 TextButton(
                     onClick = {
-                        Log.e(TAG_GLOBAL, "CategoryFilter → Cancelar")
+                        Log.d(TAG_GLOBAL, "CategoryFilter → Cancelar")
                         onCancel()
                     }
-                ) { Text("Cancelar") }
+                ) {
+                    Text(text = stringResource(R.string.category_filter_cancel))
+                }
 
-                Title("Filtro de Categorías")
+                Title(texto = stringResource(R.string.category_filter_title))
 
                 TextButton(
                     onClick = {
                         val result = categories.zip(toggles).toMap()
                         FakeUserPrefs.setCategoryVisibility(result)
-                        Log.e(TAG_GLOBAL, "Guardar: $result")
+                        Log.d(TAG_GLOBAL, "CategoryFilter → Guardar: $result")
                         onSave(result)
                     }
-                ) { Text("Guardar") }
+                ) {
+                    Text(text = stringResource(R.string.category_filter_save))
+                }
             }
 
             Spacer(Modifier.height(12.dp))
 
             Text(
-                "Aspecto de la lista",
+                text = stringResource(R.string.category_filter_subtitle),
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -89,12 +100,15 @@ fun CategoryFilter(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(cat.label, style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        text = stringResource(id = cat.labelRes),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                     Switch(
                         checked = toggles[index],
                         onCheckedChange = { checked ->
                             toggles = toggles.toMutableList().also { it[index] = checked }
-                            Log.e(TAG_GLOBAL, "Filtro: ${cat.name} = $checked")
+                            Log.d(TAG_GLOBAL, "CategoryFilter → ${cat.name} = $checked")
                         }
                     )
                 }

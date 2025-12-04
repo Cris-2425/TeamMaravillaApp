@@ -10,7 +10,9 @@ import androidx.annotation.DrawableRes
  * @property products ingredientes necesarios (productos del catálogo).
  */
 data class Recipe(
+    val id: Int,
     val title: String,
     @DrawableRes val imageRes: Int? = null,
-    val products: List<Product> = emptyList()
+    val products: List<Product> = emptyList(),
+    val instructions: String = ""
 )

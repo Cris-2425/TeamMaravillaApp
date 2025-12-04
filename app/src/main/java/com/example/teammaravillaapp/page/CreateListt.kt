@@ -7,8 +7,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.BackgroundGrid
 import com.example.teammaravillaapp.component.CreateListTopBar
@@ -21,21 +23,29 @@ import com.example.teammaravillaapp.model.SuggestedListData
 import com.example.teammaravillaapp.model.UserList
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
+import java.util.UUID
 
 /**
  * Contenedor de la pantalla de **creación de lista**.
  *
- * Coloca el contenido y el botón de volver reutilizable.
+ * @param onBack Acción al pulsar atrás.
+ * @param onListCreated Acción al crear la lista correctamente (devuelve el id).
  */
 @Composable
-fun CreateListt() {
+fun CreateListt(
+    onBack: () -> Unit,
+    onListCreated: (String) -> Unit = {}
+) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        CreateListContent()
+        CreateListContent(
+            onBack = onBack,
+            onListCreated = onListCreated
+        )
 
         Box(modifier = Modifier.align(Alignment.BottomStart)) {
-            BackButton()
+            BackButton(onClick = onBack)
         }
     }
 }
@@ -51,26 +61,41 @@ fun CreateListt() {
  * Al pulsar **Guardar**, añade una nueva [UserList] a [FakeUserLists].
  */
 @Composable
-fun CreateListContent() {
+fun CreateListContent(
+    onBack: () -> Unit,
+    onListCreated: (String) -> Unit
+) {
     var name by rememberSaveable { mutableStateOf("") }
     var selectedBackground by rememberSaveable { mutableStateOf(ListBackground.FONDO1) }
     val backgroundRes = ListBackgrounds.getBackgroundRes(selectedBackground)
+    val defaultName = stringResource(R.string.create_list_default_name)
 
     Box(Modifier.fillMaxSize()) {
-        GeneralBackground(backgroundRes)
+        GeneralBackground(bgRes = backgroundRes)
 
         Column(Modifier.fillMaxSize()) {
 
             CreateListTopBar(
-                onCancel = { Log.e(TAG_GLOBAL, "Crear Lista → Cancelar") },
+                onCancel = {
+                    Log.d(TAG_GLOBAL, "Crear Lista → Cancelar")
+                    onBack()
+                },
                 onSave = {
+                    val finalName = name.ifBlank { defaultName }
+
                     val newList = UserList(
-                        name = name.ifBlank { "Nueva lista" },
+                        id = UUID.randomUUID().toString(),
+                        name = finalName,
                         background = selectedBackground,
                         products = emptyList()
                     )
+
                     val id = FakeUserLists.add(newList)
-                    Log.e(TAG_GLOBAL, "Crear Lista → Guardada: id=$id, name='${newList.name}'")
+                    Log.d(
+                        TAG_GLOBAL,
+                        "Crear Lista → Guardada: id=$id, name='${newList.name}' bg=${newList.background}"
+                    )
+                    onListCreated(id)
                 },
                 saveEnabled = name.isNotBlank()
             )
@@ -86,9 +111,9 @@ fun CreateListContent() {
                     value = name,
                     onValueChange = {
                         name = it
-                        Log.e(TAG_GLOBAL, "Nueva lista con nombre: '$it'")
+                        Log.d(TAG_GLOBAL, "Crear Lista → nombre: '$it'")
                     },
-                    placeholder = { Text("Nombre lista") },
+                    placeholder = { Text(stringResource(R.string.create_list_name_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -96,7 +121,7 @@ fun CreateListContent() {
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    "Fondo de la lista",
+                    text = stringResource(R.string.create_list_background_title),
                     style = MaterialTheme.typography.titleMedium
                 )
 
@@ -106,14 +131,14 @@ fun CreateListContent() {
                     selectedBg = selectedBackground,
                     onSelect = { chosen ->
                         selectedBackground = chosen
-                        Log.e(TAG_GLOBAL, "Fondo elegido: $chosen")
+                        Log.d(TAG_GLOBAL, "Crear Lista → fondo elegido: $chosen")
                     }
                 )
 
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    "Listas sugeridas",
+                    text = stringResource(R.string.create_list_suggested_title),
                     style = MaterialTheme.typography.titleMedium
                 )
 
@@ -121,15 +146,11 @@ fun CreateListContent() {
 
                 SuggestedListSection(items = SuggestedListData.items) { picked ->
                     name = picked.name
-                    Log.e(TAG_GLOBAL, "Lista sugerida: '${picked.name}'")
+                    Log.d(TAG_GLOBAL, "Crear Lista → lista sugerida: '${picked.name}'")
                 }
 
                 Spacer(Modifier.height(24.dp))
             }
-        }
-
-        Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton()
         }
     }
 }
@@ -138,6 +159,9 @@ fun CreateListContent() {
 @Composable
 fun PreviewCreateListt() {
     TeamMaravillaAppTheme {
-        CreateListt()
+        CreateListt(
+            onBack = {},
+            onListCreated = {}
+        )
     }
 }

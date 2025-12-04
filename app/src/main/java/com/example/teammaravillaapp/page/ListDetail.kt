@@ -6,12 +6,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ProductBubble
@@ -36,10 +41,12 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
  * Si no existen listas, muestra un estado vacío con un mensaje informativo.
  *
  * @param listId ID opcional de la lista a visualizar.
+ * @param onBack Acción al pulsar el botón de volver.
  */
 @Composable
 fun ListDetail(
-    listId: String? = null
+    listId: String? = null,
+    onBack: () -> Unit = {}
 ) {
     val resolved: UserList? = remember(listId) {
         listId?.let(FakeUserLists::get) ?: FakeUserLists.all().lastOrNull()?.second
@@ -47,7 +54,7 @@ fun ListDetail(
 
     when (resolved) {
         null -> {
-            /** Estado vacío (sin listas registradas) */
+            // Estado vacío (sin listas registradas)
             Box(Modifier.fillMaxSize()) {
                 GeneralBackground()
                 Column(
@@ -58,45 +65,45 @@ fun ListDetail(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "Aún no hay listas creadas",
+                        text = stringResource(R.string.list_detail_empty_title),
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     Spacer(Modifier.height(8.dp))
 
                     Text(
-                        "Crea una nueva lista",
+                        text = stringResource(R.string.list_detail_empty_subtitle),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 Box(Modifier.align(Alignment.BottomStart)) {
-                    BackButton()
+                    BackButton(onClick = onBack)
                 }
             }
         }
-        else -> ListDetailContent(userList = resolved)
+        else -> ListDetailContent(
+            userList = resolved,
+            onBack = onBack
+        )
     }
 }
 
 /**
- * # Contenido principal del detalle de lista
- *
- * Construye la vista interna de la pantalla.
- * Divide la interfaz en cuatro secciones:
- * 1. Nombre de la lista.
- * 2. Productos actuales (clic → eliminar).
- * 3. Usados recientemente (clic → añadir).
- * 4. Categorías y sus productos (clic → añadir).
+ * Contenido principal del detalle de lista.
  *
  * @param userList Lista del usuario con sus productos, nombre y fondo.
+ * @param onBack Acción al pulsar el botón de volver.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ListDetailContent(
-    userList: UserList
+    userList: UserList,
+    onBack: () -> Unit = {}
 ) {
     val bgRes = ListBackgrounds.getBackgroundRes(userList.background)
-    val productsInList = remember { mutableStateListOf<Product>().apply { addAll(userList.products) } }
+    val productsInList = rememberSaveable(userList.id) {
+        mutableStateListOf<Product>().apply { addAll(userList.products) }
+    }
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(bgRes = bgRes)
@@ -108,15 +115,19 @@ fun ListDetailContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            /** Título */
+            // Título
             item {
                 Spacer(Modifier.height(8.dp))
-
                 Title(userList.name)
             }
 
-            /** Productos actuales */
-            item { Text("Productos en la lista", style = MaterialTheme.typography.titleSmall) }
+            // Productos actuales
+            item {
+                Text(
+                    text = stringResource(R.string.list_detail_current_products_title),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
 
             item {
                 if (productsInList.isEmpty()) {
@@ -131,7 +142,12 @@ fun ListDetailContent(
                                 .heightIn(min = 80.dp)
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
-                        ) { Text("No hay productos todavía") }
+                        ) {
+                            Text(
+                                text = stringResource(R.string.list_detail_no_products),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 } else {
                     Surface(
@@ -146,25 +162,30 @@ fun ListDetailContent(
                                 .fillMaxWidth()
                                 .padding(12.dp)
                         ) {
-                            productsInList.forEach {
+                            productsInList.forEach { product ->
                                 Box(
                                     Modifier
                                         .wrapContentSize()
                                         .clickable {
-                                        productsInList.remove(it)
-                                        Log.e(TAG_GLOBAL, "Quitar: ${it.name}")
-                                    }
-                                ) { ProductBubble(it) }
+                                            productsInList.remove(product)
+                                            Log.d(TAG_GLOBAL, "ListDetail → Quitar: ${product.name}")
+                                        }
+                                ) {
+                                    ProductBubble(product)
+                                }
                             }
                         }
                     }
                 }
             }
 
-            /** Usados recientemente */
-            item { Text(
-                "Usados recientemente",
-                style = MaterialTheme.typography.titleSmall) }
+            // Usados recientemente
+            item {
+                Text(
+                    text = stringResource(R.string.list_detail_recent_used_title),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
 
             item {
                 Surface(
@@ -179,23 +200,32 @@ fun ListDetailContent(
                             .fillMaxWidth()
                             .padding(12.dp)
                     ) {
-                        ProductData.recentUsed.forEach {
-                            Box(Modifier
-                                .wrapContentSize()
-                                .clickable {
-                                if (productsInList.none { p -> p.name == it.name }) {
-                                    productsInList.add(it)
-                                    Log.e(TAG_GLOBAL, "Añadir: ${it.name}")
-                                }
-                            }) { ProductBubble(it) }
+                        ProductData.recentUsed.forEach { product ->
+                            Box(
+                                Modifier
+                                    .wrapContentSize()
+                                    .clickable {
+                                        if (productsInList.none { p -> p.name == product.name }) {
+                                            productsInList.add(product)
+                                            Log.d(TAG_GLOBAL, "ListDetail → Añadir reciente: ${product.name}")
+                                        }
+                                    }
+                            ) {
+                                ProductBubble(product)
+                            }
                         }
                     }
                 }
             }
 
-            /** Categorías */
+            // Categorías
             ProductData.byCategory.forEach { (category, items) ->
-                item { Text(category.label, style = MaterialTheme.typography.titleSmall) }
+                item {
+                    Text(
+                        text = stringResource(id = category.labelRes),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
                 item {
                     Surface(
                         shape = MaterialTheme.shapes.medium,
@@ -209,15 +239,22 @@ fun ListDetailContent(
                                 .fillMaxWidth()
                                 .padding(12.dp)
                         ) {
-                            items.forEach {
-                                Box(Modifier
-                                    .wrapContentSize()
-                                    .clickable {
-                                    if (productsInList.none { p -> p.name == it.name }) {
-                                        productsInList.add(it)
-                                        Log.e(TAG_GLOBAL, "Añadir${category.name}: ${it.name}")
-                                    }
-                                }) { ProductBubble(it) }
+                            items.forEach { product ->
+                                Box(
+                                    Modifier
+                                        .wrapContentSize()
+                                        .clickable {
+                                            if (productsInList.none { p -> p.name == product.name }) {
+                                                productsInList.add(product)
+                                                Log.d(
+                                                    TAG_GLOBAL,
+                                                    "ListDetail → Añadir categoría ${category.name}: ${product.name}"
+                                                )
+                                            }
+                                        }
+                                ) {
+                                    ProductBubble(product)
+                                }
                             }
                         }
                     }
@@ -226,7 +263,7 @@ fun ListDetailContent(
         }
 
         Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton()
+            BackButton(onClick = onBack)
         }
     }
 }
