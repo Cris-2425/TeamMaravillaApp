@@ -62,7 +62,7 @@ fun ProductBubble(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                // Sin imagen: fondo plano con el nombre abreviado
+                // Sin imagen: nombre abreviado
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
