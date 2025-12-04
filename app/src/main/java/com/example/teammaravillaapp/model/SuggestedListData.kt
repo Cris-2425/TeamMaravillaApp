@@ -3,30 +3,18 @@ package com.example.teammaravillaapp.model
 import com.example.teammaravillaapp.R
 
 /**
- * Datos de ejemplo para las listas sugeridas que aparecen en CreateList.
+ * Datos de ejemplo de listas sugeridas para el flujo de creación.
  *
- * Usa [SuggestedListName] para obtener los textos desde strings.xml,
- * garantizando localización y consistencia.
+ * Se usan nombres de texto directos para evitar depender de contexto
+ * en inicialización estática (funciona bien en Preview).
  */
 object SuggestedListData {
-
+    /** Conjunto fijo de sugerencias básicas. */
     val items: List<SuggestedList> =
         listOf(
-            SuggestedList(
-                name = SuggestedListName.WEEKLY_SHOP.label,
-                imageRes = R.drawable.fondo_farmacia
-            ),
-            SuggestedList(
-                name = SuggestedListName.BBQ.label,
-                imageRes = R.drawable.fondo_bbq
-            ),
-            SuggestedList(
-                name = SuggestedListName.BREAKFAST.label,
-                imageRes = R.drawable.fondo_desayuno
-            ),
-            SuggestedList(
-                name = SuggestedListName.CLEANING.label,
-                imageRes = R.drawable.fondo_limpieza
-            )
+            SuggestedList("Compra semanal", R.drawable.fondo_farmacia),
+            SuggestedList("BBQ sábado", R.drawable.fondo_bbq),
+            SuggestedList("Desayunos", R.drawable.fondo_desayuno),
+            SuggestedList("Limpieza", R.drawable.fondo_limpieza)
         )
 }

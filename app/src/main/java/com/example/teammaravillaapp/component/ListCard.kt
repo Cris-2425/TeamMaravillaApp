@@ -23,18 +23,20 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
  *
  * @param cardInfo datos visuales de la tarjeta.
  * @param modifier para espaciados/anchos desde fuera.
+ * @param onClick acción al pulsar la tarjeta completa (navegación, etc.).
  */
-
 @Composable
 fun ListCard(
     cardInfo: CardInfo,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .size(width = 240.dp, height = 100.dp)
             .clickable {
                 Log.e(TAG_GLOBAL, "Lista: ${cardInfo.title}")
+                onClick()
             }
     ) {
         Row(Modifier.padding(8.dp)) {

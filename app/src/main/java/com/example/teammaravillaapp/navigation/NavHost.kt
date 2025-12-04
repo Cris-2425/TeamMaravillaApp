@@ -62,6 +62,28 @@ fun TeamMaravillaNavHost(
             Home(
                 onNavigateCreateList = {
                     navController.navigate(NavRoute.CreateList.route)
+                },
+                onNavigateHome = {
+                    navController.navigate(NavRoute.Home.route) {
+                        popUpTo(NavRoute.Home.route) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateProfile = {
+                    navController.navigate(NavRoute.Profile.route)
+                },
+                onNavigateCamera = {
+                    // futuro: pantalla de cámara / escáner
+                },
+                onNavigateRecipes = {
+                    navController.navigate(NavRoute.Recipes.route)
+                },
+                onExitApp = {
+                    // hacer navController.popBackStack()
+                    // o delegar en la Activity si quieres cerrar la app.
+                },
+                onOpenList = { listId ->
+                    navController.navigate(NavRoute.ListDetail.createRoute(listId))
                 }
             )
         }
@@ -120,7 +142,7 @@ fun TeamMaravillaNavHost(
                 recipeId = recipeId,
                 onBack = { navController.navigateUp() },
                 onAddToShoppingList = { _ ->
-                    // Aquí en el futuro podrías abrir un diálogo para elegir lista
+                    // Abrir un diálogo para elegir lista
                     // o añadir a una lista por defecto.
                 }
             )
@@ -133,8 +155,8 @@ fun TeamMaravillaNavHost(
                 onNavigate = { option ->
                     when (option) {
                         ProfileOption.LISTS -> {
-                            // Por ahora volvemos a Home, más adelante puedes
-                            // navegar a una pantalla de "Mis listas" si la creas.
+                            // Por ahora volvemos a Home, más adelante
+                            // navegar a una pantalla de "Mis listas" si la creo.
                             navController.navigate(NavRoute.Home.route)
                         }
                         ProfileOption.RECIPES -> {
@@ -162,7 +184,6 @@ fun TeamMaravillaNavHost(
             Login(
                 onBack = { navController.navigateUp() },
                 onLoginSuccess = { _username ->
-                    // De momento, tras login volvemos a Home
                     navController.navigate(NavRoute.Home.route) {
                         popUpTo(NavRoute.Home.route) { inclusive = false }
                     }
@@ -170,12 +191,11 @@ fun TeamMaravillaNavHost(
             )
         }
 
-        // 🎛TIPO DE VISTA DE LISTA
+        // TIPO DE VISTA DE LISTA
         composable(NavRoute.ListViewTypes.route) {
             ListViewTypes(
-                selected = ListStyle.LISTA, // en el futuro podrías leer de FakeUserPrefs
+                selected = ListStyle.LISTA,
                 onSelect = { _style ->
-                    // Aquí puedes guardar el estilo en FakeUserPrefs, si quieres
                 },
                 onCancel = { navController.navigateUp() },
                 onSave = {
@@ -189,7 +209,6 @@ fun TeamMaravillaNavHost(
             CategoryFilter(
                 onCancel = { navController.navigateUp() },
                 onSave = {
-                    // ya guarda en FakeUserPrefs; aquí solo cerramos
                     navController.navigateUp()
                 }
             )

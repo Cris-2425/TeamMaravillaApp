@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,15 +30,15 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
  * - **Todos**: muestra [recipes].
  * - **Mis Recetas**: muestra las guardadas en [FakeUserRecipes].
  *
- * @param onBack Acción al pulsar el botón de volver.
- * @param onRecipeClick Acción al pulsar una receta (navegación al detalle).
  * @param recipes Fuente por defecto (recetas base de la app).
+ * @param onBack Acción al pulsar el botón atrás.
+ * @param onRecipeClick Navegar al detalle de la receta (por id).
  */
 @Composable
 fun Recipes(
-    onBack: () -> Unit,
-    onRecipeClick: (Int) -> Unit,
-    recipes: List<Recipe> = RecipeData.recipes
+    recipes: List<Recipe> = RecipeData.recipes,
+    onBack: () -> Unit = {},
+    onRecipeClick: (Int) -> Unit = {}
 ) {
     var showMine by remember { mutableStateOf(false) }
 
@@ -95,14 +97,12 @@ fun Recipes(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(visible) { rec ->
-                    // Al pulsar la tarjeta, navegamos al detalle de esa receta
-                    Box(
-                        modifier = Modifier.clickable {
+                    RecipeCard(
+                        recipe = rec,
+                        onClick = {
                             onRecipeClick(rec.id)
                         }
-                    ) {
-                        RecipeCard(recipe = rec)
-                    }
+                    )
                 }
             }
         }
@@ -113,13 +113,10 @@ fun Recipes(
     }
 }
 
-@Preview
+@Preview()
 @Composable
 fun PreviewRecipes() {
     TeamMaravillaAppTheme {
-        Recipes(
-            onBack = {},
-            onRecipeClick = {}
-        )
+        Recipes()
     }
 }

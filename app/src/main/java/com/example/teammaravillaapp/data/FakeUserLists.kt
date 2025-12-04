@@ -16,8 +16,11 @@ import java.util.UUID
  */
 object FakeUserLists {
 
+    /** Estructura interna (id único + contenido mutable). */
+    private data class Entry(val id: String, var list: UserList)
+
     /** Almacén en memoria de listas del usuario. */
-    private val store = mutableListOf<UserList>()
+    private val store = mutableListOf<Entry>()
 
     /**
      * Inserta una lista y devuelve su **ID**.
@@ -29,12 +32,10 @@ object FakeUserLists {
      * @return `String` con el identificador de la lista.
      */
     fun add(list: UserList): String {
-        store += list
-        Log.e(
-            TAG_GLOBAL,
-            "FakeUserLists → Añadida: id=${list.id}, name='${list.name}', bg=${list.background}"
-        )
-        return list.id
+        val id = UUID.randomUUID().toString()
+        store += Entry(id, list)
+        Log.e(TAG_GLOBAL, "FakeUserLists → Añadida: id=$id, name='${list.name}', bg=${list.background}")
+        return id
     }
 
     /**
@@ -42,14 +43,14 @@ object FakeUserLists {
      *
      * Útil para pintar listados manteniendo una referencia al id.
      */
-    fun all(): List<Pair<String, UserList>> = store.map { it.id to it }
+    fun all(): List<Pair<String, UserList>> = store.map { it.id to it.list }
 
     /**
      * Busca una lista por **id**.
      *
      * @return la lista o `null` si no existe.
      */
-    fun get(id: String): UserList? = store.firstOrNull { it.id == id }
+    fun get(id: String): UserList? = store.firstOrNull { it.id == id }?.list
 
     /**
      * Busca una lista por **nombre visible** (clave natural).
@@ -57,8 +58,22 @@ object FakeUserLists {
      * Útil cuando aún no tienes navegación con ids
      * o para operaciones rápidas de demo.
      */
-    fun getByName(name: String): UserList? =
-        store.firstOrNull { it.name == name }
+    fun getByName(name: String): String? =
+        store.firstOrNull { it.list.name == name }?.id
+
+    /**    /**
+     * Devuelve el **id** de la lista con ese nombre, si existe.
+     *
+     * Útil para enlazar tarjetas como “Compra semanal” con su lista real.
+    */
+    fun getIdByName(name: String): String? =
+    store.firstOrNull { it.list.name == name }?.id
+     * Devuelve el **id** de la lista con ese nombre, si existe.
+     *
+     * Útil para enlazar tarjetas como “Compra semanal” con su lista real.
+     */
+    fun getIdByName(name: String): String? =
+        store.firstOrNull { it.list.name == name }?.id
 
     /**
      * Reemplaza el contenido de la lista con **id** dado.
@@ -67,9 +82,9 @@ object FakeUserLists {
      * @param newList lista nueva completa.
      */
     fun update(id: String, newList: UserList) {
-        val index = store.indexOfFirst { it.id == id }
-        if (index != -1) {
-            store[index] = newList
+        val entry = store.firstOrNull { it.id == id }
+        if (entry != null) {
+            entry.list = newList
             Log.e(
                 TAG_GLOBAL,
                 "FakeUserLists → Actualizada (id=$id): '${newList.name}' (${newList.products.size} productos)"
@@ -88,18 +103,15 @@ object FakeUserLists {
      * @param newProducts productos nuevos a asignar.
      */
     fun updateProductsByName(name: String, newProducts: List<Product>) {
-        val index = store.indexOfFirst { it.name == name }
-        if (index != -1) {
-            val old = store[index]
-            store[index] = old.copy(products = newProducts)
-            Log.e(
-                TAG_GLOBAL,
-                "FakeUserLists → Productos actualizados: '$name' (${newProducts.size})"
-            )
+        val entry = store.firstOrNull { it.list.name == name }
+        if (entry != null) {
+            entry.list = entry.list.copy(products = newProducts)
+            Log.e(TAG_GLOBAL, "Productos actualizados: '$name' (${newProducts.size})")
         } else {
-            Log.e(TAG_GLOBAL, "FakeUserLists → No se encontró lista con nombre='$name'")
+            Log.e(TAG_GLOBAL, "No se encontró lista con nombre='$name'")
         }
     }
+
 
     /**
      * Borra todo el repositorio (reset).
@@ -124,6 +136,6 @@ object FakeUserLists {
             )
             add(demo)
         }
-        return store.last()
+        return store.last().list
     }
 }

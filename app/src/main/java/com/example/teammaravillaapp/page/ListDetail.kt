@@ -9,8 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -101,8 +102,18 @@ fun ListDetailContent(
     onBack: () -> Unit = {}
 ) {
     val bgRes = ListBackgrounds.getBackgroundRes(userList.background)
-    val productsInList = rememberSaveable(userList.id) {
+
+    // Estado reactivo de productos en la lista (solo en memoria)
+    val productsInList = remember(userList.name) {
         mutableStateListOf<Product>().apply { addAll(userList.products) }
+    }
+
+    // Conjunto de nombres de productos ya presentes en la lista (se recalcula en cada recomposición)
+    val inListNames = productsInList.map { it.name }.toSet()
+
+    fun syncWithRepo() {
+        // Guarda la lista en la "fake DB" para que se mantenga mientras dure la app
+        FakeUserLists.updateProductsByName(userList.name, productsInList.toList())
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -121,7 +132,7 @@ fun ListDetailContent(
                 Title(userList.name)
             }
 
-            // Productos actuales
+            // ------------------ Productos actuales ------------------
             item {
                 Text(
                     text = stringResource(R.string.list_detail_current_products_title),
@@ -163,23 +174,24 @@ fun ListDetailContent(
                                 .padding(12.dp)
                         ) {
                             productsInList.forEach { product ->
-                                Box(
-                                    Modifier
-                                        .wrapContentSize()
-                                        .clickable {
-                                            productsInList.remove(product)
-                                            Log.d(TAG_GLOBAL, "ListDetail → Quitar: ${product.name}")
-                                        }
-                                ) {
-                                    ProductBubble(product)
-                                }
+                                ProductBubble(
+                                    product = product,
+                                    onClick = {
+                                        productsInList.remove(product)
+                                        FakeUserLists.updateProductsByName(
+                                            userList.name,
+                                            productsInList.toList()
+                                        )
+                                        Log.e(TAG_GLOBAL, "ListDetail → Quitar: ${product.name}")
+                                    }
+                                )
                             }
                         }
                     }
                 }
             }
 
-            // Usados recientemente
+            // ------------------ Usados recientemente ------------------
             item {
                 Text(
                     text = stringResource(R.string.list_detail_recent_used_title),
@@ -200,60 +212,69 @@ fun ListDetailContent(
                             .fillMaxWidth()
                             .padding(12.dp)
                     ) {
-                        ProductData.recentUsed.forEach { product ->
-                            Box(
-                                Modifier
-                                    .wrapContentSize()
-                                    .clickable {
+                        ProductData.recentUsed
+                            .filter { it.name !in inListNames }
+                            .forEach { product ->
+                                ProductBubble(
+                                    product = product,
+                                    onClick = {
                                         if (productsInList.none { p -> p.name == product.name }) {
                                             productsInList.add(product)
-                                            Log.d(TAG_GLOBAL, "ListDetail → Añadir reciente: ${product.name}")
+                                            FakeUserLists.updateProductsByName(
+                                                userList.name,
+                                                productsInList.toList()
+                                            )
+                                            Log.e(TAG_GLOBAL, "ListDetail → Añadir reciente: ${product.name}")
                                         }
                                     }
-                            ) {
-                                ProductBubble(product)
+                                )
                             }
-                        }
                     }
                 }
             }
 
-            // Categorías
+            // ------------------ Categorías ------------------
             ProductData.byCategory.forEach { (category, items) ->
-                item {
-                    Text(
-                        text = stringResource(id = category.labelRes),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-                item {
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ) {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp)
+                // Filtramos productos de esta categoría que NO están en la lista
+                val available = items.filter { it.name !in inListNames }
+
+                if (available.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(id = category.labelRes),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                    item {
+                        Surface(
+                            shape = MaterialTheme.shapes.medium,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         ) {
-                            items.forEach { product ->
-                                Box(
-                                    Modifier
-                                        .wrapContentSize()
-                                        .clickable {
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp)
+                            ) {
+                                available.forEach { product ->
+                                    ProductBubble(
+                                        product = product,
+                                        onClick = {
                                             if (productsInList.none { p -> p.name == product.name }) {
                                                 productsInList.add(product)
-                                                Log.d(
+                                                FakeUserLists.updateProductsByName(
+                                                    userList.name,
+                                                    productsInList.toList()
+                                                )
+                                                Log.e(
                                                     TAG_GLOBAL,
                                                     "ListDetail → Añadir categoría ${category.name}: ${product.name}"
                                                 )
                                             }
                                         }
-                                ) {
-                                    ProductBubble(product)
+                                    )
                                 }
                             }
                         }
