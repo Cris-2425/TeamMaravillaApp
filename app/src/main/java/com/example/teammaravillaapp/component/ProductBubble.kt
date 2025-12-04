@@ -31,11 +31,14 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
  * No gestiona estado; se usa como célula reutilizable en listas/categorías.
  *
  * @param product modelo visual (nombre/imagen).
+ * @param modifier para tamaño/espaciados.
+ * @param onClick acción al pulsar la burbuja.
  */
 @Composable
 fun ProductBubble(
     product: Product,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Surface(
         shape = CircleShape,
@@ -44,7 +47,8 @@ fun ProductBubble(
         modifier = modifier
             .size(72.dp)
             .clickable {
-                Log.e(TAG_GLOBAL, "Producto: ${product.name}")
+                Log.e(TAG_GLOBAL, "Producto pulsado: ${product.name}")
+                onClick()
             }
     ) {
         Box(contentAlignment = Alignment.Center) {

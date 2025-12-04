@@ -15,28 +15,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.*
+import com.example.teammaravillaapp.data.FakeUserLists
 import com.example.teammaravillaapp.model.CardInfo
+import com.example.teammaravillaapp.model.OptionButton
 import com.example.teammaravillaapp.model.QuickActionData
 import com.example.teammaravillaapp.model.SearchFieldData
-import com.example.teammaravillaapp.model.OptionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 import kotlinx.coroutines.launch
 
 /**
- * Pantalla **Home**.
+ * Pantalla principal (Home / Inicio).
  *
- * Estructura base:
- * - Drawer lateral con [DrawerContent] para acciones globales.
- * - Scaffold con [TopBar], [BottomBar] y FAB.
- * - Buscador, acciones rápidas y un bloque de “listas recientes”.
- *
- * @param onNavigateCreateList Acción al crear una nueva lista (FAB o acción rápida).
+ * @param onNavigateCreateList Navegar a la pantalla de creación de lista.
+ * @param onNavigateHome Navegar a Home (BottomBar).
+ * @param onNavigateProfile Navegar a Perfil (BottomBar).
+ * @param onNavigateCamera Acción al pulsar el botón de "cámara" (BottomBar).
+ * @param onNavigateRecipes Navegar a Recetas (BottomBar).
+ * @param onExitApp Acción al pulsar "Salir" en el BottomBar o Drawer.
+ * @param onOpenList Navegar al detalle de una lista por su id.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(
-    onNavigateCreateList: () -> Unit = {}
+    onNavigateCreateList: () -> Unit = {},
+    onNavigateHome: () -> Unit = {},
+    onNavigateProfile: () -> Unit = {},
+    onNavigateCamera: () -> Unit = {},
+    onNavigateRecipes: () -> Unit = {},
+    onExitApp: () -> Unit = {},
+    onOpenList: (String) -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -71,6 +79,7 @@ fun Home(
                 onExit = {
                     Log.d(TAG_GLOBAL, "Home → Drawer: Salir")
                     scope.launch { drawerState.close() }
+                    onExitApp()
                 }
             )
         }
@@ -92,7 +101,29 @@ fun Home(
                 )
             },
             bottomBar = {
-                BottomBar(selectedButton = OptionButton.HOME)
+                BottomBar(
+                    selectedButton = OptionButton.HOME,
+                    homeButton = {
+                        Log.e(TAG_GLOBAL, "BottomBar → Home")
+                        onNavigateHome()
+                    },
+                    profileButton = {
+                        Log.e(TAG_GLOBAL, "BottomBar → Profile")
+                        onNavigateProfile()
+                    },
+                    cameraButton = {
+                        Log.e(TAG_GLOBAL, "BottomBar → Camera")
+                        onNavigateCamera()
+                    },
+                    recipesButton = {
+                        Log.e(TAG_GLOBAL, "BottomBar → Recipes")
+                        onNavigateRecipes()
+                    },
+                    exitButton = {
+                        Log.e(TAG_GLOBAL, "BottomBar → Exit")
+                        onExitApp()
+                    }
+                )
             },
             floatingActionButton = {
                 FloatingActionButton(
@@ -105,7 +136,9 @@ fun Home(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.home_fab_add_content_description)
+                        contentDescription = stringResource(
+                            R.string.home_fab_add_content_description
+                        )
                     )
                 }
             }
@@ -134,7 +167,7 @@ fun Home(
                         ),
                         onValueChange = {
                             search = it
-                            Log.d(TAG_GLOBAL, "Home → SearchField: '$it'")
+                            Log.e(TAG_GLOBAL, "Home → SearchField: '$it'")
                         }
                     )
 
@@ -158,6 +191,7 @@ fun Home(
                                         labelFavorites -> {
                                             // futuro: navegación a Favoritos
                                         }
+
                                         labelHistory -> {
                                             // futuro: navegación a Historial
                                         }
@@ -176,26 +210,37 @@ fun Home(
 
                     Spacer(Modifier.height(8.dp))
 
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        ListCard(
-                            cardInfo = CardInfo(
-                                imageID = R.drawable.list_supermarket,
-                                imageDescription = stringResource(R.string.home_recent_list_super_img_desc),
-                                title = stringResource(R.string.home_recent_list_super_title),
-                                subtitle = stringResource(R.string.home_recent_list_super_subtitle)
-                            )
+                    // 🔹 Listas recientes dinámicas desde FakeUserLists
+                    val recentLists = remember {
+                        FakeUserLists.all().ifEmpty {
+                            FakeUserLists.sample()      // crea una demo si está vacío
+                            FakeUserLists.all()
+                        }
+                    }
+
+                    if (recentLists.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.home_recent_lists_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
-                        ListCard(
-                            cardInfo = CardInfo(
-                                imageID = R.drawable.list_bbq,
-                                imageDescription = stringResource(R.string.home_recent_list_bbq_img_desc),
-                                title = stringResource(R.string.home_recent_list_bbq_title),
-                                subtitle = stringResource(R.string.home_recent_list_bbq_subtitle)
-                            )
-                        )
+                    } else {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            recentLists.forEach { (id, userList) ->
+                                ListCard(
+                                    cardInfo = CardInfo(
+                                        imageID = R.drawable.list_supermarket, // genérico
+                                        imageDescription = userList.name,
+                                        title = userList.name,
+                                        subtitle = "${userList.products.size} productos"
+                                    ),
+                                    onClick = { onOpenList(id) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -203,12 +248,10 @@ fun Home(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewHome() {
     TeamMaravillaAppTheme {
-        Home(
-            onNavigateCreateList = {}
-        )
+        Home()
     }
 }

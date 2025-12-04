@@ -19,7 +19,8 @@ sealed class NavRoute(val route: String) {
 
     data object ListDetail : NavRoute("list_detail/{listId}") {
         const val ARG_LIST_ID = "listId"
-        fun createRoute(listId: String): String = "list_detail/$listId"
+        fun createRoute(listId: String): String =
+            "list_detail/$listId"
     }
 
     data object Recipes : NavRoute("recipes")

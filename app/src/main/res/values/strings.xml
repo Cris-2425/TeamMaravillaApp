@@ -77,6 +77,7 @@
     <string name="home_quick_favorites">Favoritos</string>
     <string name="home_quick_history">Historial</string>
     <string name="home_recent_lists_title">Listas recientes</string>
+    <string name="home_recent_lists_empty">No existen listas recientes</string>
     <string name="home_fab_add_content_description">Añadir lista</string>
     <string name="home_recent_list_super_img_desc">Lista supermercado</string>
     <string name="home_recent_list_super_title">Compra semanal</string>
