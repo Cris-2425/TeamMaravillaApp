@@ -3,11 +3,8 @@ package com.example.teammaravillaapp.component
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,12 +23,14 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Burbuja circular de **producto** (imagen o texto).
+ * Burbuja de producto con:
+ * - Imagen arriba (si hay)
+ * - Nombre abajo
  *
- * No gestiona estado; se usa como célula reutilizable en listas/categorías.
+ * Se usa en ListDetail, CreateList, etc.
  *
- * @param product modelo visual (nombre/imagen).
- * @param modifier para tamaño/espaciados.
+ * @param product producto a mostrar.
+ * @param modifier para ajustar tamaño/espaciados desde fuera.
  * @param onClick acción al pulsar la burbuja.
  */
 @Composable
@@ -40,40 +39,57 @@ fun ProductBubble(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.secondary,
-        contentColor = MaterialTheme.colorScheme.onSecondary,
-        modifier = modifier
-            .size(72.dp)
-            .clickable {
-                Log.e(TAG_GLOBAL, "Producto pulsado: ${product.name}")
-                onClick()
-            }
+    Column(
+        modifier = modifier.width(72.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable {
+                    Log.e(TAG_GLOBAL, "Producto pulsado: ${product.name}")
+                    onClick()
+                }
+        ) {
             if (product.imageRes != null) {
                 Image(
                     painter = painterResource(id = product.imageRes),
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
+                    modifier = Modifier.fillMaxSize()
                 )
             } else {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(6.dp)
-                )
+                // Sin imagen: fondo plano con el nombre abreviado
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = product.name.take(3), // por ejemplo "Har", "Lec", etc.
+                        style = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
+
+        Spacer(Modifier.height(4.dp))
+
+        Text(
+            text = product.name,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewProductBubble() {
     TeamMaravillaAppTheme {
