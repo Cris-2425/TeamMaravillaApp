@@ -10,7 +10,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
@@ -28,30 +30,42 @@ fun TopBar(
     onMoreClick: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
-        title = { Title(title) },
+        title = { Title(texto = title) },
         navigationIcon = {
-            IconButton(onClick = {
-                Log.e(TAG_GLOBAL, "Click en 'Menú'")
-                onMenuClick()
-            }
+            IconButton(
+                onClick = {
+                    Log.e(TAG_GLOBAL, "Click en 'Menú'")
+                    onMenuClick()
+                }
             ) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = stringResource(R.string.topbar_menu_cd)
+                )
             }
         },
         actions = {
-            IconButton(onClick = {
-                Log.e(TAG_GLOBAL, "Click en 'Buscar'")
-                onSearchClick()
-            }
+            IconButton(
+                onClick = {
+                    Log.e(TAG_GLOBAL, "Click en 'Buscar'")
+                    onSearchClick()
+                }
             ) {
-                Icon(Icons.Default.Search, contentDescription = "Search")
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = stringResource(R.string.topbar_search_cd)
+                )
             }
-            IconButton(onClick = {
-                Log.e(TAG_GLOBAL, "Click en 'Más opciones'")
-                onMoreClick()
-            }
+            IconButton(
+                onClick = {
+                    Log.e(TAG_GLOBAL, "Click en 'Más opciones'")
+                    onMoreClick()
+                }
             ) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Más")
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.topbar_more_cd)
+                )
             }
         }
     )

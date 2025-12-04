@@ -6,7 +6,7 @@ package com.example.teammaravillaapp.model
  * Nota: la convención de nombres en enums suele ser PascalCase,
  * pero se mantiene el identificador actual para no romper código.
  */
-enum class optionButton {
+enum class OptionButton {
     HOME,
     PROFILE,
     CAMERA,

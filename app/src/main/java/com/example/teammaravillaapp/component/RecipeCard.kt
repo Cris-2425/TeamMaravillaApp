@@ -7,8 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,14 +31,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.data.FakeUserRecipes
 import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
-import com.example.teammaravillaapp.data.FakeUserRecipes
 
 /**
  * Tarjeta de receta reutilizable.
@@ -52,11 +54,8 @@ import com.example.teammaravillaapp.data.FakeUserRecipes
  * - **Tap** sobre la tarjeta → [onClick].
  * - **Tap** sobre el corazón → añade/quita de *Mis Recetas* en [FakeUserRecipes].
  *
- * Notas de estado:
- * - `isMine` se inicializa leyendo el repositorio en memoria. No persiste entre sesiones (MVP).
- *
  * @param recipe Receta a renderizar.
- * @param modifier Modificador de Jetpack Compose para ajustar tamaño/espaciados/… desde fuera.
+ * @param modifier Modificador de Jetpack Compose para ajustar tamaño/espaciados desde fuera.
  * @param onClick Acción al pulsar la tarjeta completa (navegar a detalle, etc.).
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -66,11 +65,14 @@ fun RecipeCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    /**
-     * Estado local que refleja si la receta está en "Mis Recetas".
-     * Se recalcula cuando cambia el título de la receta.
-     */
+    // Estado local que refleja si la receta está en "Mis Recetas".
     val isMine = remember(recipe.title) { mutableStateOf(FakeUserRecipes.contains(recipe)) }
+
+    val ingredientsTitle = stringResource(R.string.recipe_ingredients_title)
+    val imagePlaceholder = stringResource(R.string.recipe_image_placeholder)
+    val noIngredientsText = stringResource(R.string.recipe_no_ingredients)
+    val favAddCd = stringResource(R.string.recipe_favorite_add_cd)
+    val favRemoveCd = stringResource(R.string.recipe_favorite_remove_cd)
 
     Surface(
         shape = RoundedCornerShape(22.dp),
@@ -85,7 +87,7 @@ fun RecipeCard(
     ) {
         Column(Modifier.padding(14.dp)) {
 
-            /** Cabecera con título e icono de favorito */
+            // Cabecera con título e icono de favorito
             Surface(
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.surface,
@@ -108,24 +110,23 @@ fun RecipeCard(
                         textAlign = TextAlign.Center
                     )
 
-                    /** Botón de favorito: añade o elimina del repositorio en memoria */
-                    IconButton(onClick = {
-                        if (isMine.value) {
-                            FakeUserRecipes.remove(recipe)
-                        } else {
-                            FakeUserRecipes.add(recipe)
+                    // Botón de favorito: añade o elimina del repositorio en memoria
+                    IconButton(
+                        onClick = {
+                            if (isMine.value) {
+                                FakeUserRecipes.remove(recipe)
+                            } else {
+                                FakeUserRecipes.add(recipe)
+                            }
+                            isMine.value = !isMine.value
                         }
-                        isMine.value = !isMine.value
-                    }) {
+                    ) {
                         Icon(
                             imageVector = if (isMine.value)
                                 Icons.Filled.Favorite
                             else
                                 Icons.Outlined.FavoriteBorder,
-                            contentDescription = if (isMine.value)
-                                "Quitar de Mis Recetas"
-                            else
-                                "Añadir a Mis Recetas",
+                            contentDescription = if (isMine.value) favRemoveCd else favAddCd,
                             tint = if (isMine.value)
                                 MaterialTheme.colorScheme.primary
                             else
@@ -157,7 +158,7 @@ fun RecipeCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Foto Receta",
+                        text = imagePlaceholder,
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -167,7 +168,7 @@ fun RecipeCard(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Ingredientes",
+                text = ingredientsTitle,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSecondary
             )
@@ -176,7 +177,7 @@ fun RecipeCard(
 
             if (recipe.products.isEmpty()) {
                 Text(
-                    text = "Sin ingredientes",
+                    text = noIngredientsText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondary
                 )

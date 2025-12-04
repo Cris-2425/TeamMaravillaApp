@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -14,12 +15,13 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 /**
  * Grid fluido para **burbujas de opciones** (perfil).
  *
- * No hace scroll por si solo.
+ * Ahora soporta callback de click con índice.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OptionsGrid(
-    options: List<String>
+    options: List<String>,
+    onOptionClick: (Int) -> Unit = {}
 ) {
     FlowRow(
         maxItemsInEachRow = 3,
@@ -27,8 +29,11 @@ fun OptionsGrid(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        options.forEach {
-            OptionBubble(it)
+        options.forEachIndexed { index, text ->
+            OptionBubble(
+                label = text,
+                modifier = Modifier.clickable { onOptionClick(index) }
+            )
         }
     }
 }
@@ -41,7 +46,8 @@ fun PreviewOptionsGrid() {
             listOf(
                 "Historial",
                 "Favoritos",
-                "Configuración")
+                "Configuración"
+            )
         )
     }
 }

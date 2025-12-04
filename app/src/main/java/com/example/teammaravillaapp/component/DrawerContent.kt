@@ -12,8 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
@@ -38,11 +40,11 @@ fun DrawerContent(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "Notificaciones",
+            text = stringResource(R.string.drawer_notifications),
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    Log.e(TAG_GLOBAL, "Notificaciones")
+                    Log.e(TAG_GLOBAL, "Drawer → Notificaciones")
                     onNotifications()
                 }
                 .padding(16.dp),
@@ -50,11 +52,11 @@ fun DrawerContent(
         )
 
         Text(
-            text = "Compartir lista",
+            text = stringResource(R.string.drawer_share_list),
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    Log.e(TAG_GLOBAL, "Compartir lista")
+                    Log.e(TAG_GLOBAL, "Drawer → Compartir lista")
                     onShare()
                 }
                 .padding(16.dp),
@@ -62,11 +64,11 @@ fun DrawerContent(
         )
 
         Text(
-            text = "Opciones",
+            text = stringResource(R.string.drawer_options),
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    Log.e(TAG_GLOBAL, "Opciones")
+                    Log.e(TAG_GLOBAL, "Drawer → Opciones")
                     onOptions()
                 }
                 .padding(16.dp),
@@ -74,11 +76,11 @@ fun DrawerContent(
         )
 
         Text(
-            text = "Salir",
+            text = stringResource(R.string.drawer_exit),
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    Log.e(TAG_GLOBAL, "Salir")
+                    Log.e(TAG_GLOBAL, "Drawer → Salir")
                     onExit()
                 }
                 .padding(16.dp),

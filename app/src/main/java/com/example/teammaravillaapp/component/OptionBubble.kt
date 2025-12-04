@@ -1,7 +1,5 @@
 package com.example.teammaravillaapp.component
 
-import android.util.Log
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -15,23 +13,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
  * Burbuja circular de opción simple (perfil).
  *
- * Solo pinta y loguea; añade navegación fuera.
+ * Solo pinta; el click se gestiona desde fuera.
  */
 @Composable
 fun OptionBubble(
-    label: String
+    label: String,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
-            .size(90.dp)
-            .clickable {
-                Log.e(TAG_GLOBAL, "Profile → Click en opción: $label")
-                       },
+        modifier = modifier.size(90.dp),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -50,6 +44,6 @@ fun OptionBubble(
 @Composable
 fun PreviewOptionBubble() {
     TeamMaravillaAppTheme {
-        OptionBubble("Mis Listas")
+        OptionBubble("Mis listas")
     }
 }
