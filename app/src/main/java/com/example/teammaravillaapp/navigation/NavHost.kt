@@ -2,6 +2,7 @@ package com.example.teammaravillaapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,6 +19,7 @@ import com.example.teammaravillaapp.page.Login
 import com.example.teammaravillaapp.page.Profile
 import com.example.teammaravillaapp.page.Recipes
 import com.example.teammaravillaapp.page.RecipesDetail
+import com.example.teammaravillaapp.viewModel.LoginViewModel
 
 /**
  * `NavHost` principal de la aplicación.
@@ -80,7 +82,7 @@ fun TeamMaravillaNavHost(
                 },
                 onExitApp = {
                     // hacer navController.popBackStack()
-                    // o delegar en la Activity si quieres cerrar la app.
+                    // o delegar en la Activity si quiero cerrar la app.
                 },
                 onOpenList = { listId ->
                     navController.navigate(NavRoute.ListDetail.createRoute(listId))
@@ -181,13 +183,15 @@ fun TeamMaravillaNavHost(
 
         // LOGIN
         composable(NavRoute.Login.route) {
+            val loginViewModel : LoginViewModel = viewModel()
             Login(
                 onBack = { navController.navigateUp() },
                 onLoginSuccess = { _username ->
                     navController.navigate(NavRoute.Home.route) {
                         popUpTo(NavRoute.Home.route) { inclusive = false }
                     }
-                }
+                },
+                loginViewModel =  loginViewModel
             )
         }
 

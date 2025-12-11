@@ -17,7 +17,7 @@
     <string name="recipe_ingredients_title">Ingredientes</string>
     <string name="recipe_instructions_title">Preparación</string>
     <string name="recipe_add_ingredients_button">Añadir ingredientes a la lista de la compra</string>
-    <string name="recipe_not_found">No se ha encontrado la receta seleccionada.</string>
+    <string name="recipe_not_found">No se ha encontrado la receta seleccionada</string>
 
     <!-- Recipes -->
     <string name="recipes_title_all">Recetas</string>
@@ -39,7 +39,7 @@
     <string name="login_username_placeholder">Usuario</string>
     <string name="login_password_placeholder">Contraseña</string>
     <string name="login_button_text">Entrar</string>
-    <string name="login_error_empty_fields">Por favor, rellena usuario y contraseña.</string>
+    <string name="login_error_empty_fields">Por favor, rellena usuario y contraseña</string>
 
     <!-- ListViewTypes -->
     <string name="list_view_types_title">Aspecto de la lista</string>
@@ -52,7 +52,7 @@
 
     <!-- ListDetail -->
     <string name="list_detail_empty_title">Aún no hay listas creadas</string>
-    <string name="list_detail_empty_subtitle">Crea una nueva lista para empezar a añadir productos.</string>
+    <string name="list_detail_empty_subtitle">Crea una nueva lista para empezar a añadir productos</string>
     <string name="list_detail_current_products_title">Productos en la lista</string>
     <string name="list_detail_no_products">No hay productos todavía</string>
     <string name="list_detail_recent_used_title">Usados recientemente</string>
