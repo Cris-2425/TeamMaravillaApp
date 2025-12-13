@@ -120,6 +120,7 @@
     <string name="topbar_menu_cd">Menú</string>
     <string name="topbar_search_cd">Buscar</string>
     <string name="topbar_more_cd">Más opciones</string>
+    <string name="topbar_theme_cd">Temas</string>
 
     <!-- ******************************************************************************* -->
     <!-- Package model -->

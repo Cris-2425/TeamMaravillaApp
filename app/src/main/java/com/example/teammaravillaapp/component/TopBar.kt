@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -13,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.preferences.ThemeMode
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
@@ -27,7 +30,9 @@ fun TopBar(
     title: String,
     onMenuClick: () -> Unit = {},
     onSearchClick: () -> Unit = {},
-    onMoreClick: () -> Unit = {}
+    onMoreClick: () -> Unit = {},
+    isDark: Boolean,
+    onThemeToggle: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = { Title(texto = title) },
@@ -67,6 +72,17 @@ fun TopBar(
                     contentDescription = stringResource(R.string.topbar_more_cd)
                 )
             }
+            IconButton(
+                onClick = {
+                    Log.e(TAG_GLOBAL, "Click en 'Temas'")
+                    onThemeToggle()
+                }
+            ) {
+                Icon(
+                    imageVector = if (isDark) Icons.Default.DarkMode else Icons.Default.LightMode,
+                    contentDescription = stringResource(R.string.topbar_theme_cd)
+                )
+            }
         }
     )
 }
@@ -75,6 +91,8 @@ fun TopBar(
 @Composable
 fun PreviewTopBar() {
     TeamMaravillaAppTheme {
-        TopBar("Team Maravilla")
+        TopBar("Team Maravilla",
+            isDark = false,
+            onThemeToggle = {})
     }
 }

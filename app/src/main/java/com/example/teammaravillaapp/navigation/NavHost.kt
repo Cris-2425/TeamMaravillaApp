@@ -18,6 +18,7 @@ import com.example.teammaravillaapp.page.Login
 import com.example.teammaravillaapp.page.Profile
 import com.example.teammaravillaapp.page.Recipes
 import com.example.teammaravillaapp.page.RecipesDetail
+import com.example.teammaravillaapp.viewmodel.AppSettingsViewModel
 
 /**
  * `NavHost` principal de la aplicación.
@@ -48,6 +49,7 @@ import com.example.teammaravillaapp.page.RecipesDetail
 @Composable
 fun TeamMaravillaNavHost(
     navController: NavHostController,
+    appSettingsViewModel: AppSettingsViewModel,
     modifier: Modifier = Modifier,
     startDestination: String = NavRoute.Home.route
 ) {
@@ -60,6 +62,7 @@ fun TeamMaravillaNavHost(
         // HOME
         composable(NavRoute.Home.route) {
             Home(
+                appSettingsViewModel = appSettingsViewModel,
                 onNavigateCreateList = {
                     navController.navigate(NavRoute.CreateList.route)
                 },

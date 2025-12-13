@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.page
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -20,8 +21,11 @@ import com.example.teammaravillaapp.model.CardInfo
 import com.example.teammaravillaapp.model.OptionButton
 import com.example.teammaravillaapp.model.QuickActionData
 import com.example.teammaravillaapp.model.SearchFieldData
+import com.example.teammaravillaapp.preferences.ThemeMode
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
+import com.example.teammaravillaapp.viewmodel.AppSettingsViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -38,14 +42,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(
+    appSettingsViewModel: AppSettingsViewModel,
     onNavigateCreateList: () -> Unit = {},
     onNavigateHome: () -> Unit = {},
     onNavigateProfile: () -> Unit = {},
     onNavigateCamera: () -> Unit = {},
     onNavigateRecipes: () -> Unit = {},
     onExitApp: () -> Unit = {},
-    onOpenList: (String) -> Unit = {}
+    onOpenList: (String) -> Unit = {},
 ) {
+    val themeMode by appSettingsViewModel.themeMode.collectAsState()
+
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var search by remember { mutableStateOf("") }
@@ -97,6 +104,15 @@ fun Home(
                     },
                     onMoreClick = {
                         Log.d(TAG_GLOBAL, "Home → TopBar: Más opciones")
+                    },
+                    isDark = themeMode == ThemeMode.DARK,
+                    onThemeToggle = {
+                        appSettingsViewModel.setThemeMode(
+                            if (themeMode == ThemeMode.DARK)
+                                ThemeMode.LIGHT
+                            else
+                                ThemeMode.DARK
+                        )
                     }
                 )
             },
@@ -251,7 +267,28 @@ fun Home(
 @Preview(showBackground = true)
 @Composable
 fun PreviewHome() {
-    TeamMaravillaAppTheme {
-        Home()
+    var isDark by remember { mutableStateOf(true) }
+
+    TeamMaravillaAppTheme(
+        themeMode = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT
+    ) {
+        Home(
+            appSettingsViewModel = object : AppSettingsViewModel(Application()) {
+                override val themeMode = MutableStateFlow(
+                    if (isDark) ThemeMode.DARK else ThemeMode.LIGHT
+                )
+
+                override fun setThemeMode(mode: ThemeMode) {
+                    isDark = mode == ThemeMode.DARK
+                }
+            },
+            onNavigateCreateList = {},
+            onNavigateHome = {},
+            onNavigateProfile = {},
+            onNavigateCamera = {},
+            onNavigateRecipes = {},
+            onExitApp = {},
+            onOpenList = {}
+        )
     }
 }

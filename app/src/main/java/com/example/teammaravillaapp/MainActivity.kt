@@ -3,9 +3,13 @@ package com.example.teammaravillaapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.teammaravillaapp.navigation.TeamMaravillaNavHost
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.viewmodel.AppSettingsViewModel
 
 /**
  * # MainActivity
@@ -48,10 +52,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TeamMaravillaAppTheme {
+            val appSettingsViewModel: AppSettingsViewModel = viewModel()
+            val themeMode by appSettingsViewModel.themeMode.collectAsState()
+
+            TeamMaravillaAppTheme(themeMode = themeMode) {
                 val navController = rememberNavController()
-                TeamMaravillaNavHost(navController = navController)
+
+                TeamMaravillaNavHost(
+                    navController = navController,
+                    appSettingsViewModel = appSettingsViewModel
+                )
             }
         }
+
     }
 }
