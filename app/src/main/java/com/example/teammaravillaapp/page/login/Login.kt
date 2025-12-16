@@ -1,11 +1,23 @@
-package com.example.teammaravillaapp.page
+package com.example.teammaravillaapp.page.login
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,20 +32,12 @@ import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-/**
- * Pantalla de Login / Registro simple.
- *
- * @param onBack Acción al pulsar atrás.
- * @param onLoginSuccess Acción al hacer login correctamente (devuelve el nombre de usuario).
- */
 @Composable
 fun Login(
     onBack: () -> Unit,
-    onLoginSuccess: (String) -> Unit = {}
+    loginViewModel: LoginViewModel
 ) {
-    var user by rememberSaveable { mutableStateOf("") }
-    var pass by rememberSaveable { mutableStateOf("") }
-    var showError by rememberSaveable { mutableStateOf(false) }
+    val uiState by loginViewModel.uiState.collectAsState()
 
     Box(Modifier.fillMaxSize()) {
 
@@ -68,40 +72,34 @@ fun Login(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     OutlinedTextField(
-                        value = user,
-                        onValueChange = {
-                            user = it
-                            showError = false
-                            Log.d(TAG_GLOBAL, "Login → usuario cambió a: '$it'")
-                        },
+                        value = uiState.email,
+                        onValueChange = { loginViewModel.onEmailChange(it) },
                         placeholder = { Text(stringResource(R.string.login_username_placeholder)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp)),
-                        singleLine = true
+                        singleLine = true,
+                        enabled = !uiState.isLoading
                     )
 
                     Spacer(Modifier.height(12.dp))
 
                     OutlinedTextField(
-                        value = pass,
-                        onValueChange = {
-                            pass = it
-                            showError = false
-                            Log.d(TAG_GLOBAL, "Login → contraseña longitud: ${it.length}")
-                        },
+                        value = uiState.password,
+                        onValueChange = { loginViewModel.onPasswordChange(it) },
                         placeholder = { Text(stringResource(R.string.login_password_placeholder)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp)),
                         singleLine = true,
-                        visualTransformation = PasswordVisualTransformation()
+                        visualTransformation = PasswordVisualTransformation(),
+                        enabled = !uiState.isLoading
                     )
 
-                    if (showError) {
+                    if (uiState.errorMessage != null) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = stringResource(R.string.login_error_empty_fields),
+                            text = uiState.errorMessage!!,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -111,18 +109,30 @@ fun Login(
 
                     Button(
                         onClick = {
-                            if (user.isBlank() || pass.isBlank()) {
-                                showError = true
-                                Log.d(TAG_GLOBAL, "Login → intento con campos vacíos")
-                            } else {
-                                Log.d(TAG_GLOBAL, "Login → éxito con usuario: '$user'")
-                                onLoginSuccess(user)
-                            }
+                            Log.d(TAG_GLOBAL, "Login → click")
+                            loginViewModel.onLoginClick()
                         },
-                        enabled = user.isNotBlank() && pass.isNotBlank(),
+                        enabled = uiState.isLoginButtonEnabled,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.login_button_text))
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.height(18.dp)
+                            )
+                            Spacer(Modifier.height(0.dp))
+                        } else {
+                            Text(stringResource(R.string.login_button_text))
+                        }
+                    }
+
+                    if (uiState.isLoading) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = "Cargando...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -131,8 +141,12 @@ fun Login(
         Box(Modifier.align(Alignment.BottomStart)) {
             BackButton(
                 onClick = {
-                    Log.d(TAG_GLOBAL, "Login → BackButton")
-                    onBack()
+                    if (!uiState.isLoading) {
+                        Log.d(TAG_GLOBAL, "Login → BackButton")
+                        onBack()
+                    } else {
+                        Log.d(TAG_GLOBAL, "Login → BackButton bloqueado (loading)")
+                    }
                 }
             )
         }
@@ -143,9 +157,6 @@ fun Login(
 @Composable
 fun PreviewLogin() {
     TeamMaravillaAppTheme {
-        Login(
-            onBack = {},
-            onLoginSuccess = {}
-        )
+        // Preview
     }
 }
