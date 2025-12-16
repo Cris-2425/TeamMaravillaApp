@@ -157,6 +157,6 @@ fun Login(
 @Composable
 fun PreviewLogin() {
     TeamMaravillaAppTheme {
-        // Preview sin VM real
+        // Preview
     }
 }
