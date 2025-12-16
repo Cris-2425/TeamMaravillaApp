@@ -1,56 +1,51 @@
 package com.example.teammaravillaapp
 
+import FakeAuthRepository
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
+import com.example.teammaravillaapp.data.session.SessionStore
+import com.example.teammaravillaapp.navigation.NavRoute
 import com.example.teammaravillaapp.navigation.TeamMaravillaNavHost
+import com.example.teammaravillaapp.page.session.SessionViewModel
+import com.example.teammaravillaapp.page.session.SessionViewModelFactory
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
-/**
- * # MainActivity
- *
- * Punto de entrada principal de la aplicación **Team Maravilla**.
- *
- * Configura el tema global y establece el sistema de navegación basado en
- * **Navigation Compose**, permitiendo que las pantallas se gestionen mediante
- * un `NavHost` centralizado definido en [TeamMaravillaNavHost].
- *
- * ---
- *
- * ## Responsabilidades:
- * - Crear el `NavController`.
- * - Iniciar el `NavHost` responsable de todas las pantallas.
- * - Aplicar el tema `TeamMaravillaAppTheme`.
- *
- * ---
- *
- * ## Flujo general:
- * ```
- * MainActivity
- *     └── rememberNavController()
- *             └── TeamMaravillaNavHost()
- *                     ├── Home
- *                     ├── CreateList
- *                     ├── ListDetail
- *                     ├── Recipes
- *                     ├── RecipesDetail
- *                     ├── Profile
- *                     ├── Login
- *                     ├── CategoryFilter
- *                     └── ListViewTypes
- * ```
- *
- * ---
- *
- */
 class MainActivity : ComponentActivity() {
+
+    private val sessionStore by lazy { SessionStore(applicationContext) }
+
+    private val sessionViewModel: SessionViewModel by viewModels {
+        SessionViewModelFactory(sessionStore)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             TeamMaravillaAppTheme {
                 val navController = rememberNavController()
-                TeamMaravillaNavHost(navController = navController)
+                val authRepository = remember { FakeAuthRepository(sessionStore) }
+
+                val isLoggedIn by sessionViewModel.isLoggedIn.collectAsState()
+
+                val startDestination = if (isLoggedIn) {
+                    NavRoute.Home.route
+                } else {
+                    NavRoute.Login.route
+                }
+
+                TeamMaravillaNavHost(
+                    navController = navController,
+                    sessionViewModel = sessionViewModel,
+                    authRepository = authRepository,
+                    startDestination = startDestination
+                )
             }
         }
     }
