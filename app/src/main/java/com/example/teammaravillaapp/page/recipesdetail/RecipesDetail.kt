@@ -1,25 +1,16 @@
-package com.example.teammaravillaapp.page
+package com.example.teammaravillaapp.page.recipesdetail
 
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,18 +24,10 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ProductBubble
-import com.example.teammaravillaapp.model.Recipe
-import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
+import com.example.teammaravillaapp.model.Recipe
 
-/**
- * Pantalla del detalle de receta:
- * - Obtiene receta desde RecipeData usando recipeId.
- * - Muestra imagen, ingredientes, preparación.
- * - Botón para añadir ingredientes a la lista (callback).
- * - Manejo de error si el id no existe.
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipesDetail(
@@ -52,17 +35,16 @@ fun RecipesDetail(
     onBack: () -> Unit,
     onAddToShoppingList: (Recipe) -> Unit
 ) {
-    val recipe = RecipeData.getRecipeById(recipeId)
+    val vm: RecipesDetailViewModel = viewModel(
+        factory = RecipesDetailViewModelFactory(recipeId)
+    )
+    val uiState by vm.uiState.collectAsState()
 
-    if (recipe == null) {
-        // Caso error
+    if (uiState.isLoading) {
         Box(Modifier.fillMaxSize()) {
             GeneralBackground()
-            Text(
-                text = stringResource(R.string.recipe_not_found),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.align(Alignment.Center),
-                color = MaterialTheme.colorScheme.onBackground
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
             )
             Box(Modifier.align(Alignment.BottomStart)) {
                 BackButton(onClick = onBack)
@@ -71,8 +53,34 @@ fun RecipesDetail(
         return
     }
 
-    Box(Modifier.fillMaxSize()) {
+    if (uiState.isNotFound) {
+        Box(Modifier.fillMaxSize()) {
+            GeneralBackground()
+            Text(
+                text = stringResource(R.string.recipe_not_found),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Box(Modifier.align(Alignment.BottomStart)) {
+                BackButton(onClick = onBack)
+            }
+        }
+        return
+    }
 
+    // ✅ Aquí ya lo convertimos en NO-NULL
+    val recipe: Recipe = uiState.recipe ?: run {
+        // estado intermedio raro (por seguridad)
+        Box(Modifier.fillMaxSize()) {
+            GeneralBackground()
+            Box(Modifier.align(Alignment.BottomStart)) {
+                BackButton(onClick = onBack)
+            }
+        }
+        return
+    }
+
+    Box(Modifier.fillMaxSize()) {
         GeneralBackground()
 
         Column(
@@ -80,7 +88,6 @@ fun RecipesDetail(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-
             Spacer(Modifier.height(16.dp))
 
             // ---------- TÍTULO ----------
@@ -138,7 +145,6 @@ fun RecipesDetail(
             Text(
                 text = stringResource(R.string.recipe_ingredients_title),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
@@ -152,10 +158,7 @@ fun RecipesDetail(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 recipe.products.forEach { product ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        ProductBubble(product)
-                        Spacer(Modifier.height(4.dp))
-                    }
+                    ProductBubble(product)
                 }
             }
 
@@ -166,7 +169,6 @@ fun RecipesDetail(
                 Text(
                     text = stringResource(R.string.recipe_instructions_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -174,8 +176,7 @@ fun RecipesDetail(
 
                 Text(
                     text = recipe.instructions,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = MaterialTheme.typography.bodyMedium
                 )
 
                 Spacer(Modifier.height(24.dp))
@@ -184,15 +185,12 @@ fun RecipesDetail(
             // ---------- BOTÓN AÑADIR A LISTA ----------
             Button(
                 onClick = { onAddToShoppingList(recipe) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = stringResource(R.string.recipe_add_ingredients_button))
             }
         }
 
-        // ---------- BOTÓN VOLVER ----------
         Box(Modifier.align(Alignment.BottomStart)) {
             BackButton(onClick = onBack)
         }

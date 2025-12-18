@@ -1,4 +1,3 @@
-// com.example.teammaravillaapp.data.FakeUserLists
 package com.example.teammaravillaapp.data
 
 import android.util.Log
@@ -13,129 +12,123 @@ import java.util.UUID
  *
  * Sirve como “fake DB” para prototipar pantallas como **CreateList** y **ListDetail**.
  * No hay persistencia: al cerrar la app se pierde el contenido.
+ *
+ * ✅ Nota: como es in-memory, no es reactivo. Cuando metas Room, esto será un DAO/Repository real.
  */
 object FakeUserLists {
 
-    /** Estructura interna (id único + contenido mutable). */
+    /** Estructura interna (id único + contenido). */
     private data class Entry(val id: String, var list: UserList)
 
     /** Almacén en memoria de listas del usuario. */
     private val store = mutableListOf<Entry>()
 
     /**
-     * Inserta una lista y devuelve su **ID**.
+     * Inserta una lista y devuelve su **ID** generado.
      *
-     * Se asume que el `id` viene ya inicializado en [UserList.id].
-     * Si necesitas generar uno nuevo, puedes usar [UUID.randomUUID].
-     *
-     * @param list contenido de la lista (id, nombre, fondo y productos).
-     * @return `String` con el identificador de la lista.
+     * ✅ Regla: el ID "real" es el de Entry. Para evitar inconsistencias,
+     * guardamos la lista con `id` actualizado a ese mismo valor.
      */
     fun add(list: UserList): String {
         val id = UUID.randomUUID().toString()
-        store += Entry(id, list)
-        Log.e(TAG_GLOBAL, "FakeUserLists → Añadida: id=$id, name='${list.name}', bg=${list.background}")
+        val normalized = list.copy(id = id)
+        store += Entry(id, normalized)
+
+        Log.d(
+            TAG_GLOBAL,
+            "FakeUserLists → Añadida: id=$id, name='${normalized.name}', bg=${normalized.background}"
+        )
         return id
     }
 
     /**
      * Devuelve todas las listas en forma `(id, lista)`.
      *
-     * Útil para pintar listados manteniendo una referencia al id.
+     * Se devuelve copia "segura" (no expone Entry).
      */
     fun all(): List<Pair<String, UserList>> = store.map { it.id to it.list }
 
-    /**
-     * Busca una lista por **id**.
-     *
-     * @return la lista o `null` si no existe.
-     */
+    /** Busca una lista por **id**. */
     fun get(id: String): UserList? = store.firstOrNull { it.id == id }?.list
 
-    /**
-     * Busca una lista por **nombre visible** (clave natural).
-     *
-     * Útil cuando aún no tienes navegación con ids
-     * o para operaciones rápidas de demo.
-     */
-    fun getByName(name: String): String? =
-        store.firstOrNull { it.list.name == name }?.id
-
-    /**    /**
-     * Devuelve el **id** de la lista con ese nombre, si existe.
-     *
-     * Útil para enlazar tarjetas como “Compra semanal” con su lista real.
-    */
-    fun getIdByName(name: String): String? =
-    store.firstOrNull { it.list.name == name }?.id
-     * Devuelve el **id** de la lista con ese nombre, si existe.
-     *
-     * Útil para enlazar tarjetas como “Compra semanal” con su lista real.
-     */
+    /** Devuelve el **id** de la lista con ese nombre, si existe. */
     fun getIdByName(name: String): String? =
         store.firstOrNull { it.list.name == name }?.id
 
     /**
      * Reemplaza el contenido de la lista con **id** dado.
-     *
-     * @param id identificador de la lista.
-     * @param newList lista nueva completa.
+     * Mantiene el id coherente.
      */
     fun update(id: String, newList: UserList) {
         val entry = store.firstOrNull { it.id == id }
         if (entry != null) {
-            entry.list = newList
-            Log.e(
+            entry.list = newList.copy(id = id)
+            Log.d(
                 TAG_GLOBAL,
-                "FakeUserLists → Actualizada (id=$id): '${newList.name}' (${newList.products.size} productos)"
+                "FakeUserLists → Actualizada (id=$id): '${entry.list.name}' (${entry.list.products.size} productos)"
             )
         } else {
-            Log.e(TAG_GLOBAL, "FakeUserLists → No se encontró la lista con id=$id para actualizar")
+            Log.d(TAG_GLOBAL, "FakeUserLists → No se encontró la lista con id=$id para actualizar")
         }
     }
 
     /**
-     * Actualiza **solo los productos** de la lista con ese **nombre**.
-     *
-     * Útil para “guardado automático” desde ListDetail cuando se añade/borra un producto.
-     *
-     * @param name nombre visible de la lista.
-     * @param newProducts productos nuevos a asignar.
+     * Actualiza **solo los productos** de la lista con ese **id**.
+     * ✅ Mejor que por nombre (el nombre puede repetirse / cambiar).
      */
-    fun updateProductsByName(name: String, newProducts: List<Product>) {
-        val entry = store.firstOrNull { it.list.name == name }
+    fun updateProducts(id: String, newProducts: List<Product>) {
+        val entry = store.firstOrNull { it.id == id }
         if (entry != null) {
             entry.list = entry.list.copy(products = newProducts)
-            Log.e(TAG_GLOBAL, "Productos actualizados: '$name' (${newProducts.size})")
+            Log.d(TAG_GLOBAL, "FakeUserLists → Productos actualizados: id=$id (${newProducts.size})")
         } else {
-            Log.e(TAG_GLOBAL, "No se encontró lista con nombre='$name'")
+            Log.d(TAG_GLOBAL, "FakeUserLists → No se encontró lista con id=$id")
         }
     }
 
-
     /**
-     * Borra todo el repositorio (reset).
+     * Mantengo tu método por compatibilidad, pero internamente lo resolvemos a id.
+     * (Ideal: ir migrando llamadas a updateProducts(id, ...))
      */
+    fun updateProductsByName(name: String, newProducts: List<Product>) {
+        val id = getIdByName(name)
+        if (id != null) updateProducts(id, newProducts)
+        else Log.d(TAG_GLOBAL, "FakeUserLists → No se encontró lista con nombre='$name'")
+    }
+
+    /** Borra todo el repositorio (reset). */
     fun clear() {
         store.clear()
-        Log.e(TAG_GLOBAL, "FakeUserLists → Repositorio limpiado")
+        Log.d(TAG_GLOBAL, "FakeUserLists → Repositorio limpiado")
     }
 
     /**
-     * Devuelve una lista de ejemplo y, si no hay datos, la **crea** primero.
-     *
-     * @return última lista (demo si estaba vacío).
+     * Datos demo SIN mutar el repositorio.
+     * Útil para previews o para enseñar UI sin "seed".
      */
-    fun sample(): UserList {
-        if (store.isEmpty()) {
-            val demo = UserList(
-                id = UUID.randomUUID().toString(),
-                name = "Compra semanal",
-                background = ListBackground.FONDO2,
-                products = emptyList()
-            )
-            add(demo)
-        }
-        return store.last().list
+    fun sampleData(): List<Pair<String, UserList>> {
+        val id = "demo-compra-semanal"
+        val demo = UserList(
+            id = id,
+            name = "Compra semanal",
+            background = ListBackground.FONDO2,
+            products = emptyList()
+        )
+        return listOf(id to demo)
+    }
+
+    /**
+     * Inicializa datos demo SOLO si está vacío (side effect controlado).
+     * ✅ Llamar desde MainActivity o desde Home con LaunchedEffect.
+     */
+    fun seedIfEmpty() {
+        if (store.isNotEmpty()) return
+        val demoList = UserList(
+            id = "",
+            name = "Compra semanal",
+            background = ListBackground.FONDO2,
+            products = emptyList()
+        )
+        add(demoList)
     }
 }
