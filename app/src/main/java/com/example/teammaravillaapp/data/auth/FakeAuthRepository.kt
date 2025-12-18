@@ -19,7 +19,7 @@ class FakeAuthRepository(
         }
         return ok
     }
-
+//
     override suspend fun logout() {
         delay(150L)
         sessionStore.clearSession()
