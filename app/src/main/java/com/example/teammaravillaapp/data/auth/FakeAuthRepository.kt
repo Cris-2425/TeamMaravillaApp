@@ -3,9 +3,6 @@ package com.example.teammaravillaapp.data.auth
 import com.example.teammaravillaapp.data.session.SessionStore
 import kotlinx.coroutines.delay
 
-/**
- * Implementación fake pero realista.
- */
 class FakeAuthRepository(
     private val sessionStore: SessionStore,
     private val delayMs: Long = 500L
