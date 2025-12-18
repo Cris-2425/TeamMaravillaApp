@@ -16,18 +16,20 @@ import com.example.teammaravillaapp.data.auth.AuthRepository
 import com.example.teammaravillaapp.model.ListStyle
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.page.CategoryFilter
-import com.example.teammaravillaapp.page.CreateListt
-import com.example.teammaravillaapp.page.Home
-import com.example.teammaravillaapp.page.ListDetail
 import com.example.teammaravillaapp.page.ListViewTypes
 import com.example.teammaravillaapp.page.Profile
-import com.example.teammaravillaapp.page.Recipes
-import com.example.teammaravillaapp.page.RecipesDetail
+import com.example.teammaravillaapp.page.recipes.Recipes
+import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
+import com.example.teammaravillaapp.page.createlist.CreateListt
+import com.example.teammaravillaapp.page.home.Home
+import com.example.teammaravillaapp.page.listdetail.ListDetail
 import com.example.teammaravillaapp.page.login.Login
 import com.example.teammaravillaapp.page.login.LoginViewModel
 import com.example.teammaravillaapp.page.login.LoginViewModelFactory
+import com.example.teammaravillaapp.page.selectlist.SelectList
 import com.example.teammaravillaapp.page.session.SessionEvent
 import com.example.teammaravillaapp.page.session.SessionViewModel
+import com.example.teammaravillaapp.ui.app.AppViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,12 +37,12 @@ fun TeamMaravillaNavHost(
     navController: NavHostController,
     sessionViewModel: SessionViewModel,
     authRepository: AuthRepository,
+    appViewModel: AppViewModel,
     modifier: Modifier = Modifier,
     startDestination: String = NavRoute.Home.route
 ) {
     val scope = rememberCoroutineScope()
 
-    // ✅ Estado de sesión desde DataStore
     val isLoggedIn by sessionViewModel.isLoggedIn.collectAsState()
     val username by sessionViewModel.username.collectAsState()
 
@@ -93,7 +95,10 @@ fun TeamMaravillaNavHost(
             CreateListt(
                 onBack = { navController.navigateUp() },
                 onListCreated = { listId ->
-                    navController.navigate(NavRoute.ListDetail.createRoute(listId))
+                    navController.navigate(NavRoute.ListDetail.createRoute(listId)) {
+                        popUpTo(NavRoute.CreateList.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -132,7 +137,32 @@ fun TeamMaravillaNavHost(
             RecipesDetail(
                 recipeId = recipeId,
                 onBack = { navController.navigateUp() },
-                onAddToShoppingList = { _ -> }
+                onAddToShoppingList = { _ ->
+                    navController.navigate(NavRoute.SelectList.createRoute(recipeId))
+                }
+            )
+        }
+
+        composable(
+            route = NavRoute.SelectList.route,
+            arguments = listOf(
+                navArgument(NavRoute.SelectList.ARG_RECIPE_ID) { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val recipeId =
+                backStackEntry.arguments?.getInt(NavRoute.SelectList.ARG_RECIPE_ID) ?: -1
+
+            SelectList(
+                recipeId = recipeId,
+                appViewModel = appViewModel,
+                onBack = { navController.navigateUp() },
+                onCreateList = { navController.navigate(NavRoute.CreateList.route) },
+                onListSelected = { listId ->
+                    navController.navigate(NavRoute.ListDetail.createRoute(listId)) {
+                        popUpTo(NavRoute.SelectList.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
@@ -146,16 +176,19 @@ fun TeamMaravillaNavHost(
                         ProfileOption.SETTINGS -> {}
                         ProfileOption.STATS -> {}
                         ProfileOption.HELP -> {}
-                        ProfileOption.LOGIN -> navController.navigate(NavRoute.Login.route)
+
+                        ProfileOption.LOGIN -> {
+                            if (isLoggedIn) {
+                                scope.launch { authRepository.logout() }
+                            } else {
+                                navController.navigate(NavRoute.Login.route)
+                            }
+                        }
                     }
                 },
-                // ✅ NUEVO
                 username = username,
                 isLoggedIn = isLoggedIn,
-                onLogout = {
-                    scope.launch { authRepository.logout() }
-                    // No navegamos aquí: SessionEvents lo hace solo.
-                }
+                onLogout = { scope.launch { authRepository.logout() } }
             )
         }
 

@@ -1,12 +1,11 @@
-package com.example.teammaravillaapp.page
+package com.example.teammaravillaapp.page.recipes
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,35 +17,15 @@ import com.example.teammaravillaapp.component.FilterRecipes
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.RecipeCard
 import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.data.FakeUserRecipes
-import com.example.teammaravillaapp.model.Recipe
-import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
-/**
- * # Pantalla: **Recetas**
- *
- * Lista de recetas con un filtro simple:
- * - **Todos**: muestra [recipes].
- * - **Mis Recetas**: muestra las guardadas en [FakeUserRecipes].
- *
- * @param recipes Fuente por defecto (recetas base de la app).
- * @param onBack Acción al pulsar el botón atrás.
- * @param onRecipeClick Navegar al detalle de la receta (por id).
- */
 @Composable
 fun Recipes(
-    recipes: List<Recipe> = RecipeData.recipes,
     onBack: () -> Unit = {},
-    onRecipeClick: (Int) -> Unit = {}
+    onRecipeClick: (Int) -> Unit = {},
+    recipesViewModel: RecipesViewModel = viewModel()
 ) {
-    var showMine by remember { mutableStateOf(false) }
-
-    val allRecipes = recipes
-    val myRecipes = FakeUserRecipes.all()
-    val visible =
-        if (showMine) myRecipes
-        else allRecipes
+    val uiState by recipesViewModel.uiState.collectAsState()
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground()
@@ -59,7 +38,7 @@ fun Recipes(
             Spacer(Modifier.height(20.dp))
 
             Title(
-                texto = if (showMine)
+                texto = if (uiState.showMine)
                     stringResource(R.string.recipes_title_mine)
                 else
                     stringResource(R.string.recipes_title_all)
@@ -71,20 +50,16 @@ fun Recipes(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    Modifier.clickable { showMine = false }
-                ) {
+                Box(Modifier.clickable { recipesViewModel.showAll() }) {
                     FilterRecipes(
                         text = stringResource(R.string.recipes_filter_all),
-                        selected = !showMine
+                        selected = !uiState.showMine
                     )
                 }
-                Box(
-                    Modifier.clickable { showMine = true }
-                ) {
+                Box(Modifier.clickable { recipesViewModel.showMine() }) {
                     FilterRecipes(
                         text = stringResource(R.string.recipes_filter_mine),
-                        selected = showMine
+                        selected = uiState.showMine
                     )
                 }
             }
@@ -96,12 +71,10 @@ fun Recipes(
                 contentPadding = PaddingValues(bottom = 120.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(visible) { rec ->
+                items(uiState.visibleRecipes) { rec ->
                     RecipeCard(
                         recipe = rec,
-                        onClick = {
-                            onRecipeClick(rec.id)
-                        }
+                        onClick = { onRecipeClick(rec.id) }
                     )
                 }
             }
@@ -113,7 +86,7 @@ fun Recipes(
     }
 }
 
-@Preview()
+@Preview
 @Composable
 fun PreviewRecipes() {
     TeamMaravillaAppTheme {

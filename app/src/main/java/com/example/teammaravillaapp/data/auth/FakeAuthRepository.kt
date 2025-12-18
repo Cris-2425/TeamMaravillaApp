@@ -1,12 +1,10 @@
-import com.example.teammaravillaapp.data.auth.AuthRepository
+package com.example.teammaravillaapp.data.auth
+
 import com.example.teammaravillaapp.data.session.SessionStore
 import kotlinx.coroutines.delay
 
 /**
- * Implementación "fake" pero realista:
- * - Simula latencia de red
- * - Valida credenciales simples
- * - Puedes ampliarlo para usar Retrofit + persistencia sin cambiar el contrato
+ * Implementación fake pero realista.
  */
 class FakeAuthRepository(
     private val sessionStore: SessionStore,
@@ -20,7 +18,6 @@ class FakeAuthRepository(
                 (email.isNotBlank() && password.length >= 4)
 
         if (ok) {
-            // ✅ Persistimos sesión en DataStore
             sessionStore.saveSession(username = email, token = null)
         }
         return ok
@@ -28,7 +25,6 @@ class FakeAuthRepository(
 
     override suspend fun logout() {
         delay(150L)
-        // ✅ Limpia sesión persistida
         sessionStore.clearSession()
     }
 }
