@@ -5,15 +5,15 @@ import com.example.teammaravillaapp.model.ListBackground
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.UserList
 import com.example.teammaravillaapp.util.TAG_GLOBAL
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 
 /**
  * Repositorio **en memoria** para las listas del usuario.
  *
- * Sirve como “fake DB” para prototipar pantallas como **CreateList** y **ListDetail**.
+ * ✅ Ahora ES reactivo (StateFlow) para que Home/ListDetail se actualicen solos.
  * No hay persistencia: al cerrar la app se pierde el contenido.
- *
- * ✅ Nota: como es in-memory, no es reactivo. Cuando metas Room, esto será un DAO/Repository real.
  */
 object FakeUserLists {
 
@@ -22,6 +22,15 @@ object FakeUserLists {
 
     /** Almacén en memoria de listas del usuario. */
     private val store = mutableListOf<Entry>()
+
+    /** Stream reactivo con todas las listas (id + lista). */
+    private val _lists = MutableStateFlow<List<Pair<String, UserList>>>(emptyList())
+    val lists: StateFlow<List<Pair<String, UserList>>> = _lists
+
+    /** Emite una copia segura del estado actual. */
+    private fun emit() {
+        _lists.value = store.map { it.id to it.list }
+    }
 
     /**
      * Inserta una lista y devuelve su **ID** generado.
@@ -33,6 +42,7 @@ object FakeUserLists {
         val id = UUID.randomUUID().toString()
         val normalized = list.copy(id = id)
         store += Entry(id, normalized)
+        emit()
 
         Log.d(
             TAG_GLOBAL,
@@ -43,8 +53,7 @@ object FakeUserLists {
 
     /**
      * Devuelve todas las listas en forma `(id, lista)`.
-     *
-     * Se devuelve copia "segura" (no expone Entry).
+     * (Copia segura)
      */
     fun all(): List<Pair<String, UserList>> = store.map { it.id to it.list }
 
@@ -63,6 +72,7 @@ object FakeUserLists {
         val entry = store.firstOrNull { it.id == id }
         if (entry != null) {
             entry.list = newList.copy(id = id)
+            emit()
             Log.d(
                 TAG_GLOBAL,
                 "FakeUserLists → Actualizada (id=$id): '${entry.list.name}' (${entry.list.products.size} productos)"
@@ -80,6 +90,7 @@ object FakeUserLists {
         val entry = store.firstOrNull { it.id == id }
         if (entry != null) {
             entry.list = entry.list.copy(products = newProducts)
+            emit()
             Log.d(TAG_GLOBAL, "FakeUserLists → Productos actualizados: id=$id (${newProducts.size})")
         } else {
             Log.d(TAG_GLOBAL, "FakeUserLists → No se encontró lista con id=$id")
@@ -99,12 +110,13 @@ object FakeUserLists {
     /** Borra todo el repositorio (reset). */
     fun clear() {
         store.clear()
+        emit()
         Log.d(TAG_GLOBAL, "FakeUserLists → Repositorio limpiado")
     }
 
     /**
      * Datos demo SIN mutar el repositorio.
-     * Útil para previews o para enseñar UI sin "seed".
+     * Útil para previews.
      */
     fun sampleData(): List<Pair<String, UserList>> {
         val id = "demo-compra-semanal"
@@ -118,8 +130,8 @@ object FakeUserLists {
     }
 
     /**
-     * Inicializa datos demo SOLO si está vacío (side effect controlado).
-     * ✅ Llamar desde MainActivity o desde Home con LaunchedEffect.
+     * Inicializa datos demo SOLO si está vacío.
+     * ✅ Llamar desde MainActivity o desde HomeViewModel init.
      */
     fun seedIfEmpty() {
         if (store.isNotEmpty()) return

@@ -6,18 +6,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.teammaravillaapp.data.auth.AuthRepository
 import com.example.teammaravillaapp.model.ListStyle
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.page.CategoryFilter
 import com.example.teammaravillaapp.page.ListViewTypes
-import com.example.teammaravillaapp.page.Profile
+import com.example.teammaravillaapp.page.profile.Profile
 import com.example.teammaravillaapp.page.recipes.Recipes
 import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
 import com.example.teammaravillaapp.page.createlist.CreateListt
@@ -25,18 +24,19 @@ import com.example.teammaravillaapp.page.home.Home
 import com.example.teammaravillaapp.page.listdetail.ListDetail
 import com.example.teammaravillaapp.page.login.Login
 import com.example.teammaravillaapp.page.login.LoginViewModel
-import com.example.teammaravillaapp.page.login.LoginViewModelFactory
+import com.example.teammaravillaapp.page.profile.ProfileViewModel
+import com.example.teammaravillaapp.page.recipesdetail.RecipesDetailViewModel
 import com.example.teammaravillaapp.page.selectlist.SelectList
 import com.example.teammaravillaapp.page.session.SessionEvent
 import com.example.teammaravillaapp.page.session.SessionViewModel
 import com.example.teammaravillaapp.ui.app.AppViewModel
+import com.example.teammaravillaapp.ui.debug.ProductsDebugScreen
 import kotlinx.coroutines.launch
 
 @Composable
 fun TeamMaravillaNavHost(
     navController: NavHostController,
     sessionViewModel: SessionViewModel,
-    authRepository: AuthRepository,
     appViewModel: AppViewModel,
     modifier: Modifier = Modifier,
     startDestination: String = NavRoute.Home.route
@@ -108,12 +108,8 @@ fun TeamMaravillaNavHost(
             arguments = listOf(
                 navArgument(NavRoute.ListDetail.ARG_LIST_ID) { type = NavType.StringType }
             )
-        ) { backStackEntry ->
-            val listId = backStackEntry.arguments?.getString(NavRoute.ListDetail.ARG_LIST_ID)
-            ListDetail(
-                listId = listId,
-                onBack = { navController.navigateUp() }
-            )
+        ) {
+            ListDetail(onBack = { navController.navigateUp() })
         }
 
         composable(NavRoute.Recipes.route) {
@@ -130,15 +126,11 @@ fun TeamMaravillaNavHost(
             arguments = listOf(
                 navArgument(NavRoute.RecipesDetail.ARG_RECIPE_ID) { type = NavType.IntType }
             )
-        ) { backStackEntry ->
-            val recipeId =
-                backStackEntry.arguments?.getInt(NavRoute.RecipesDetail.ARG_RECIPE_ID) ?: -1
-
+        ) {
             RecipesDetail(
-                recipeId = recipeId,
                 onBack = { navController.navigateUp() },
-                onAddToShoppingList = { _ ->
-                    navController.navigate(NavRoute.SelectList.createRoute(recipeId))
+                onAddToShoppingList = { recipe ->
+                    navController.navigate(NavRoute.SelectList.createRoute(recipe.id))
                 }
             )
         }
@@ -148,12 +140,8 @@ fun TeamMaravillaNavHost(
             arguments = listOf(
                 navArgument(NavRoute.SelectList.ARG_RECIPE_ID) { type = NavType.IntType }
             )
-        ) { backStackEntry ->
-            val recipeId =
-                backStackEntry.arguments?.getInt(NavRoute.SelectList.ARG_RECIPE_ID) ?: -1
-
+        ) {
             SelectList(
-                recipeId = recipeId,
                 appViewModel = appViewModel,
                 onBack = { navController.navigateUp() },
                 onCreateList = { navController.navigate(NavRoute.CreateList.route) },
@@ -167,6 +155,8 @@ fun TeamMaravillaNavHost(
         }
 
         composable(NavRoute.Profile.route) {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+
             Profile(
                 onBack = { navController.navigateUp() },
                 onNavigate = { option ->
@@ -176,10 +166,10 @@ fun TeamMaravillaNavHost(
                         ProfileOption.SETTINGS -> {}
                         ProfileOption.STATS -> {}
                         ProfileOption.HELP -> {}
-
+                        ProfileOption.DEBUG_PRODUCTS -> navController.navigate(NavRoute.ProductsDebug.route)
                         ProfileOption.LOGIN -> {
                             if (isLoggedIn) {
-                                scope.launch { authRepository.logout() }
+                                profileViewModel.logout()
                             } else {
                                 navController.navigate(NavRoute.Login.route)
                             }
@@ -188,17 +178,13 @@ fun TeamMaravillaNavHost(
                 },
                 username = username,
                 isLoggedIn = isLoggedIn,
-                onLogout = { scope.launch { authRepository.logout() } }
+                onLogout = { profileViewModel.logout() }
             )
         }
 
+
         composable(NavRoute.Login.route) {
-            val loginViewModel: LoginViewModel = viewModel(
-                factory = LoginViewModelFactory(
-                    authRepository = authRepository,
-                    sessionViewModel = sessionViewModel
-                )
-            )
+            val loginViewModel: LoginViewModel = hiltViewModel()
 
             Login(
                 onBack = { navController.navigateUp() },
@@ -219,6 +205,12 @@ fun TeamMaravillaNavHost(
             CategoryFilter(
                 onCancel = { navController.navigateUp() },
                 onSave = { navController.navigateUp() }
+            )
+        }
+
+        composable(NavRoute.ProductsDebug.route) {
+            ProductsDebugScreen(
+                onBack = { navController.navigateUp() }
             )
         }
     }

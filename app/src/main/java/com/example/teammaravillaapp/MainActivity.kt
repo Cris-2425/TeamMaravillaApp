@@ -9,33 +9,22 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModelProvider
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.teammaravillaapp.data.auth.FakeAuthRepository
-import com.example.teammaravillaapp.data.session.SessionStore
 import com.example.teammaravillaapp.navigation.TeamMaravillaNavHost
 import com.example.teammaravillaapp.page.session.SessionViewModel
-import com.example.teammaravillaapp.page.session.SessionViewModelFactory
+import com.example.teammaravillaapp.ui.app.AppViewModel
 import com.example.teammaravillaapp.ui.events.UiEvent
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.ui.app.AppViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // 🔹 Infraestructura base
-        val sessionStore = SessionStore(applicationContext)
-        val authRepository = FakeAuthRepository(sessionStore)
-
-        // 🔹 ViewModels con Factory (SIN Hilt)
-        val sessionViewModel = ViewModelProvider(
-            this,
-            SessionViewModelFactory(sessionStore)
-        )[SessionViewModel::class.java]
-
-        val appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
 
         setContent {
             TeamMaravillaAppTheme {
@@ -43,17 +32,20 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
 
-                // 🔹 Escucha de eventos globales (Snackbar)
+                // ✅ SessionViewModel por Hilt
+                val sessionViewModel: SessionViewModel = hiltViewModel()
+
+                // AppViewModel: si NO es Hilt todavía, puedes dejar viewModel()
+                val appViewModel: AppViewModel = viewModel()
+
                 LaunchedEffect(Unit) {
                     appViewModel.events.collect { event ->
                         when (event) {
-                            is UiEvent.ShowSnackbar -> {
-                                snackbarHostState.showSnackbar(event.message)
-                            }
+                            is UiEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
                         }
                     }
                 }
-                //
+
                 Scaffold(
                     snackbarHost = { SnackbarHost(snackbarHostState) }
                 ) { innerPadding ->
@@ -61,9 +53,8 @@ class MainActivity : ComponentActivity() {
                     TeamMaravillaNavHost(
                         navController = navController,
                         sessionViewModel = sessionViewModel,
-                        authRepository = authRepository,
                         appViewModel = appViewModel,
-                        modifier = androidx.compose.ui.Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding)
                     )
                 }
             }

@@ -9,8 +9,11 @@ import androidx.annotation.DrawableRes
  * @property imageRes imagen opcional del producto.
  * @property category categoría a la que pertenece.
  */
+
 data class Product(
+    val id: String,
     val name: String,
-    @DrawableRes val imageRes: Int? = null,
-    val category: ProductCategory = ProductCategory.OTHER
+    val imageRes: Int? = null,
+    val category: ProductCategory? = ProductCategory.OTHER,
+    val imageUrl: String? = null
 )

@@ -9,5 +9,7 @@ data class ListDetailUiState(
     val productsInList: List<Product> = emptyList()
 ) {
     val isEmptyState: Boolean get() = (userList == null)
-    val inListNames: Set<String> get() = productsInList.map { it.name }.toSet()
+
+    val inListIds: Set<String>
+        get() = productsInList.map { it.id }.toSet()
 }
