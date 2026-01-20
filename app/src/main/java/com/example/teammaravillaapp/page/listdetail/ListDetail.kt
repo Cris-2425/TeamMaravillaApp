@@ -25,13 +25,16 @@ import com.example.teammaravillaapp.model.ListBackgrounds
 import com.example.teammaravillaapp.model.ProductData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun ListDetail(
     listId: String? = null,
     onBack: () -> Unit = {}
 ) {
-    val vm: ListDetailViewModel = viewModel(factory = ListDetailViewModelFactory(listId))
+    val vm: ListDetailViewModel = hiltViewModel()
     val uiState by vm.uiState.collectAsState()
 
     when {
@@ -49,9 +52,7 @@ fun ListDetail(
                         text = stringResource(R.string.list_detail_empty_title),
                         style = MaterialTheme.typography.titleMedium
                     )
-
                     Spacer(Modifier.height(8.dp))
-
                     Text(
                         text = stringResource(R.string.list_detail_empty_subtitle),
                         style = MaterialTheme.typography.bodyMedium
@@ -66,7 +67,9 @@ fun ListDetail(
         else -> {
             val userList = uiState.userList!!
             val bgRes = ListBackgrounds.getBackgroundRes(userList.background)
-            val inListNames = uiState.inListNames
+
+            // ✅ CAMBIO: ahora filtramos por ids, no por name
+            val inListIds = uiState.inListIds
 
             Box(Modifier.fillMaxSize()) {
                 GeneralBackground(bgRes = bgRes)
@@ -130,7 +133,7 @@ fun ListDetail(
                                             product = product,
                                             onClick = {
                                                 vm.removeProduct(product)
-                                                Log.d(TAG_GLOBAL, "ListDetail → Quitar: ${product.name}")
+                                                Log.d(TAG_GLOBAL, "ListDetail → Quitar: ${product.id} / ${product.name}")
                                             }
                                         )
                                     }
@@ -161,13 +164,13 @@ fun ListDetail(
                                     .padding(12.dp)
                             ) {
                                 ProductData.recentUsed
-                                    .filter { it.name !in inListNames }
+                                    .filter { it.id !in inListIds } // ✅ CAMBIO
                                     .forEach { product ->
                                         ProductBubble(
                                             product = product,
                                             onClick = {
                                                 vm.addProduct(product)
-                                                Log.d(TAG_GLOBAL, "ListDetail → Añadir reciente: ${product.name}")
+                                                Log.d(TAG_GLOBAL, "ListDetail → Añadir reciente: ${product.id} / ${product.name}")
                                             }
                                         )
                                     }
@@ -177,7 +180,7 @@ fun ListDetail(
 
                     // ------------------ Categorías ------------------
                     ProductData.byCategory.forEach { (category, items) ->
-                        val available = items.filter { it.name !in inListNames }
+                        val available = items.filter { it.id !in inListIds } // ✅ CAMBIO
 
                         if (available.isNotEmpty()) {
                             item {
@@ -206,7 +209,7 @@ fun ListDetail(
                                                     vm.addProduct(product)
                                                     Log.d(
                                                         TAG_GLOBAL,
-                                                        "ListDetail → Añadir categoría ${category.name}: ${product.name}"
+                                                        "ListDetail → Añadir categoría ${category.name}: ${product.id} / ${product.name}"
                                                     )
                                                 }
                                             )

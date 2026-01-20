@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.page
+package com.example.teammaravillaapp.page.profile
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -64,7 +64,7 @@ fun ProfileContent(
     onLogout: () -> Unit,
     onOptionClick: (ProfileOption) -> Unit
 ) {
-    val options = ProfileOption.values()
+    val options = ProfileOption.entries.toTypedArray()
 
     Column(
         Modifier

@@ -3,16 +3,20 @@ package com.example.teammaravillaapp.page.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.data.auth.AuthRepository
+import com.example.teammaravillaapp.data.session.SessionManager
 import com.example.teammaravillaapp.page.session.SessionViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val sessionViewModel: SessionViewModel
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -41,14 +45,12 @@ class LoginViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            // ✅ Cambia aquí: fake o repo real
-            // val ok = (state.email == "juan" && state.password == "1234")
             val ok = authRepository.login(state.email, state.password)
 
             _uiState.update { it.copy(isLoading = false) }
 
             if (ok) {
-                sessionViewModel.notifyLoggedIn()
+                sessionManager.notifyLoggedIn()
             } else {
                 _uiState.update { it.copy(errorMessage = "Credenciales incorrectas") }
             }

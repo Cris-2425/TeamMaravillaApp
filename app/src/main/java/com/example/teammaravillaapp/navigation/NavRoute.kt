@@ -26,4 +26,6 @@ sealed class NavRoute(val route: String) {
     data object Login : NavRoute("login")
     data object ListViewTypes : NavRoute("list_view_types")
     data object CategoryFilter : NavRoute("category_filter")
+
+    data object ProductsDebug : NavRoute("products_debug")
 }

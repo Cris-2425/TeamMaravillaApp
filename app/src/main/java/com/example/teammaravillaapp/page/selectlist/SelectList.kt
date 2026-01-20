@@ -11,22 +11,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
+import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
 import com.example.teammaravillaapp.ui.app.AppViewModel
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 @Composable
 fun SelectList(
-    recipeId: Int,
     appViewModel: AppViewModel,
     onBack: () -> Unit,
     onCreateList: () -> Unit,
     onListSelected: (String) -> Unit
 ) {
-    val vm: SelectListViewModel = viewModel(factory = SelectListViewModelFactory(recipeId))
+    val vm: SelectListViewModel = hiltViewModel()
+
     val uiState by vm.uiState.collectAsState()
 
     Box(Modifier.fillMaxSize()) {
@@ -120,5 +124,18 @@ fun SelectList(
         Box(Modifier.align(Alignment.BottomStart)) {
             BackButton(onClick = onBack)
         }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewRecipesDetail() {
+    TeamMaravillaAppTheme {
+        SelectList(
+            appViewModel = hiltViewModel(),
+            onBack = {},
+            onCreateList = {},
+            onListSelected = {}
+        )
     }
 }

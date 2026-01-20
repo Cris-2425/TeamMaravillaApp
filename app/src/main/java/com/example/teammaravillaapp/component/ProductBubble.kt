@@ -13,32 +13,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.teammaravillaapp.model.Manzana
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-/**
- * Burbuja de producto con:
- * - Imagen arriba (si hay)
- * - Nombre abajo
- *
- * Se usa en ListDetail, CreateList, etc.
- *
- * @param product producto a mostrar.
- * @param modifier para ajustar tamaño/espaciados desde fuera.
- * @param onClick acción al pulsar la burbuja.
- */
 @Composable
 fun ProductBubble(
     product: Product,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier.width(72.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -50,28 +44,48 @@ fun ProductBubble(
                 .size(64.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .clickable {
-                    Log.e(TAG_GLOBAL, "Producto pulsado: ${product.name}")
+                    Log.d(TAG_GLOBAL, "Producto pulsado: ${product.name}")
                     onClick()
                 }
         ) {
-            if (product.imageRes != null) {
-                Image(
-                    painter = painterResource(id = product.imageRes),
-                    contentDescription = product.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                // Sin imagen: nombre abreviado
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = product.name.take(3), // por ejemplo "Har", "Lec", etc.
-                        style = MaterialTheme.typography.labelMedium,
-                        textAlign = TextAlign.Center
+            when {
+                // 1) URL remota (API)
+                !product.imageUrl.isNullOrBlank() -> {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(product.imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                        placeholder = null,
+                        error = null
                     )
+                }
+
+                // 2) Recurso local (fallback)
+                product.imageRes != null -> {
+                    Image(
+                        painter = painterResource(id = product.imageRes),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                // 3) Sin imagen
+                else -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = product.name.take(3),
+                            style = MaterialTheme.typography.labelMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
@@ -31,13 +31,11 @@ import com.example.teammaravillaapp.model.Recipe
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipesDetail(
-    recipeId: Int,
     onBack: () -> Unit,
     onAddToShoppingList: (Recipe) -> Unit
 ) {
-    val vm: RecipesDetailViewModel = viewModel(
-        factory = RecipesDetailViewModelFactory(recipeId)
-    )
+    val vm: RecipesDetailViewModel = hiltViewModel()
+
     val uiState by vm.uiState.collectAsState()
 
     if (uiState.isLoading) {
@@ -202,7 +200,6 @@ fun RecipesDetail(
 fun PreviewRecipesDetail() {
     TeamMaravillaAppTheme {
         RecipesDetail(
-            recipeId = 1,
             onBack = {},
             onAddToShoppingList = {}
         )

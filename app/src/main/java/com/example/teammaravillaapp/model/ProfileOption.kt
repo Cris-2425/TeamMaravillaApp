@@ -58,6 +58,7 @@ enum class ProfileOption(
 
     /** Sección de ayuda o soporte. */
     HELP(R.string.profile_option_help),
+    DEBUG_PRODUCTS(R.string.profile_option_debug_products),
 
     /** Acción para iniciar sesión o cambiar de usuario. */
     LOGIN(R.string.profile_option_login)

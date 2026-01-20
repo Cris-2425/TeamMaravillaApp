@@ -2,14 +2,19 @@ package com.example.teammaravillaapp.data.auth
 
 import com.example.teammaravillaapp.data.session.SessionStore
 import kotlinx.coroutines.delay
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Implementación fake pero realista.
  */
-class FakeAuthRepository(
+
+@Singleton
+class FakeAuthRepository @Inject constructor(
     private val sessionStore: SessionStore,
-    private val delayMs: Long = 500L
 ) : AuthRepository {
+
+    private val delayMs: Long = 500L
 
     override suspend fun login(email: String, password: String): Boolean {
         delay(delayMs)
