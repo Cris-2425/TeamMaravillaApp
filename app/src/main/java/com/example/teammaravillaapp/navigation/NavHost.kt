@@ -12,7 +12,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.teammaravillaapp.model.ListStyle
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.page.CategoryFilter
 import com.example.teammaravillaapp.page.ListViewTypes
@@ -25,7 +24,6 @@ import com.example.teammaravillaapp.page.listdetail.ListDetail
 import com.example.teammaravillaapp.page.login.Login
 import com.example.teammaravillaapp.page.login.LoginViewModel
 import com.example.teammaravillaapp.page.profile.ProfileViewModel
-import com.example.teammaravillaapp.page.recipesdetail.RecipesDetailViewModel
 import com.example.teammaravillaapp.page.selectlist.SelectList
 import com.example.teammaravillaapp.page.session.SessionEvent
 import com.example.teammaravillaapp.page.session.SessionViewModel
@@ -129,8 +127,8 @@ fun TeamMaravillaNavHost(
         ) {
             RecipesDetail(
                 onBack = { navController.navigateUp() },
-                onAddToShoppingList = { recipe ->
-                    navController.navigate(NavRoute.SelectList.createRoute(recipe.id))
+                onAddToShoppingList = { recipeId ->
+                    navController.navigate(NavRoute.SelectList.createRoute(recipeId))
                 }
             )
         }
@@ -194,8 +192,6 @@ fun TeamMaravillaNavHost(
 
         composable(NavRoute.ListViewTypes.route) {
             ListViewTypes(
-                selected = ListStyle.LISTA,
-                onSelect = { _ -> },
                 onCancel = { navController.navigateUp() },
                 onSave = { navController.navigateUp() }
             )

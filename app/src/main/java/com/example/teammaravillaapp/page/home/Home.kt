@@ -8,12 +8,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.*
 import com.example.teammaravillaapp.model.CardInfo
@@ -139,7 +138,8 @@ fun Home(
                                         imageID = R.drawable.list_supermarket,
                                         imageDescription = list.name,
                                         title = list.name,
-                                        subtitle = "${list.products.size} productos"
+                                        // ✅ antes: list.products.size
+                                        subtitle = "${list.productIds.size} productos"
                                     ),
                                     onClick = { onOpenList(id) }
                                 )

@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.FilterRecipes
@@ -23,7 +23,7 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 fun Recipes(
     onBack: () -> Unit = {},
     onRecipeClick: (Int) -> Unit = {},
-    recipesViewModel: RecipesViewModel = viewModel()
+    recipesViewModel: RecipesViewModel = hiltViewModel()
 ) {
     val uiState by recipesViewModel.uiState.collectAsState()
 
@@ -50,18 +50,16 @@ fun Recipes(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(Modifier.clickable { recipesViewModel.showAll() }) {
-                    FilterRecipes(
-                        text = stringResource(R.string.recipes_filter_all),
-                        selected = !uiState.showMine
-                    )
-                }
-                Box(Modifier.clickable { recipesViewModel.showMine() }) {
-                    FilterRecipes(
-                        text = stringResource(R.string.recipes_filter_mine),
-                        selected = uiState.showMine
-                    )
-                }
+                FilterRecipes(
+                    text = stringResource(R.string.recipes_filter_all),
+                    selected = !uiState.showMine,
+                    onClick = { recipesViewModel.showAll() }
+                )
+                FilterRecipes(
+                    text = stringResource(R.string.recipes_filter_mine),
+                    selected = uiState.showMine,
+                    onClick = { recipesViewModel.showMine() }
+                )
             }
 
             Spacer(Modifier.height(16.dp))
@@ -71,10 +69,13 @@ fun Recipes(
                 contentPadding = PaddingValues(bottom = 120.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(uiState.visibleRecipes) { rec ->
+                items(uiState.visibleRecipes) { item ->
                     RecipeCard(
-                        recipe = rec,
-                        onClick = { onRecipeClick(rec.id) }
+                        recipe = item.recipe,
+                        ingredients = item.ingredients,
+                        isFavorite = item.recipe.id in uiState.favoriteIds,
+                        onToggleFavorite = { recipesViewModel.toggleFavorite(item.recipe.id) },
+                        onClick = { onRecipeClick(item.recipe.id) }
                     )
                 }
             }

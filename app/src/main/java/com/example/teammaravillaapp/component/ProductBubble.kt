@@ -48,8 +48,10 @@ fun ProductBubble(
                     onClick()
                 }
         ) {
+            val abbr = product.name.take(3)
+
             when {
-                // 1) URL remota (API)
+                // 1) URL remota
                 !product.imageUrl.isNullOrBlank() -> {
                     AsyncImage(
                         model = ImageRequest.Builder(context)
@@ -59,12 +61,14 @@ fun ProductBubble(
                         contentDescription = product.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
-                        placeholder = null,
-                        error = null
+                        // Placeholder mientras carga
+                        placeholder = painterResource(id = com.example.teammaravillaapp.R.drawable.logo),
+                        // Fallback si falla
+                        error = painterResource(id = com.example.teammaravillaapp.R.drawable.logo)
                     )
                 }
 
-                // 2) Recurso local (fallback)
+                // 2) Recurso local (si lo sigues usando)
                 product.imageRes != null -> {
                     Image(
                         painter = painterResource(id = product.imageRes),
@@ -74,14 +78,14 @@ fun ProductBubble(
                     )
                 }
 
-                // 3) Sin imagen
+                // 3) Sin imagen: abreviatura
                 else -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = product.name.take(3),
+                            text = abbr,
                             style = MaterialTheme.typography.labelMedium,
                             textAlign = TextAlign.Center
                         )

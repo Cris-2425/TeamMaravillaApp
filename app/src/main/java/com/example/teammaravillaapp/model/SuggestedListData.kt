@@ -9,12 +9,16 @@ import com.example.teammaravillaapp.R
  * en inicialización estática (funciona bien en Preview).
  */
 object SuggestedListData {
-    /** Conjunto fijo de sugerencias básicas. */
-    val items: List<SuggestedList> =
-        listOf(
-            SuggestedList("Compra semanal", R.drawable.fondo_farmacia),
-            SuggestedList("BBQ sábado", R.drawable.fondo_bbq),
-            SuggestedList("Desayunos", R.drawable.fondo_desayuno),
-            SuggestedList("Limpieza", R.drawable.fondo_limpieza)
+    val items: List<SuggestedList> = listOf(
+        SuggestedList(
+            name = "Compra semanal",
+            imageRes = R.drawable.fondo_farmacia,
+            productIds = listOf("leche", "pan", "huevo", "tomate")
+        ),
+        SuggestedList(
+            name = "BBQ sábado",
+            imageRes = R.drawable.fondo_bbq,
+            productIds = listOf("carne_picada", "chorizo", "pan", "cocacola")
         )
+    )
 }

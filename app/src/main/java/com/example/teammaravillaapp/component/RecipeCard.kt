@@ -4,28 +4,15 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,38 +23,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.FakeUserRecipes
+import com.example.teammaravillaapp.model.Product
+import com.example.teammaravillaapp.model.ProductData
 import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.model.RecipeData
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-/**
- * Tarjeta de receta reutilizable.
- *
- * Muestra:
- * - Cabecera con el **título** y un **botón de favorito** (Mis Recetas).
- * - Imagen (o placeholder si no hay imagen).
- * - Sección **"Ingredientes"** con los productos como burbujas.
- *
- * Acciones:
- * - **Tap** sobre la tarjeta → [onClick].
- * - **Tap** sobre el corazón → añade/quita de *Mis Recetas* en [FakeUserRecipes].
- *
- * @param recipe Receta a renderizar.
- * @param modifier Modificador de Jetpack Compose para ajustar tamaño/espaciados desde fuera.
- * @param onClick Acción al pulsar la tarjeta completa (navegar a detalle, etc.).
- */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipeCard(
     recipe: Recipe,
+    ingredients: List<Product>,
     modifier: Modifier = Modifier,
+    isFavorite: Boolean = false,
+    onToggleFavorite: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
-    // Estado local que refleja si la receta está en "Mis Recetas".
-    val isMine = remember(recipe.title) { mutableStateOf(FakeUserRecipes.contains(recipe)) }
-
     val ingredientsTitle = stringResource(R.string.recipe_ingredients_title)
     val imagePlaceholder = stringResource(R.string.recipe_image_placeholder)
     val noIngredientsText = stringResource(R.string.recipe_no_ingredients)
@@ -87,7 +58,6 @@ fun RecipeCard(
     ) {
         Column(Modifier.padding(14.dp)) {
 
-            // Cabecera con título e icono de favorito
             Surface(
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.surface,
@@ -110,27 +80,12 @@ fun RecipeCard(
                         textAlign = TextAlign.Center
                     )
 
-                    // Botón de favorito: añade o elimina del repositorio en memoria
-                    IconButton(
-                        onClick = {
-                            if (isMine.value) {
-                                FakeUserRecipes.remove(recipe)
-                            } else {
-                                FakeUserRecipes.add(recipe)
-                            }
-                            isMine.value = !isMine.value
-                        }
-                    ) {
+                    IconButton(onClick = onToggleFavorite) {
                         Icon(
-                            imageVector = if (isMine.value)
-                                Icons.Filled.Favorite
-                            else
-                                Icons.Outlined.FavoriteBorder,
-                            contentDescription = if (isMine.value) favRemoveCd else favAddCd,
-                            tint = if (isMine.value)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface
+                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = if (isFavorite) favRemoveCd else favAddCd,
+                            tint = if (isFavorite) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -175,7 +130,7 @@ fun RecipeCard(
 
             Spacer(Modifier.height(6.dp))
 
-            if (recipe.products.isEmpty()) {
+            if (ingredients.isEmpty()) {
                 Text(
                     text = noIngredientsText,
                     style = MaterialTheme.typography.bodyMedium,
@@ -187,9 +142,7 @@ fun RecipeCard(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    recipe.products.forEach {
-                        ProductBubble(it)
-                    }
+                    ingredients.forEach { ProductBubble(it) }
                 }
             }
         }
@@ -199,7 +152,15 @@ fun RecipeCard(
 @Preview
 @Composable
 fun PreviewRecipeCard() {
-    TeamMaravillaAppTheme {
-        RecipeCard(RecipeData.recipes.first())
+    val r = RecipeData.recipes.first()
+    val byId = ProductData.allProducts.associateBy { it.id }
+    val ing = r.productIds.mapNotNull { byId[it] }
+
+    MaterialTheme {
+        RecipeCard(
+            recipe = r,
+            ingredients = ing,
+            isFavorite = true
+        )
     }
 }

@@ -24,13 +24,20 @@ class ProductListDetailViewModel @Inject constructor(
     fun load() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
             try {
                 val products = repo.getProducts()
-                val initialSelected = _uiState.value.selectedId ?: products.firstOrNull()?.id
-                _uiState.value = ProductListDetailUiState(
+                // 3) Mantener selección si sigue existiendo; si no, primera opción
+                val prevSelected = _uiState.value.selectedId
+                val selectedId = when {
+                    prevSelected != null && products.any { it.id == prevSelected } -> prevSelected
+                    else -> products.firstOrNull()?.id
+                }
+                _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     products = products,
-                    selectedId = initialSelected
+                    selectedId = selectedId,
+                    error = null
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -40,6 +47,7 @@ class ProductListDetailViewModel @Inject constructor(
             }
         }
     }
+
 
     fun select(id: String) {
         _uiState.value = _uiState.value.copy(selectedId = id)

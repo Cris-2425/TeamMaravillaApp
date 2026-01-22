@@ -11,5 +11,5 @@ data class UserList(
     val id: String = java.util.UUID.randomUUID().toString(),
     val name: String,
     val background: ListBackground,
-    val products: List<Product> = emptyList()
+    val productIds: List<String> = emptyList()
 )

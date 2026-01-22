@@ -4,46 +4,76 @@ import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.network.api.ProductApi
 import com.example.teammaravillaapp.network.mapper.toDomain
 import com.example.teammaravillaapp.network.mapper.toDto
-import com.example.teammaravillaapp.repository.ProductRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Fuente REMOTA de productos.
+ *
+ * - Lee/escribe el JSON completo en el backend
+ * - NO es reactiva (Room es la fuente observable)
+ * - CachedProductRepository decide cuándo usarla
+ */
 @Singleton
 class RemoteProductRepository @Inject constructor(
     private val api: ProductApi
-) : ProductRepository {
+) {
 
-    override suspend fun getProducts(): List<Product> =
+    /**
+     * Remote no observa: la UI observa Room.
+     */
+    fun observeProducts(): Flow<List<Product>> = emptyFlow()
+
+    /**
+     * GET json/products/all
+     */
+    suspend fun getProducts(): List<Product> =
         api.getAll().map { it.toDomain() }
 
-    override suspend fun saveProducts(products: List<Product>) {
+    /**
+     * POST json/products/all
+     * Sobrescribe el archivo completo
+     */
+    suspend fun saveProducts(products: List<Product>) {
         api.saveAll(products.map { it.toDto() })
     }
 
-    override suspend fun addProduct(product: Product) {
-        val current = getProducts().toMutableList()
-
-        val idx = current.indexOfFirst { it.id == product.id }
-        if (idx >= 0) current[idx] = product else current.add(product)
-
-        saveProducts(current)
+    /**
+     * Añadir producto:
+     * - Leemos todo
+     * - Añadimos
+     * - Guardamos todo
+     */
+    suspend fun addProduct(product: Product) {
+        val current = api.getAll().map { it.toDomain() }
+        saveProducts(current + product)
     }
 
-    override suspend fun deleteProduct(id: String) {
-        val current = getProducts()
-        val updated = current.filterNot { it.id == id }
-        saveProducts(updated)
+    /**
+     * Eliminar producto:
+     * - Leemos todo
+     * - Filtramos
+     * - Guardamos todo
+     */
+    suspend fun deleteProduct(id: String) {
+        val current = api.getAll().map { it.toDomain() }
+        saveProducts(current.filterNot { it.id == id })
     }
 
-    override suspend fun updateProduct(product: Product) {
-        val current = getProducts().toMutableList()
-        val next = current.map { if (it.id == product.id) product else it }
-        saveProducts(next)
-    }
-
-    private fun mimeFor(ext: String): String = when (ext.lowercase()) {
-        "jpg", "jpeg" -> "image/jpeg"
-        "png" -> "image/png"
-        else -> "application/octet-stream"
+    /**
+     * Actualizar producto:
+     * - Leemos todo
+     * - Reemplazamos
+     * - Guardamos todo
+     */
+    suspend fun updateProduct(product: Product) {
+        val current = api.getAll().map { it.toDomain() }
+        saveProducts(
+            current.map {
+                if (it.id == product.id) product else it
+            }
+        )
     }
 }

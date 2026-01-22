@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,14 +19,12 @@ import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.data.FakeUserLists
 import com.example.teammaravillaapp.model.ListBackgrounds
-import com.example.teammaravillaapp.model.ProductData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ListDetail(
@@ -68,7 +65,7 @@ fun ListDetail(
             val userList = uiState.userList!!
             val bgRes = ListBackgrounds.getBackgroundRes(userList.background)
 
-            // ✅ CAMBIO: ahora filtramos por ids, no por name
+            // ahora filtramos por ids, no por name
             val inListIds = uiState.inListIds
 
             Box(Modifier.fillMaxSize()) {
@@ -133,7 +130,10 @@ fun ListDetail(
                                             product = product,
                                             onClick = {
                                                 vm.removeProduct(product)
-                                                Log.d(TAG_GLOBAL, "ListDetail → Quitar: ${product.id} / ${product.name}")
+                                                Log.d(
+                                                    TAG_GLOBAL,
+                                                    "ListDetail → Quitar: ${product.id} / ${product.name}"
+                                                )
                                             }
                                         )
                                     }
@@ -163,24 +163,30 @@ fun ListDetail(
                                     .fillMaxWidth()
                                     .padding(12.dp)
                             ) {
-                                ProductData.recentUsed
-                                    .filter { it.id !in inListIds } // ✅ CAMBIO
-                                    .forEach { product ->
+                                val recent = uiState.recentCatalog.filter { it.id !in inListIds }
+
+                                if (uiState.isLoadingCatalog) {
+                                    Text("Cargando catálogo...", style = MaterialTheme.typography.bodyMedium)
+                                } else if (recent.isEmpty()) {
+                                    Text(
+                                        text = uiState.catalogError ?: "No hay productos disponibles.",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                } else {
+                                    recent.forEach { product ->
                                         ProductBubble(
                                             product = product,
-                                            onClick = {
-                                                vm.addProduct(product)
-                                                Log.d(TAG_GLOBAL, "ListDetail → Añadir reciente: ${product.id} / ${product.name}")
-                                            }
+                                            onClick = { vm.addProduct(product) }
                                         )
                                     }
+                                }
                             }
                         }
                     }
 
                     // ------------------ Categorías ------------------
-                    ProductData.byCategory.forEach { (category, items) ->
-                        val available = items.filter { it.id !in inListIds } // ✅ CAMBIO
+                    uiState.catalogByCategory.forEach { (category, items) ->
+                        val available = items.filter { it.id !in inListIds }
 
                         if (available.isNotEmpty()) {
                             item {
@@ -205,13 +211,7 @@ fun ListDetail(
                                         available.forEach { product ->
                                             ProductBubble(
                                                 product = product,
-                                                onClick = {
-                                                    vm.addProduct(product)
-                                                    Log.d(
-                                                        TAG_GLOBAL,
-                                                        "ListDetail → Añadir categoría ${category.name}: ${product.id} / ${product.name}"
-                                                    )
-                                                }
+                                                onClick = { vm.addProduct(product) }
                                             )
                                         }
                                     }
@@ -233,8 +233,6 @@ fun ListDetail(
 @Composable
 fun PreviewListDetailFromSample() {
     TeamMaravillaAppTheme {
-        FakeUserLists.seedIfEmpty()
-        val id = FakeUserLists.all().last().first
-        ListDetail(listId = id)
+        ListDetail()
     }
 }

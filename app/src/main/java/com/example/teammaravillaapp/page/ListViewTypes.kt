@@ -10,27 +10,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.CircularOption
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.model.ListStyle
+import com.example.teammaravillaapp.page.prefs.UserPrefsViewModel
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
-/**
- * # Pantalla: **Tipos de vista de lista**
- *
- * Permite al usuario elegir el estilo visual preferido para mostrar sus listas.
- */
 @Composable
 fun ListViewTypes(
-    selected: ListStyle = ListStyle.LISTA,
-    onSelect: (ListStyle) -> Unit = {},
     onCancel: () -> Unit = {},
-    onSave: () -> Unit = {}
+    onSave: () -> Unit = {},
+    vm: UserPrefsViewModel = hiltViewModel()
 ) {
-    var current by rememberSaveable { mutableStateOf(selected) }
+    val prefsState by vm.uiState.collectAsState()
+
+    var current by rememberSaveable { mutableStateOf(ListStyle.LISTA) }
+
+    LaunchedEffect(prefsState.listStyle) {
+        current = prefsState.listStyle
+    }
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.15f)
@@ -40,7 +42,6 @@ fun ListViewTypes(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Barra superior: Cancelar - Título - Guardar
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -51,7 +52,7 @@ fun ListViewTypes(
                 }
                 Title(texto = stringResource(R.string.list_view_types_title))
                 TextButton(onClick = {
-                    onSelect(current)
+                    vm.setListStyle(current)
                     onSave()
                 }) {
                     Text(text = stringResource(R.string.list_view_types_save))
@@ -69,7 +70,6 @@ fun ListViewTypes(
 
             Spacer(Modifier.height(24.dp))
 
-            // Opciones visuales
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -78,23 +78,17 @@ fun ListViewTypes(
                 CircularOption(
                     label = stringResource(R.string.list_view_types_option_list),
                     selected = current == ListStyle.LISTA
-                ) {
-                    current = ListStyle.LISTA
-                }
+                ) { current = ListStyle.LISTA }
 
                 CircularOption(
                     label = stringResource(R.string.list_view_types_option_mosaic),
                     selected = current == ListStyle.MOSAIC
-                ) {
-                    current = ListStyle.MOSAIC
-                }
+                ) { current = ListStyle.MOSAIC }
 
                 CircularOption(
                     label = stringResource(R.string.list_view_types_option_other),
                     selected = current == ListStyle.ETC
-                ) {
-                    current = ListStyle.ETC
-                }
+                ) { current = ListStyle.ETC }
             }
         }
 

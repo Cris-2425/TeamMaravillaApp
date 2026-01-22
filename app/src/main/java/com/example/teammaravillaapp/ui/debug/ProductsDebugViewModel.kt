@@ -94,7 +94,7 @@ class ProductsDebugViewModel @Inject constructor(
         }
     }
 
-    /** ✅ Seed “de verdad”: sube imágenes + guarda JSON en API */
+    /** sube imágenes + guarda JSON en API */
     fun seed() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }

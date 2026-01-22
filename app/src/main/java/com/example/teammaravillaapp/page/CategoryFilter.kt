@@ -13,42 +13,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.data.FakeUserPrefs
 import com.example.teammaravillaapp.model.ProductCategory
+import com.example.teammaravillaapp.page.prefs.UserPrefsViewModel
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-/**
- * Pantalla de **filtro por categorías**.
- *
- * Muestra una lista de conmutadores (uno por [ProductCategory]) para
- * decidir qué categorías se ven en otras pantallas (por ejemplo, en ListDetail).
- *
- * El estado inicial viene de [FakeUserPrefs.getCategoryVisibility] y al guardar
- * se persiste con [FakeUserPrefs.setCategoryVisibility].
- *
- * @param initialVisibility Mapa opcional con la visibilidad inicial por categoría.
- * @param onCancel Acción al pulsar "Cancelar".
- * @param onSave Callback con el mapa final de visibilidades tras pulsar "Guardar".
- */
 @Composable
 fun CategoryFilter(
-    initialVisibility: Map<ProductCategory, Boolean> = FakeUserPrefs.getCategoryVisibility(),
     onCancel: () -> Unit = {},
-    onSave: (Map<ProductCategory, Boolean>) -> Unit = {}
+    onSave: (Map<ProductCategory, Boolean>) -> Unit = {},
+    vm: UserPrefsViewModel = hiltViewModel()
 ) {
     val categories = ProductCategory.entries
+    val prefsState by vm.uiState.collectAsState()
 
-    var toggles by rememberSaveable {
-        mutableStateOf(categories.map { initialVisibility[it] ?: true })
+    var toggles by rememberSaveable { mutableStateOf<List<Boolean>>(emptyList()) }
+
+    // Inicializa toggles cuando llega el map del repo
+    LaunchedEffect(prefsState.categoryVisibility) {
+        toggles = categories.map { prefsState.categoryVisibility[it] ?: true }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    val ready = toggles.size == categories.size
 
+    Box(Modifier.fillMaxSize()) {
         GeneralBackground()
 
         Column(
@@ -56,7 +49,6 @@ fun CategoryFilter(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Top bar simple: Cancelar - Título - Guardar
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -67,22 +59,29 @@ fun CategoryFilter(
                         Log.d(TAG_GLOBAL, "CategoryFilter → Cancelar")
                         onCancel()
                     }
-                ) {
-                    Text(text = stringResource(R.string.category_filter_cancel))
-                }
+                ) { Text(text = stringResource(R.string.category_filter_cancel)) }
 
                 Title(texto = stringResource(R.string.category_filter_title))
 
                 TextButton(
+                    enabled = ready,
                     onClick = {
-                        val result = categories.zip(toggles).toMap()
-                        FakeUserPrefs.setCategoryVisibility(result)
-                        Log.d(TAG_GLOBAL, "CategoryFilter → Guardar: $result")
-                        onSave(result)
+                        // ✅ visibilityMap (para devolver al caller si quieres)
+                        val visibilityMap = categories.zip(toggles).toMap()
+
+                        // ✅ hiddenSet (lo que TU repo guarda)
+                        val hiddenSet: Set<ProductCategory> =
+                            categories.zip(toggles)
+                                .filter { (_, visible) -> !visible }
+                                .map { (cat, _) -> cat }
+                                .toSet()
+
+                        vm.setHiddenCategories(hiddenSet)
+
+                        Log.d(TAG_GLOBAL, "CategoryFilter → Guardar hidden=$hiddenSet")
+                        onSave(visibilityMap)
                     }
-                ) {
-                    Text(text = stringResource(R.string.category_filter_save))
-                }
+                ) { Text(text = stringResource(R.string.category_filter_save)) }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -95,6 +94,8 @@ fun CategoryFilter(
             Spacer(Modifier.height(12.dp))
 
             categories.forEachIndexed { index, cat ->
+                val checked = if (ready) toggles[index] else true
+
                 Row(
                     Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -105,10 +106,11 @@ fun CategoryFilter(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Switch(
-                        checked = toggles[index],
-                        onCheckedChange = { checked ->
-                            toggles = toggles.toMutableList().also { it[index] = checked }
-                            Log.d(TAG_GLOBAL, "CategoryFilter → ${cat.name} = $checked")
+                        checked = checked,
+                        onCheckedChange = { newChecked ->
+                            if (!ready) return@Switch
+                            toggles = toggles.toMutableList().also { it[index] = newChecked }
+                            Log.d(TAG_GLOBAL, "CategoryFilter → ${cat.name} = $newChecked")
                         }
                     )
                 }
