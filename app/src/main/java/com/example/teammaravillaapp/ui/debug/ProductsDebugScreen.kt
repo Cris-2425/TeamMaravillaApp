@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
+import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.component.Title
 
 @Composable
@@ -118,21 +119,22 @@ fun ProductsDebugScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(uiState.products) { p ->
-                        Surface(
-                            shape = MaterialTheme.shapes.large,
-                            tonalElevation = 2.dp,
-                            modifier = Modifier.fillMaxWidth()
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(Modifier.padding(12.dp)) {
+                            ProductBubble(product = p)
+
+                            Column(Modifier.weight(1f)) {
                                 Text(
-                                    text = "${p.name}  ·  id=${p.id}",
+                                    text = "${p.name} · id=${p.id}",
                                     style = MaterialTheme.typography.titleMedium,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                Spacer(Modifier.height(4.dp))
                                 Text(
-                                    text = "cat=${p.category}  |  imageUrl=${p.imageUrl ?: "-"}",
+                                    text = "cat=${p.category} | imageUrl=${p.imageUrl ?: "-"}",
                                     style = MaterialTheme.typography.bodySmall,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis

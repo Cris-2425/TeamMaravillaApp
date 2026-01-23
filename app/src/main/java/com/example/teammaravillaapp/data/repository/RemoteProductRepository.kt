@@ -4,46 +4,100 @@ import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.network.api.ProductApi
 import com.example.teammaravillaapp.network.mapper.toDomain
 import com.example.teammaravillaapp.network.mapper.toDto
-import com.example.teammaravillaapp.repository.ProductRepository
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Fuente REMOTA de productos.
+ *
+ * Backend actual:
+ * - GET  json/products/all  -> devuelve lista completa
+ * - POST json/products/all  -> sobrescribe lista completa
+ *
+ * Importante:
+ * - Para evitar pisadas (race conditions), serializamos operaciones con Mutex.
+ */
 @Singleton
 class RemoteProductRepository @Inject constructor(
     private val api: ProductApi
-) : ProductRepository {
+) {
 
-    override suspend fun getProducts(): List<Product> =
+    private val writeMutex = Mutex()
+
+    /**
+     * GET json/products/all
+     */
+    suspend fun getProducts(): List<Product> =
         api.getAll().map { it.toDomain() }
 
-    override suspend fun saveProducts(products: List<Product>) {
+    /**
+     * POST json/products/all
+     * Sobrescribe el archivo completo
+     */
+    suspend fun saveProducts(products: List<Product>) {
         api.saveAll(products.map { it.toDto() })
     }
 
-    override suspend fun addProduct(product: Product) {
-        val current = getProducts().toMutableList()
-
-        val idx = current.indexOfFirst { it.id == product.id }
-        if (idx >= 0) current[idx] = product else current.add(product)
-
-        saveProducts(current)
+    /**
+     * Añadir producto (seguro ante concurrencia):
+     * - lock
+     * - GET all
+     * - si ya existe id -> reemplaza (o ignora; aquí lo reemplazamos)
+     * - POST all
+     */
+    suspend fun addProduct(product: Product) {
+        writeMutex.withLock {
+            val current = fetchAllDomain()
+            val updated = upsertById(current, product)
+            saveProducts(updated)
+        }
     }
 
-    override suspend fun deleteProduct(id: String) {
-        val current = getProducts()
-        val updated = current.filterNot { it.id == id }
-        saveProducts(updated)
+    /**
+     * Eliminar producto (seguro ante concurrencia):
+     * - lock
+     * - GET all
+     * - filtra
+     * - POST all
+     */
+    suspend fun deleteProduct(id: String) {
+        writeMutex.withLock {
+            val current = fetchAllDomain()
+            val updated = current.filterNot { it.id == id }
+            saveProducts(updated)
+        }
     }
 
-    override suspend fun updateProduct(product: Product) {
-        val current = getProducts().toMutableList()
-        val next = current.map { if (it.id == product.id) product else it }
-        saveProducts(next)
+    /**
+     * Actualizar producto (seguro ante concurrencia):
+     * - lock
+     * - GET all
+     * - reemplaza si existe; si no existe, lo añade (upsert)
+     * - POST all
+     */
+    suspend fun updateProduct(product: Product) {
+        writeMutex.withLock {
+            val current = fetchAllDomain()
+            val updated = upsertById(current, product)
+            saveProducts(updated)
+        }
     }
 
-    private fun mimeFor(ext: String): String = when (ext.lowercase()) {
-        "jpg", "jpeg" -> "image/jpeg"
-        "png" -> "image/png"
-        else -> "application/octet-stream"
+    // -------------------------
+    // Helpers
+    // -------------------------
+
+    private suspend fun fetchAllDomain(): List<Product> =
+        api.getAll().map { it.toDomain() }
+
+    private fun upsertById(list: List<Product>, item: Product): List<Product> {
+        val exists = list.any { it.id == item.id }
+        return if (!exists) {
+            list + item
+        } else {
+            list.map { if (it.id == item.id) item else it }
+        }
     }
 }

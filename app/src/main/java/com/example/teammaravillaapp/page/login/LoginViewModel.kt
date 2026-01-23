@@ -3,8 +3,7 @@ package com.example.teammaravillaapp.page.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.data.auth.AuthRepository
-import com.example.teammaravillaapp.data.session.SessionManager
-import com.example.teammaravillaapp.page.session.SessionViewModel
+import com.example.teammaravillaapp.page.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

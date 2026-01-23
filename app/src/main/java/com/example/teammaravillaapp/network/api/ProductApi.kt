@@ -1,6 +1,7 @@
 package com.example.teammaravillaapp.network.api
 
 import com.example.teammaravillaapp.network.dto.ProductDto
+import com.google.gson.JsonElement
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -12,6 +13,9 @@ interface ProductApi {
      */
     @GET("json/products/all")
     suspend fun getAll(): List<ProductDto>
+
+    @GET("json/products/all")
+    suspend fun getAllRaw(): JsonElement
 
     /**
      * Sobrescribe data/products/all.json con la lista completa.

@@ -1,12 +1,15 @@
 package com.example.teammaravillaapp.page.selectlist
 
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.model.Product
-import com.example.teammaravillaapp.model.RecipeData
 import com.example.teammaravillaapp.navigation.NavRoute
 import com.example.teammaravillaapp.repository.ListsRepository
+import com.example.teammaravillaapp.repository.RecipesRepository
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SelectListViewModel @Inject constructor(
     private val listsRepository: ListsRepository,
+    private val recipesRepository: RecipesRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -28,28 +32,30 @@ class SelectListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SelectListUiState())
     val uiState: StateFlow<SelectListUiState> = _uiState.asStateFlow()
 
-
     init {
-        listsRepository.seedIfEmpty()
-        loadRecipe()
+        viewModelScope.launch { listsRepository.seedIfEmpty() }
+        observeRecipe()
         observeLists()
     }
 
-    private fun loadRecipe() {
-        val recipe = RecipeData.getRecipeById(recipeId)
-        if (recipe == null) {
-            _uiState.value = SelectListUiState(
-                isLoading = false,
-                isRecipeNotFound = true
-            )
-            return
+    private fun observeRecipe() {
+        viewModelScope.launch {
+            recipesRepository.observeRecipe(recipeId).collectLatest { recipeWithIngredients ->
+                _uiState.update {
+                    if (recipeWithIngredients == null) {
+                        it.copy(
+                            isLoading = false,
+                            isRecipeNotFound = true
+                        )
+                    } else {
+                        it.copy(
+                            isLoading = false,
+                            recipe = recipeWithIngredients.recipe
+                        )
+                    }
+                }
+            }
         }
-
-        _uiState.value = SelectListUiState(
-            isLoading = false,
-            recipe = recipe,
-            lists = emptyList()
-        )
     }
 
     private fun observeLists() {
@@ -60,31 +66,15 @@ class SelectListViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Añade los productos de la receta a la lista seleccionada.
-     * Evita duplicados por `name`.
-     */
     fun addRecipeIngredientsToList(listId: String) {
-        val recipe = _uiState.value.recipe ?: return
-        val currentList = listsRepository.get(listId) ?: return
+        viewModelScope.launch {
+            val recipe = _uiState.value.recipe ?: return@launch
+            val currentList = listsRepository.get(listId) ?: return@launch
 
-        val merged = mergeProductsNoDuplicates(
-            currentList.products,
-            recipe.products
-        )
+            val mergedIds = (currentList.productIds + recipe.productIds)
+                .distinct()
 
-        listsRepository.updateProducts(listId, merged)
-    }
-
-    private fun mergeProductsNoDuplicates(
-        base: List<Product>,
-        add: List<Product>
-    ): List<Product> {
-        val existing = base.map { it.name }.toHashSet()
-        val result = base.toMutableList()
-        for (p in add) {
-            if (existing.add(p.name)) result.add(p)
+            listsRepository.updateProductIds(listId, mergedIds)
         }
-        return result
     }
 }

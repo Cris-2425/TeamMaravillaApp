@@ -8,9 +8,11 @@ import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -29,25 +31,57 @@ class ProductsDebugViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProductsDebugUiState())
-    val uiState: StateFlow<ProductsDebugUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<ProductsDebugUiState> = _uiState
 
-    init { refresh() }
+    private var observeJob: Job? = null
 
+    init {
+        startObserving()
+    }
+
+    private fun startObserving() {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            repo.observeProducts()
+                .onStart {
+                    _uiState.update { it.copy(isLoading = true, error = null) }
+                }
+                .catch { e ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = e.message ?: "Error desconocido"
+                        )
+                    }
+                }
+                .collect { list ->
+                    _uiState.update {
+                        it.copy(isLoading = false, products = list, error = null)
+                    }
+                }
+        }
+    }
+
+    /**
+     * Refrescar:
+     * - basta con llamar a getProducts() para forzar, si el cache está vacío.
+     * - si el cache no está vacío, el refresh best-effort ya lo hace CachedProductRepository al observar.
+     *
+     * Aquí lo dejamos como "ping" manual, y si falla mostramos error.
+     */
     fun refresh() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching { repo.getProducts() }
-                .onSuccess { list -> _uiState.update { it.copy(isLoading = false, products = list) } }
                 .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error desconocido") }
+                    _uiState.update {
+                        it.copy(error = e.message ?: "Error desconocido")
+                    }
                 }
         }
     }
 
     fun addDummyProduct() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-
             val id = UUID.randomUUID().toString().take(8)
             val p = Product(
                 id = "debug_$id",
@@ -57,9 +91,8 @@ class ProductsDebugViewModel @Inject constructor(
             )
 
             runCatching { repo.addProduct(p) }
-                .onSuccess { refresh() }
                 .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error al añadir") }
+                    _uiState.update { it.copy(error = e.message ?: "Error al añadir") }
                 }
         }
     }
@@ -67,11 +100,9 @@ class ProductsDebugViewModel @Inject constructor(
     fun deleteFirst() {
         val first = _uiState.value.products.firstOrNull() ?: return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching { repo.deleteProduct(first.id) }
-                .onSuccess { refresh() }
                 .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error al borrar") }
+                    _uiState.update { it.copy(error = e.message ?: "Error al borrar") }
                 }
         }
     }
@@ -79,33 +110,26 @@ class ProductsDebugViewModel @Inject constructor(
     fun updateFirst() {
         val first = _uiState.value.products.firstOrNull() ?: return
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-
             val updated = first.copy(
                 name = first.name + " (upd)",
                 category = first.category ?: ProductCategory.OTHER
             )
 
             runCatching { repo.updateProduct(updated) }
-                .onSuccess { refresh() }
                 .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error al actualizar") }
+                    _uiState.update { it.copy(error = e.message ?: "Error al actualizar") }
                 }
         }
     }
 
-    /** ✅ Seed “de verdad”: sube imágenes + guarda JSON en API */
+    /** sube imágenes + guarda JSON en API */
     fun seed() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-
             runCatching {
                 val items = buildSeedItemsFromProductData()
                 catalogSeeder.seedAll(items)
-            }.onSuccess {
-                refresh()
             }.onFailure { e ->
-                _uiState.update { it.copy(isLoading = false, error = e.message ?: "Error en seed") }
+                _uiState.update { it.copy(error = e.message ?: "Error en seed") }
             }
         }
     }

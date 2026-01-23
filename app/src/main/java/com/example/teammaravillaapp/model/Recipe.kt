@@ -7,12 +7,13 @@ import androidx.annotation.DrawableRes
  *
  * @property title nombre de la receta.
  * @property imageRes imagen opcional asociada (foto/plato).
- * @property products ingredientes necesarios (productos del catálogo).
+ * @property productIds ids de productos del catálogo (API/Room).
  */
+
 data class Recipe(
     val id: Int,
     val title: String,
     @DrawableRes val imageRes: Int? = null,
-    val products: List<Product> = emptyList(),
+    val productIds: List<String> = emptyList(),
     val instructions: String = ""
 )

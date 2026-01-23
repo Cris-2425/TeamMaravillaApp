@@ -26,6 +26,11 @@ sealed class NavRoute(val route: String) {
     data object Login : NavRoute("login")
     data object ListViewTypes : NavRoute("list_view_types")
     data object CategoryFilter : NavRoute("category_filter")
-
     data object ProductsDebug : NavRoute("products_debug")
+
+    data object Camera : NavRoute("camera?listId={listId}") {
+        const val ARG_LIST_ID = "listId"
+        fun createRoute(listId: String? = null): String =
+            if (listId.isNullOrBlank()) "camera" else "camera?listId=$listId"
+    }
 }

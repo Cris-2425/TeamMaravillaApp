@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 val sessionViewModel: SessionViewModel = hiltViewModel()
 
                 // AppViewModel: si NO es Hilt todavía, puedes dejar viewModel()
-                val appViewModel: AppViewModel = viewModel()
+                val appViewModel: AppViewModel = hiltViewModel()
 
                 LaunchedEffect(Unit) {
                     appViewModel.events.collect { event ->

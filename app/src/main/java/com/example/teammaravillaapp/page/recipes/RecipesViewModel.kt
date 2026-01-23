@@ -1,46 +1,66 @@
 package com.example.teammaravillaapp.page.recipes
 
 import androidx.lifecycle.ViewModel
-import com.example.teammaravillaapp.data.FakeUserRecipes
-import com.example.teammaravillaapp.model.RecipeData
+import androidx.lifecycle.viewModelScope
+import com.example.teammaravillaapp.model.RecipeWithIngredients
+import com.example.teammaravillaapp.repository.FavoritesRepository
+import com.example.teammaravillaapp.repository.RecipesRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RecipesViewModel : ViewModel() {
+@HiltViewModel
+class RecipesViewModel @Inject constructor(
+    private val recipesRepository: RecipesRepository,
+    private val favoritesRepository: FavoritesRepository
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RecipesUiState())
-    val uiState: StateFlow<RecipesUiState> = _uiState.asStateFlow()
+    private val showMine = MutableStateFlow(false)
+
+    val uiState: StateFlow<RecipesUiState> =
+        combine(
+            showMine,
+            favoritesRepository.favoriteIds,
+            recipesRepository.recipes
+        ) { showMineNow, favIds, recipes ->
+
+            val visible: List<RecipeWithIngredients> =
+                if (showMineNow) recipes.filter { it.recipe.id in favIds }
+                else recipes
+
+            RecipesUiState(
+                showMine = showMineNow,
+                favoriteIds = favIds,
+                visibleRecipes = visible
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = RecipesUiState()
+        )
 
     init {
-        loadAll()
-    }
-
-    private fun loadAll() {
-        _uiState.update {
-            it.copy(
-                showMine = false,
-                visibleRecipes = RecipeData.recipes
-            )
+        viewModelScope.launch {
+            recipesRepository.seedIfEmpty()
         }
     }
 
     fun showAll() {
-        _uiState.update {
-            it.copy(
-                showMine = false,
-                visibleRecipes = RecipeData.recipes
-            )
-        }
+        showMine.value = false
     }
 
     fun showMine() {
-        _uiState.update {
-            it.copy(
-                showMine = true,
-                visibleRecipes = FakeUserRecipes.all()
-            )
+        showMine.value = true
+    }
+
+    fun toggleFavorite(recipeId: Int) {
+        viewModelScope.launch {
+            favoritesRepository.toggle(recipeId)
         }
     }
 }

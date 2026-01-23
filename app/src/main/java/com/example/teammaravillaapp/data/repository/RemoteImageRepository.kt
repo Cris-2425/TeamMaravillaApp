@@ -17,22 +17,23 @@ class RemoteImageRepository @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val api: ImageApi
 ) {
-    // Cambia el puerto si tu API usa otro
-    fun buildPublicUrl(id: String): String = "http://10.0.2.2:5131/images/$id"
+    private val baseUrl = "http://10.0.2.2:5131"
+
+    fun buildPublicUrl(id: String): String = "$baseUrl/images/$id"
 
     /**
-     * Sube una imagen desde res/drawable usando multipart.
-     *
-     * Usa ProductImageExt.extFor(id) para enviar:
-     * - filename correcto (id.jpg / id.jpeg / id.png)
-     * - MIME correcto (image/jpeg o image/png)
+     * Devuelve true si la imagen existe en el server.
+     * Asume 404 cuando no existe.
      */
+    suspend fun exists(id: String): Boolean =
+        runCatching { api.getImage(id) }.isSuccess
+
     @SuppressLint("ResourceType")
     suspend fun uploadFromDrawable(
         id: String,
         @DrawableRes drawableRes: Int
     ) {
-        val ext = ProductImageExt.extFor(id) // "jpg" / "jpeg" / "png"
+        val ext = ProductImageExt.extFor(id)
 
         val mime = when (ext.lowercase()) {
             "jpg", "jpeg" -> "image/jpeg"
@@ -49,7 +50,6 @@ class RemoteImageRepository @Inject constructor(
             body = body
         )
 
-        // Endpoint esperado: POST /images/{id} multipart (file)
         api.uploadImage(id = id, file = part)
     }
 }

@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.network
+package com.example.teammaravillaapp.network.module
 
 import com.example.teammaravillaapp.network.api.ImageApi
 import com.example.teammaravillaapp.network.api.ProductApi
@@ -16,6 +16,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
+    // Emulator -> host machine
     private const val BASE_URL = "http://10.0.2.2:5131/"
 
     @Provides

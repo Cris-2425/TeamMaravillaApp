@@ -8,12 +8,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.*
 import com.example.teammaravillaapp.model.CardInfo
@@ -133,13 +132,23 @@ fun Home(
                         )
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            uiState.recentLists.forEach { (id, list) ->
+                            uiState.recentLists.forEach { row ->
+                                val id = row.id
+                                val list = row.list
+                                val p = row.progress
+
+                                val subtitle = if (p.totalCount == 0) {
+                                    "0 productos"
+                                } else {
+                                    "${p.checkedCount}/${p.totalCount} comprados"
+                                }
+
                                 ListCard(
                                     cardInfo = CardInfo(
                                         imageID = R.drawable.list_supermarket,
                                         imageDescription = list.name,
                                         title = list.name,
-                                        subtitle = "${list.products.size} productos"
+                                        subtitle = subtitle
                                     ),
                                     onClick = { onOpenList(id) }
                                 )

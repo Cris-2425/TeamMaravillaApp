@@ -8,6 +8,11 @@
     <!-- Package page -->
     <!-- ******************************************************************************* -->
 
+    <!-- Global -->
+    <string name="common_clear">Clear</string>
+    <string name="common_plus">Add</string>
+    <string name="common_minus">Remove</string>
+
     <!-- BackButton -->
     <string name="back_button_content_description">Back</string>
 
@@ -57,6 +62,29 @@
     <string name="list_detail_current_products_title">Products in list</string>
     <string name="list_detail_no_products">Still there is no products</string>
     <string name="list_detail_recent_used_title">Used recently</string>
+    <string name="list_detail_search_placeholder">Search product…</string>
+    <string name="list_detail_search_loading">Loading catalog…</string>
+    <string name="list_detail_search_no_results">No results</string>
+    <string name="list_detail_search_results_title">Results</string>
+    <string name="list_detail_catalog_loading">Loading catalog…</string>
+    <string name="list_detail_catalog_empty">No products available</string>
+    <string name="list_detail_menu_cd">Options</string>
+    <string name="list_detail_menu_remove_checked">Remove purchased</string>
+    <string name="list_detail_menu_uncheck_all">Uncheck all</string>
+    <string name="list_detail_menu_clear_list">Clear list</string>
+    <string name="list_detail_clear_confirm_title">Clear list</string>
+    <string name="list_detail_clear_confirm_body">All products will be removed from the list. Continue?</string>
+    <string name="list_detail_clear_confirm_yes">Clear</string>
+    <string name="list_detail_clear_confirm_no">Cancel</string>
+    <string name="list_detail_add_receipt_cd">Add receipt</string>
+    <string name="list_detail_receipt_title">Receipt</string>
+    <string name="list_detail_receipt_cd">Receipt Photo</string>
+    <string name="list_detail_receipt_remove">Remove receipt</string>
+    <string name="list_detail_search_clear_cd">Clear</string>
+    <string name="list_detail_qty_minus_cd">Less</string>
+    <string name="list_detail_qty_plus_cd">More</string>
+    <string name="list_detail_menu_category_filter">Category filter</string>
+    <string name="list_detail_menu_clear_category_filter">Remove category filter</string>
 
     <!-- Createlistt -->
     <string name="create_list_default_name">New list</string>
@@ -69,6 +97,9 @@
     <string name="category_filter_cancel">Cancel</string>
     <string name="category_filter_save">Save</string>
     <string name="category_filter_subtitle">Choose which categories you want to show</string>
+    <string name="category_filter_subtitle_active">Showing only products from the selected categories</string>
+    <string name="category_filter_subtitle_all">Showing products from all categories.</string>
+    <string name="category_filter_show_all">Show all</string>
 
     <!-- Home -->
     <string name="home_title">Home</string>
@@ -86,6 +117,24 @@
     <string name="home_recent_list_bbq_img_desc">List BBQ</string>
     <string name="home_recent_list_bbq_title">Saturday BBQ</string>
     <string name="home_recent_list_bbq_subtitle">Butcher shop</string>
+
+    <!-- CameraScreen -->
+    <string name="camera_title">Camera</string>
+    <string name="camera_action_title">Actions</string>
+    <string name="common_back">Back</string>
+    <string name="camera_title_generic">Images</string>
+    <string name="camera_subtitle_generic">Select an image from your gallery</string>
+    <string name="camera_title_receipt">Purchase receipt</string>
+    <string name="camera_subtitle_receipt">Please attach a photo of the receipt to this list</string>
+    <string name="camera_no_image">No image selected</string>
+    <string name="camera_image_cd">Selected image</string>
+    <string name="camera_pick_image">Choose image</string>
+    <string name="camera_save_receipt">Save as receipt</string>
+    <string name="camera_clear_selection">Remove selection</string>
+    <string name="camera_error_no_list">There is no associated list. Open the camera from a list</string>
+    <string name="camera_error_no_image">Select an image first</string>
+    <string name="camera_saved_ok">Receipt saved ✅</string>
+
 
     <!-- ******************************************************************************* -->
     <!-- Package component -->

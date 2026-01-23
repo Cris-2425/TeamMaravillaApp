@@ -4,34 +4,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.teammaravillaapp.model.ListStyle
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.page.CategoryFilter
-import com.example.teammaravillaapp.page.ListViewTypes
-import com.example.teammaravillaapp.page.profile.Profile
-import com.example.teammaravillaapp.page.recipes.Recipes
-import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
+import com.example.teammaravillaapp.page.listviewtypes.ListViewTypes
+import com.example.teammaravillaapp.page.camera.CameraScreen
 import com.example.teammaravillaapp.page.createlist.CreateListt
 import com.example.teammaravillaapp.page.home.Home
 import com.example.teammaravillaapp.page.listdetail.ListDetail
 import com.example.teammaravillaapp.page.login.Login
 import com.example.teammaravillaapp.page.login.LoginViewModel
+import com.example.teammaravillaapp.page.profile.Profile
 import com.example.teammaravillaapp.page.profile.ProfileViewModel
-import com.example.teammaravillaapp.page.recipesdetail.RecipesDetailViewModel
+import com.example.teammaravillaapp.page.recipes.Recipes
+import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
 import com.example.teammaravillaapp.page.selectlist.SelectList
 import com.example.teammaravillaapp.page.session.SessionEvent
 import com.example.teammaravillaapp.page.session.SessionViewModel
 import com.example.teammaravillaapp.ui.app.AppViewModel
 import com.example.teammaravillaapp.ui.debug.ProductsDebugScreen
-import kotlinx.coroutines.launch
 
 @Composable
 fun TeamMaravillaNavHost(
@@ -41,8 +38,6 @@ fun TeamMaravillaNavHost(
     modifier: Modifier = Modifier,
     startDestination: String = NavRoute.Home.route
 ) {
-    val scope = rememberCoroutineScope()
-
     val isLoggedIn by sessionViewModel.isLoggedIn.collectAsState()
     val username by sessionViewModel.username.collectAsState()
 
@@ -82,12 +77,13 @@ fun TeamMaravillaNavHost(
                     }
                 },
                 onNavigateProfile = { navController.navigate(NavRoute.Profile.route) },
-                onNavigateCamera = { },
+
+                // ✅ BottomBar camera: uso genérico
+                onNavigateCamera = { navController.navigate(NavRoute.Camera.createRoute()) },
+
                 onNavigateRecipes = { navController.navigate(NavRoute.Recipes.route) },
-                onExitApp = { },
-                onOpenList = { listId ->
-                    navController.navigate(NavRoute.ListDetail.createRoute(listId))
-                }
+                onExitApp = { /* si quieres, cierra activity desde MainActivity */ },
+                onOpenList = { listId -> navController.navigate(NavRoute.ListDetail.createRoute(listId)) }
             )
         }
 
@@ -109,7 +105,10 @@ fun TeamMaravillaNavHost(
                 navArgument(NavRoute.ListDetail.ARG_LIST_ID) { type = NavType.StringType }
             )
         ) {
-            ListDetail(onBack = { navController.navigateUp() })
+            ListDetail(
+                onBack = { navController.navigateUp() },
+                onOpenCategoryFilter = { navController.navigate(NavRoute.CategoryFilter.route) }
+            )
         }
 
         composable(NavRoute.Recipes.route) {
@@ -129,8 +128,8 @@ fun TeamMaravillaNavHost(
         ) {
             RecipesDetail(
                 onBack = { navController.navigateUp() },
-                onAddToShoppingList = { recipe ->
-                    navController.navigate(NavRoute.SelectList.createRoute(recipe.id))
+                onAddToShoppingList = { recipeId ->
+                    navController.navigate(NavRoute.SelectList.createRoute(recipeId))
                 }
             )
         }
@@ -168,11 +167,8 @@ fun TeamMaravillaNavHost(
                         ProfileOption.HELP -> {}
                         ProfileOption.DEBUG_PRODUCTS -> navController.navigate(NavRoute.ProductsDebug.route)
                         ProfileOption.LOGIN -> {
-                            if (isLoggedIn) {
-                                profileViewModel.logout()
-                            } else {
-                                navController.navigate(NavRoute.Login.route)
-                            }
+                            if (isLoggedIn) profileViewModel.logout()
+                            else navController.navigate(NavRoute.Login.route)
                         }
                     }
                 },
@@ -182,20 +178,13 @@ fun TeamMaravillaNavHost(
             )
         }
 
-
         composable(NavRoute.Login.route) {
             val loginViewModel: LoginViewModel = hiltViewModel()
-
-            Login(
-                onBack = { navController.navigateUp() },
-                loginViewModel = loginViewModel
-            )
+            Login(onBack = { navController.navigateUp() }, loginViewModel = loginViewModel)
         }
 
         composable(NavRoute.ListViewTypes.route) {
             ListViewTypes(
-                selected = ListStyle.LISTA,
-                onSelect = { _ -> },
                 onCancel = { navController.navigateUp() },
                 onSave = { navController.navigateUp() }
             )
@@ -209,7 +198,22 @@ fun TeamMaravillaNavHost(
         }
 
         composable(NavRoute.ProductsDebug.route) {
-            ProductsDebugScreen(
+            ProductsDebugScreen(onBack = { navController.navigateUp() })
+        }
+
+        composable(
+            route = NavRoute.Camera.route,
+            arguments = listOf(
+                navArgument(NavRoute.Camera.ARG_LIST_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val listId = backStackEntry.arguments?.getString(NavRoute.Camera.ARG_LIST_ID)
+            CameraScreen(
+                listId = listId,
                 onBack = { navController.navigateUp() }
             )
         }

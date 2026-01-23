@@ -10,5 +10,6 @@ import androidx.annotation.DrawableRes
  */
 data class SuggestedList(
     val name: String,
-    @DrawableRes val imageRes: Int
+    @DrawableRes val imageRes: Int,
+    val productIds: List<String> = emptyList()
 )

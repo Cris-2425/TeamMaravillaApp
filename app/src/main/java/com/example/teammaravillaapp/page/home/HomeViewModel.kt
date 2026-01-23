@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.repository.ListsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,40 +17,45 @@ class HomeViewModel @Inject constructor(
     private val listsRepository: ListsRepository
 ) : ViewModel() {
 
-    private val searchQuery = MutableStateFlow("")
+    private val search = MutableStateFlow("")
 
-    private val _uiState: StateFlow<HomeUiState> =
+    val uiState: StateFlow<HomeUiState> =
         combine(
-            searchQuery,
-            listsRepository.lists
-        ) { search, lists ->
+            search,
+            listsRepository.lists,
+            listsRepository.observeProgress()
+        ) { q, lists, progressMap ->
 
-            val filtered = if (search.isBlank()) {
+            val trimmed = q.trim()
+            val filtered = if (trimmed.isBlank()) {
                 lists
             } else {
-                val q = search.trim().lowercase()
-                lists.filter { (_, list) ->
-                    list.name.lowercase().contains(q)
-                }
+                lists.filter { (_, list) -> list.name.contains(trimmed, ignoreCase = true) }
+            }
+
+            val rows = filtered.map { (id, list) ->
+                HomeListRow(
+                    id = id,
+                    list = list,
+                    progress = progressMap[id] ?: com.example.teammaravillaapp.repository.ListProgress(0, 0)
+                )
             }
 
             HomeUiState(
-                search = search,
-                recentLists = filtered
+                search = q,
+                recentLists = rows
             )
         }.stateIn(
             scope = viewModelScope,
-            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(5_000),
             initialValue = HomeUiState()
         )
 
-    val uiState: StateFlow<HomeUiState> = _uiState
-
     init {
-        listsRepository.seedIfEmpty()
+        viewModelScope.launch { listsRepository.seedIfEmpty() }
     }
 
     fun onSearchChange(newValue: String) {
-        searchQuery.value = newValue
+        search.value = newValue
     }
 }

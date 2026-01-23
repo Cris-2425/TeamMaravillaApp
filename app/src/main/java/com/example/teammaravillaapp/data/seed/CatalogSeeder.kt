@@ -13,19 +13,31 @@ class CatalogSeeder @Inject constructor(
 ) {
     /**
      * Seed “full”:
-     * 1) Sube imágenes (multipart) para los items que tengan imageRes
+     * 1) Sube imágenes (multipart) para los items que tengan imageRes (si no existen ya)
      * 2) Guarda la lista completa en la API (saveProducts)
      *
      * NOTA: si tu API guarda un único JSON "all", esto SOBRESCRIBE el fichero entero.
      */
     suspend fun seedAll(items: List<SeedItem>) {
         val seededProducts: List<Product> = items.map { item ->
-            val url = if (item.imageRes != null) {
-                imageRepo.uploadFromDrawable(
-                    id = item.id,
-                    drawableRes = item.imageRes
-                )
-                imageRepo.buildPublicUrl(item.id)
+
+            val url: String? = if (item.imageRes != null) {
+                // Idempotencia: si ya existe en server, no la subimos
+                val alreadyThere = runCatching { imageRepo.exists(item.id) }.getOrDefault(false)
+
+                if (alreadyThere) {
+                    imageRepo.buildPublicUrl(item.id)
+                } else {
+                    // Robustez: si falla la subida, no rompemos todo el seed
+                    val uploaded = runCatching {
+                        imageRepo.uploadFromDrawable(
+                            id = item.id,
+                            drawableRes = item.imageRes
+                        )
+                    }.isSuccess
+
+                    if (uploaded) imageRepo.buildPublicUrl(item.id) else null
+                }
             } else {
                 null
             }
@@ -38,7 +50,6 @@ class CatalogSeeder @Inject constructor(
             )
         }
 
-        // Guarda el catálogo completo (JSON único)
         productRepo.saveProducts(seededProducts)
     }
 }

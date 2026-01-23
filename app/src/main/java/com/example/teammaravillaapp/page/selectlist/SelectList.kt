@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.page.selectlist
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -109,7 +110,7 @@ fun SelectList(
                                         )
                                         Spacer(Modifier.height(4.dp))
                                         Text(
-                                            text = "${list.products.size} productos",
+                                            text = "${list.productIds.size} productos",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -124,18 +125,5 @@ fun SelectList(
         Box(Modifier.align(Alignment.BottomStart)) {
             BackButton(onClick = onBack)
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewRecipesDetail() {
-    TeamMaravillaAppTheme {
-        SelectList(
-            appViewModel = hiltViewModel(),
-            onBack = {},
-            onCreateList = {},
-            onListSelected = {}
-        )
     }
 }

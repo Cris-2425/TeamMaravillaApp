@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +35,7 @@ import com.example.teammaravillaapp.model.Recipe
 @Composable
 fun RecipesDetail(
     onBack: () -> Unit,
-    onAddToShoppingList: (Recipe) -> Unit
+    onAddToShoppingList: (Int) -> Unit
 ) {
     val vm: RecipesDetailViewModel = hiltViewModel()
 
@@ -94,15 +97,39 @@ fun RecipesDetail(
                 color = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
-                Text(
-                    text = recipe.title,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 10.dp),
-                    style = MaterialTheme.typography.titleSmall,
-                    textAlign = TextAlign.Center
-                )
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    Text(
+                        text = recipe.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )
+
+                    IconButton(onClick = { vm.toggleFavorite() }) {
+                        Icon(
+                            imageVector =
+                                if (uiState.isFavorite)
+                                    Icons.Filled.Favorite
+                                else
+                                    Icons.Outlined.FavoriteBorder,
+                            contentDescription = null,
+                            tint =
+                                if (uiState.isFavorite)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+                }
             }
+
 
             Spacer(Modifier.height(24.dp))
 
@@ -155,7 +182,7 @@ fun RecipesDetail(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                recipe.products.forEach { product ->
+                uiState.ingredients.forEach { product ->
                     ProductBubble(product)
                 }
             }
@@ -182,7 +209,7 @@ fun RecipesDetail(
 
             // ---------- BOTÓN AÑADIR A LISTA ----------
             Button(
-                onClick = { onAddToShoppingList(recipe) },
+                onClick = { onAddToShoppingList(recipe.id) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = stringResource(R.string.recipe_add_ingredients_button))
