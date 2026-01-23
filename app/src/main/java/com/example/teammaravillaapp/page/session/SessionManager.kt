@@ -1,6 +1,5 @@
-package com.example.teammaravillaapp.data.session
+package com.example.teammaravillaapp.page.session
 
-import com.example.teammaravillaapp.page.session.SessionEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

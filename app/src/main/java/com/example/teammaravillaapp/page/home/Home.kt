@@ -132,14 +132,23 @@ fun Home(
                         )
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            uiState.recentLists.forEach { (id, list) ->
+                            uiState.recentLists.forEach { row ->
+                                val id = row.id
+                                val list = row.list
+                                val p = row.progress
+
+                                val subtitle = if (p.totalCount == 0) {
+                                    "0 productos"
+                                } else {
+                                    "${p.checkedCount}/${p.totalCount} comprados"
+                                }
+
                                 ListCard(
                                     cardInfo = CardInfo(
                                         imageID = R.drawable.list_supermarket,
                                         imageDescription = list.name,
                                         title = list.name,
-                                        // ✅ antes: list.products.size
-                                        subtitle = "${list.productIds.size} productos"
+                                        subtitle = subtitle
                                     ),
                                     onClick = { onOpenList(id) }
                                 )

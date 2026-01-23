@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.page
+package com.example.teammaravillaapp.page.listviewtypes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

@@ -14,11 +14,12 @@ import com.example.teammaravillaapp.data.local.mapper.Converters
     entities = [
         ProductEntity::class,
         ListEntity::class,
+        ListItemEntity::class,
         FavoriteRecipeEntity::class,
         RecipeEntity::class,
         RecipeIngredientCrossRef::class
     ],
-    version = 3,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

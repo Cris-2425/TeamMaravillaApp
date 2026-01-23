@@ -8,5 +8,5 @@ data class ListEntity(
     @PrimaryKey val id: String,
     val name: String,
     val background: String,
-    val productIds: List<String> //
+    val createdAt: Long
 )

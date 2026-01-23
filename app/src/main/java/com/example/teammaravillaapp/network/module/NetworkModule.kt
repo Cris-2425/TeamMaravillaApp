@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.network
+package com.example.teammaravillaapp.network.module
 
 import com.example.teammaravillaapp.network.api.ImageApi
 import com.example.teammaravillaapp.network.api.ProductApi

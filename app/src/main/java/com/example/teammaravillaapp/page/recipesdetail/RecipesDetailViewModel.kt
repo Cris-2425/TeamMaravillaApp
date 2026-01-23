@@ -61,7 +61,9 @@ class RecipesDetailViewModel @Inject constructor(
 
     fun toggleFavorite() {
         val id = uiState.value.recipe?.id ?: return
-        favoritesRepository.toggle(id)
+        viewModelScope.launch {
+            favoritesRepository.toggle(id)
+        }
     }
 
     fun addRecipeIngredientsToList(listId: String) {

@@ -19,15 +19,25 @@ class AppViewModel @Inject constructor(
     private val listsRepository: ListsRepository
 ) : ViewModel() {
 
+    private val isEmulator: Boolean =
+        android.os.Build.FINGERPRINT.contains("generic")
+                || android.os.Build.MODEL.contains("Emulator")
+                || android.os.Build.MODEL.contains("Android SDK built for x86")
+
     init {
         seedOnAppStart()
     }
 
     private fun seedOnAppStart() {
         viewModelScope.launch {
+            // ✅ siempre
             recipesRepository.seedIfEmpty()
             listsRepository.seedIfEmpty()
-            productRepository.getProducts()
+
+            // 🌐 solo si hay backend accesible
+            if (isEmulator) {
+                productRepository.getProducts()
+            }
         }
     }
 

@@ -3,10 +3,10 @@ package com.example.teammaravillaapp.component
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,13 +18,6 @@ import com.example.teammaravillaapp.model.OptionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
-/**
- * Barra de navegación inferior.
- *
- * Solo gestiona **UI + callbacks**.
- *
- * @param selectedButton botón activo.
- */
 @Composable
 fun BottomBar(
     selectedButton: OptionButton,
@@ -38,7 +31,7 @@ fun BottomBar(
         NavigationBarItem(
             selected = selectedButton == OptionButton.HOME,
             onClick = {
-                Log.e(TAG_GLOBAL, "Ir al inicio")
+                Log.d(TAG_GLOBAL, "Ir al inicio")
                 homeButton()
             },
             icon = {
@@ -48,10 +41,11 @@ fun BottomBar(
                 )
             }
         )
+
         NavigationBarItem(
             selected = selectedButton == OptionButton.PROFILE,
             onClick = {
-                Log.e(TAG_GLOBAL, "Ir al perfil")
+                Log.d(TAG_GLOBAL, "Ir al perfil")
                 profileButton()
             },
             icon = {
@@ -61,23 +55,25 @@ fun BottomBar(
                 )
             }
         )
+
         NavigationBarItem(
             selected = selectedButton == OptionButton.CAMERA,
             onClick = {
-                Log.e(TAG_GLOBAL, "Ir a la cámara")
+                Log.d(TAG_GLOBAL, "Ir a la cámara")
                 cameraButton()
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Default.AddCircle,
+                    imageVector = Icons.Default.PhotoCamera,
                     contentDescription = stringResource(R.string.bottom_bar_camera_cd)
                 )
             }
         )
+
         NavigationBarItem(
             selected = selectedButton == OptionButton.RECIPES,
             onClick = {
-                Log.e(TAG_GLOBAL, "Ir a recetas")
+                Log.d(TAG_GLOBAL, "Ir a recetas")
                 recipesButton()
             },
             icon = {
@@ -87,10 +83,11 @@ fun BottomBar(
                 )
             }
         )
+
         NavigationBarItem(
             selected = selectedButton == OptionButton.EXIT,
             onClick = {
-                Log.e(TAG_GLOBAL, "Salir de la aplicación")
+                Log.d(TAG_GLOBAL, "Salir de la aplicación")
                 exitButton()
             },
             icon = {
@@ -106,39 +103,5 @@ fun BottomBar(
 @Preview
 @Composable
 fun PreviewBottomBarHome() {
-    TeamMaravillaAppTheme {
-        BottomBar(selectedButton = OptionButton.HOME)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewBottomBarProfile() {
-    TeamMaravillaAppTheme {
-        BottomBar(selectedButton = OptionButton.PROFILE)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewBottomBarCamera() {
-    TeamMaravillaAppTheme {
-        BottomBar(selectedButton = OptionButton.CAMERA)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewBottomBarRecipes() {
-    TeamMaravillaAppTheme {
-        BottomBar(selectedButton = OptionButton.RECIPES)
-    }
-}
-
-@Preview
-@Composable
-fun PreviewBottomBarExit() {
-    TeamMaravillaAppTheme {
-        BottomBar(selectedButton = OptionButton.EXIT)
-    }
+    TeamMaravillaAppTheme { BottomBar(selectedButton = OptionButton.HOME) }
 }

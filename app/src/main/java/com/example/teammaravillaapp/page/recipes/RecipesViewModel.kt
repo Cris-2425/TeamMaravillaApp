@@ -45,7 +45,6 @@ class RecipesViewModel @Inject constructor(
         )
 
     init {
-        // Seed inicial a Room (si aún está vacío)
         viewModelScope.launch {
             recipesRepository.seedIfEmpty()
         }
@@ -60,6 +59,8 @@ class RecipesViewModel @Inject constructor(
     }
 
     fun toggleFavorite(recipeId: Int) {
-        favoritesRepository.toggle(recipeId)
+        viewModelScope.launch {
+            favoritesRepository.toggle(recipeId)
+        }
     }
 }
