@@ -2,11 +2,12 @@ package com.example.teammaravillaapp.data.repository
 
 import com.example.teammaravillaapp.data.local.dao.RecipesDao
 import com.example.teammaravillaapp.data.local.entity.RecipeEntity
-import com.example.teammaravillaapp.data.local.entity.RecipeIngredientCrossRef
+import com.example.teammaravillaapp.data.local.entity.RecipeIngredientsCrossRef
 import com.example.teammaravillaapp.data.local.mapper.toDomain
-import com.example.teammaravillaapp.model.RecipeData
+import com.example.teammaravillaapp.data.local.mapper.toIngredientLine
+import com.example.teammaravillaapp.model.IngredientLine
+import com.example.teammaravillaapp.data.seed.RecipeData
 import com.example.teammaravillaapp.model.RecipeWithIngredients
-import com.example.teammaravillaapp.repository.RecipesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -26,6 +27,10 @@ class RoomRecipesRepository @Inject constructor(
     override suspend fun getRecipe(id: Int): RecipeWithIngredients? =
         dao.getById(id)?.toDomain()
 
+    override fun observeIngredientLines(recipeId: Int): Flow<List<IngredientLine>> =
+        dao.observeIngredientLines(recipeId)
+            .map { lines -> lines.map { it.toIngredientLine() } }
+
     override suspend fun seedIfEmpty() {
         if (dao.count() > 0) return
 
@@ -38,11 +43,19 @@ class RoomRecipesRepository @Inject constructor(
             )
         }
 
-        val crossRefs = RecipeData.recipes.flatMap { r ->
-            r.productIds.map { pid -> RecipeIngredientCrossRef(r.id, pid) }
+        val ingredientRows = RecipeData.recipes.flatMap { r ->
+            r.productIds.distinct().mapIndexed { index, pid ->
+                RecipeIngredientsCrossRef(
+                    recipeId = r.id,
+                    productId = pid,
+                    quantity = null,
+                    unit = null,
+                    position = index
+                )
+            }
         }
 
         dao.upsertRecipes(entities)
-        dao.upsertCrossRefs(crossRefs)
+        dao.upsertCrossRefs(ingredientRows)
     }
 }

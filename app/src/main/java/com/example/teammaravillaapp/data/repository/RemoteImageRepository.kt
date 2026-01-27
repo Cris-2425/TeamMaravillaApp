@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.data.repository
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.DrawableRes
-import com.example.teammaravillaapp.model.ProductImageExt
+import com.example.teammaravillaapp.data.seed.ProductImageExt
 import com.example.teammaravillaapp.network.api.ImageApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaType

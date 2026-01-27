@@ -6,8 +6,6 @@ import com.example.teammaravillaapp.data.local.mapper.toDomain
 import com.example.teammaravillaapp.data.local.mapper.toEntity
 import com.example.teammaravillaapp.model.ListBackground
 import com.example.teammaravillaapp.model.UserList
-import com.example.teammaravillaapp.repository.ListProgress
-import com.example.teammaravillaapp.repository.ListsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
@@ -128,4 +126,15 @@ class RoomListsRepository @Inject constructor(
                     )
                 }
             }
+
+    override suspend fun deleteById(id: String) {
+        dao.deleteItemsForList(id)
+        dao.deleteById(id)
+    }
+
+    override suspend fun rename(id: String, newName: String) {
+        val current = dao.getById(id) ?: return
+        val updated = current.list.copy(name = newName)
+        dao.upsert(updated)
+    }
 }

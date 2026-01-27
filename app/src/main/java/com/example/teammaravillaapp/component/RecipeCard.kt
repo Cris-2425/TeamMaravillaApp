@@ -24,9 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.Product
-import com.example.teammaravillaapp.model.ProductData
+import com.example.teammaravillaapp.data.seed.ProductData
 import com.example.teammaravillaapp.model.Recipe
-import com.example.teammaravillaapp.model.RecipeData
+import com.example.teammaravillaapp.data.seed.RecipeData
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -40,28 +40,31 @@ fun RecipeCard(
     onClick: () -> Unit = {}
 ) {
     val ingredientsTitle = stringResource(R.string.recipe_ingredients_title)
-    val imagePlaceholder = stringResource(R.string.recipe_image_placeholder)
     val noIngredientsText = stringResource(R.string.recipe_no_ingredients)
     val favAddCd = stringResource(R.string.recipe_favorite_add_cd)
     val favRemoveCd = stringResource(R.string.recipe_favorite_remove_cd)
 
+    val cs = MaterialTheme.colorScheme
+    val imageShape = RoundedCornerShape(18.dp)
+
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        contentColor = MaterialTheme.colorScheme.onSecondary,
+        color = cs.secondary,
+        contentColor = cs.onSecondary,
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                Log.e(TAG_GLOBAL, "Click en '${recipe.title}'")
+                Log.d(TAG_GLOBAL, "Click en '${recipe.title}'")
                 onClick()
             }
     ) {
         Column(Modifier.padding(14.dp)) {
 
+            // Header
             Surface(
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                color = cs.surface,
+                contentColor = cs.onSurface
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -75,8 +78,7 @@ fun RecipeCard(
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(start = 8.dp)
-                            .align(Alignment.CenterVertically),
+                            .padding(start = 8.dp),
                         textAlign = TextAlign.Center
                     )
 
@@ -84,8 +86,7 @@ fun RecipeCard(
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = if (isFavorite) favRemoveCd else favAddCd,
-                            tint = if (isFavorite) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurface
+                            tint = if (isFavorite) cs.primary else cs.onSurface
                         )
                     }
                 }
@@ -93,29 +94,31 @@ fun RecipeCard(
 
             Spacer(Modifier.height(12.dp))
 
-            if (recipe.imageRes != null) {
+            // Imagen (SAFE)
+            val img = recipe.imageRes
+            if (img != null && img != 0) {
                 Image(
-                    painter = painterResource(id = recipe.imageRes),
+                    painter = painterResource(img),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(14.dp)),
+                        .height(140.dp)
+                        .clip(imageShape),
                     contentScale = ContentScale.Crop
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
+                        .height(140.dp)
+                        .clip(imageShape)
+                        .background(cs.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = imagePlaceholder,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        text = stringResource(R.string.recipe_image_placeholder),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = cs.onSurfaceVariant
                     )
                 }
             }
@@ -125,7 +128,7 @@ fun RecipeCard(
             Text(
                 text = ingredientsTitle,
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSecondary
+                color = cs.onSecondary
             )
 
             Spacer(Modifier.height(6.dp))
@@ -134,7 +137,7 @@ fun RecipeCard(
                 Text(
                     text = noIngredientsText,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondary
+                    color = cs.onSecondary
                 )
             } else {
                 FlowRow(

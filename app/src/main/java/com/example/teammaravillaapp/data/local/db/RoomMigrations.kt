@@ -103,4 +103,47 @@ object RoomMigrations {
             db.execSQL("ALTER TABLE list_items ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1")
         }
     }
+
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+
+            // 1) Crear nueva tabla con columnas extra
+            db.execSQL(
+                """
+            CREATE TABLE IF NOT EXISTS recipe_ingredients_new (
+                recipeId INTEGER NOT NULL,
+                productId TEXT NOT NULL,
+                quantity REAL,
+                unit TEXT,
+                position INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY(recipeId, productId)
+            )
+            """.trimIndent()
+            )
+
+            // 2) Copiar datos existentes (solo recipeId/productId)
+            db.execSQL(
+                """
+            INSERT INTO recipe_ingredients_new (recipeId, productId, quantity, unit, position)
+            SELECT recipeId, productId, NULL, NULL, 0
+            FROM recipe_ingredients
+            """.trimIndent()
+            )
+
+            // 3) Reemplazar tabla antigua
+            db.execSQL("DROP TABLE recipe_ingredients")
+            db.execSQL("ALTER TABLE recipe_ingredients_new RENAME TO recipe_ingredients")
+
+            // 4) Índices (opcional pero recomendado)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_recipe_ingredients_recipeId ON recipe_ingredients(recipeId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_recipe_ingredients_productId ON recipe_ingredients(productId)")
+        }
+    }
+
+    val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE products ADD COLUMN imageRes INTEGER")
+        }
+    }
+
 }

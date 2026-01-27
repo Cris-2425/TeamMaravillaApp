@@ -3,7 +3,6 @@ package com.example.teammaravillaapp.page.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.data.auth.AuthRepository
-import com.example.teammaravillaapp.page.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,8 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
-    private val sessionManager: SessionManager
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -48,9 +46,7 @@ class LoginViewModel @Inject constructor(
 
             _uiState.update { it.copy(isLoading = false) }
 
-            if (ok) {
-                sessionManager.notifyLoggedIn()
-            } else {
+            if (!ok) {
                 _uiState.update { it.copy(errorMessage = "Credenciales incorrectas") }
             }
         }

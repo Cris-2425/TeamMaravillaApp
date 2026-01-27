@@ -1,15 +1,11 @@
 package com.example.teammaravillaapp.page.selectlist
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.navigation.NavRoute
-import com.example.teammaravillaapp.repository.ListsRepository
-import com.example.teammaravillaapp.repository.RecipesRepository
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.data.repository.ListsRepository
+import com.example.teammaravillaapp.data.repository.RecipesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

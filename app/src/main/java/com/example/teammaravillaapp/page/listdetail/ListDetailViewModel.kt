@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
-import com.example.teammaravillaapp.model.ProductData
+import com.example.teammaravillaapp.data.seed.ProductData
 import com.example.teammaravillaapp.model.UserList
 import com.example.teammaravillaapp.navigation.NavRoute
-import com.example.teammaravillaapp.repository.ListsRepository
-import com.example.teammaravillaapp.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.ListsRepository
+import com.example.teammaravillaapp.data.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

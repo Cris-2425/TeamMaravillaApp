@@ -12,6 +12,10 @@
     <string name="common_clear">Clear</string>
     <string name="common_plus">Add</string>
     <string name="common_minus">Remove</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_change">Change</string>
 
     <!-- BackButton -->
     <string name="back_button_content_description">Back</string>
@@ -39,6 +43,11 @@
     <string name="profile_option_help">Help</string>
     <string name="profile_option_debug_products">Debug productos</string>
     <string name="profile_option_login">Login / Change user</string>
+    <string name="profile_logout">Logout</string>
+    <string name="profile_status_logged_in">Logged in</string>
+    <string name="profile_status_logged_out">Guest</string>
+    <string name="profile_change_photo">Change photo</string>
+    <string name="profile_remove_photo">Remove photo</string>
 
     <!-- Login -->
     <string name="login_title">Register</string>
@@ -46,6 +55,7 @@
     <string name="login_password_placeholder">Password</string>
     <string name="login_button_text">Enter</string>
     <string name="login_error_empty_fields">Please, fill user and password</string>
+    <string name="login_subtitle">Login to save yours lists and recipes</string>
 
     <!-- ListViewTypes -->
     <string name="list_view_types_title">List view type</string>
@@ -55,6 +65,13 @@
     <string name="list_view_types_option_list">List</string>
     <string name="list_view_types_option_mosaic">Mosaic</string>
     <string name="list_view_types_option_other">Other</string>
+    <string name="list_view_types_bubbles">Bubles</string>
+    <string name="list_view_types_bubbles_desc">Chip/bubble view</string>
+    <string name="list_view_types_list">List</string>
+    <string name="list_view_types_list_desc">Vertical list with more information</string>
+    <string name="list_view_types_compact">Compact</string>
+    <string name="list_view_types_compact_desc">Narrower list to see more products</string>
+    <string name="list_detail_menu_view_type">View type</string>
 
     <!-- ListDetail -->
     <string name="list_detail_empty_title">There is no list created</string>
@@ -103,7 +120,7 @@
 
     <!-- Home -->
     <string name="home_title">Home</string>
-    <string name="home_search_placeholder">Search product or list</string>
+    <string name="home_search_placeholder">Search list…</string>
     <string name="home_quick_actions_title">Fast actions</string>
     <string name="home_quick_new_list">New list</string>
     <string name="home_quick_favorites">Favorites</string>
@@ -117,8 +134,10 @@
     <string name="home_recent_list_bbq_img_desc">List BBQ</string>
     <string name="home_recent_list_bbq_title">Saturday BBQ</string>
     <string name="home_recent_list_bbq_subtitle">Butcher shop</string>
+    <string name="home_list_subtitle_empty">0 products</string>
+    <string name="home_list_subtitle_progress">%1$d/%2$d purchased</string>
 
-    <!-- CameraScreen -->
+    <!-- Camera -->
     <string name="camera_title">Camera</string>
     <string name="camera_action_title">Actions</string>
     <string name="common_back">Back</string>
@@ -135,6 +154,53 @@
     <string name="camera_error_no_image">Select an image first</string>
     <string name="camera_saved_ok">Receipt saved ✅</string>
 
+    <!-- SelectList -->
+    <string name="select_list_empty">You don\'t have any lists yet</string>
+    <string name="select_list_create">Create list</string>
+    <string name="select_list_added_ok">Ingredients added to the list</string>
+    <string name="select_list_products_count">%1$d products</string>
+    <string name="select_list_subtitle">Select a list to add: %1$s</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Statist</string>
+    <string name="stats_subtitle">Summary of your activity in the app</string>
+    <string name="stats_totals">Totals</string>
+    <string name="stats_lists">Lists</string>
+    <string name="stats_products">Products</string>
+    <string name="stats_recipes">Recipes</string>
+    <string name="stats_favorites">Favorites</string>
+    <string name="stats_items_total">Items in lists</string>
+    <string name="stats_items_checked">Purchased</string>
+    <string name="stats_last7_title">Last 7 days</string>
+    <string name="stats_lists_created">Created lists</string>
+    <string name="stats_items_added">Items added</string>
+    <string name="stats_top_products">Top products</string>
+    <string name="stats_top_products_empty">You haven\'t added any products to any list yet</string>
+
+    <!-- Help -->
+    <string name="help_title">Ayuda</string>
+    <string name="help_subtitle">Guía rápida y preguntas frecuentes</string>
+    <string name="help_quick_start_title">Guía rápida</string>
+    <string name="help_quick_start_body">Crea listas, añade productos, marca comprados y consulta recetas. Desliza una lista para borrarla (con opción de deshacer).</string>
+    <string name="help_faq_title">Preguntas frecuentes</string>
+    <string name="help_faq_q1">¿Cómo creo una lista?</string>
+    <string name="help_faq_a1">Pulsa el botón + y elige un nombre y fondo.</string>
+    <string name="help_faq_q2">¿Cómo añado productos?</string>
+    <string name="help_faq_a2">Entra en una lista y usa el buscador o los productos sugeridos.</string>
+    <string name="help_faq_q3">¿Cómo marco cantidades y comprados?</string>
+    <string name="help_faq_a3">Usa el checkbox y los botones + / - en cada producto.</string>
+    <string name="help_faq_q4">¿Puedo recuperar una lista borrada?</string>
+    <string name="help_faq_a4">Sí: al borrarla aparece “Deshacer” durante unos segundos.</string>
+    <string name="help_contact_title">Contacto</string>
+    <string name="help_contact_body">¿Algo no funciona o tienes una idea? Envíame feedback.</string>
+    <string name="help_contact_button">Enviar feedback</string>
+
+    <!-- History -->
+    <string name="history_title">Browsing history</string>
+    <string name="history_empty">You haven\'t opened any lists yet</string>
+    <string name="history_clear">Clear history</string>
+    <string name="history_open_again">Tap to open</string>
+    <string name="history_remove">Remove</string>
 
     <!-- ******************************************************************************* -->
     <!-- Package component -->
@@ -193,5 +259,10 @@
     <string name="suggested_list_bbq">Saturday BBQ</string>
     <string name="suggested_list_breakfast">Breakfast</string>
     <string name="suggested_list_cleaning">Cleaning</string>
+
+    <!-- ListViewType -->
+    <string name="list_view_bubbles">Bubles</string>
+    <string name="list_view_list">List</string>
+    <string name="list_view_compact">Compact</string>
 
 </resources>

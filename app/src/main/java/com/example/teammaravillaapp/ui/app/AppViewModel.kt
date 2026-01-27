@@ -2,9 +2,9 @@ package com.example.teammaravillaapp.ui.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.repository.ListsRepository
-import com.example.teammaravillaapp.repository.ProductRepository
-import com.example.teammaravillaapp.repository.RecipesRepository
+import com.example.teammaravillaapp.data.repository.ListsRepository
+import com.example.teammaravillaapp.data.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.RecipesRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,6 +31,7 @@ class AppViewModel @Inject constructor(
     private fun seedOnAppStart() {
         viewModelScope.launch {
             // ✅ siempre
+            productRepository.seedIfEmpty()
             recipesRepository.seedIfEmpty()
             listsRepository.seedIfEmpty()
 

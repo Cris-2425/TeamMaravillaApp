@@ -1,7 +1,6 @@
 package com.example.teammaravillaapp.data.repository
 
 import com.example.teammaravillaapp.model.Product
-import com.example.teammaravillaapp.repository.ProductRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,7 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class CachedProductRepository @Inject constructor(
     private val remote: RemoteProductRepository,
-    private val local: LocalProductRepository
+    private val local: RoomProductRepository
 ) : ProductRepository {
 
     // Scope interno SOLO para refresh best-effort (no bloquea UI)
@@ -102,5 +101,10 @@ class CachedProductRepository @Inject constructor(
                 lastRefreshMs = System.currentTimeMillis()
             }
         }
+    }
+
+    override suspend fun seedIfEmpty() {
+        local.seedIfEmpty()
+        runCatching { refreshIfStale() }
     }
 }

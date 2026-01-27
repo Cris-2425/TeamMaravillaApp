@@ -6,7 +6,7 @@ import com.example.teammaravillaapp.data.seed.CatalogSeeder
 import com.example.teammaravillaapp.data.seed.buildSeedItemsFromProductData
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
-import com.example.teammaravillaapp.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

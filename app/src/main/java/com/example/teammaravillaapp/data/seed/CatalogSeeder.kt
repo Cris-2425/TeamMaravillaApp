@@ -2,7 +2,7 @@ package com.example.teammaravillaapp.data.seed
 
 import com.example.teammaravillaapp.data.repository.RemoteImageRepository
 import com.example.teammaravillaapp.model.Product
-import com.example.teammaravillaapp.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.ProductRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

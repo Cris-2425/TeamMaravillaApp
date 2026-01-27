@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.navigation.NavRoute
-import com.example.teammaravillaapp.repository.FavoritesRepository
-import com.example.teammaravillaapp.repository.ListsRepository
-import com.example.teammaravillaapp.repository.RecipesRepository
+import com.example.teammaravillaapp.data.repository.FavoritesRepository
+import com.example.teammaravillaapp.data.repository.ListsRepository
+import com.example.teammaravillaapp.data.repository.RecipesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +29,9 @@ class RecipesDetailViewModel @Inject constructor(
     val uiState: StateFlow<RecipesDetailUiState> =
         combine(
             recipesRepository.observeRecipe(recipeId),
+            recipesRepository.observeIngredientLines(recipeId),
             favoritesRepository.favoriteIds
-        ) { recipeWithIng, favIds ->
+        ) { recipeWithIng, ingredientLines, favIds ->
 
             if (recipeWithIng == null) {
                 RecipesDetailUiState(
@@ -42,12 +43,14 @@ class RecipesDetailViewModel @Inject constructor(
                     isLoading = false,
                     isNotFound = false,
                     recipe = recipeWithIng.recipe,
-                    ingredients = recipeWithIng.ingredients,
+                    ingredients = ingredientLines.map { it.product },
+                    // ingredients = ingredientLines,
                     isFavorite = recipeWithIng.recipe.id in favIds,
                     error = null
                 )
             }
-        }.stateIn(
+        }
+            .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = RecipesDetailUiState(isLoading = true)

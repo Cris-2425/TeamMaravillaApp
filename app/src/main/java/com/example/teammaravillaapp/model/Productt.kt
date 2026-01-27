@@ -1,10 +1,12 @@
 package com.example.teammaravillaapp.model
 
+import com.example.teammaravillaapp.data.seed.ProductData
+
 /**
  * Alias de productos para uso rápido en pantallas y datos de ejemplo.
  *
  * Importante:
- * Estos alias dependen del nombre exacto en [ProductData.allProducts].
+ * Estos alias dependen del nombre exacto en [com.example.teammaravillaapp.data.seed.ProductData.allProducts].
  * Si cambias el `name` en el catálogo, actualiza aquí el correspondiente.
  */
 
