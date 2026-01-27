@@ -41,7 +41,7 @@
     <string name="profile_option_settings">Settings</string>
     <string name="profile_option_stats">Statist</string>
     <string name="profile_option_help">Help</string>
-    <string name="profile_option_debug_products">Debug productos</string>
+    <string name="profile_option_debug_products">Debug products</string>
     <string name="profile_option_login">Login / Change user</string>
     <string name="profile_logout">Logout</string>
     <string name="profile_status_logged_in">Logged in</string>
@@ -178,22 +178,22 @@
     <string name="stats_top_products_empty">You haven\'t added any products to any list yet</string>
 
     <!-- Help -->
-    <string name="help_title">Ayuda</string>
-    <string name="help_subtitle">Guía rápida y preguntas frecuentes</string>
-    <string name="help_quick_start_title">Guía rápida</string>
-    <string name="help_quick_start_body">Crea listas, añade productos, marca comprados y consulta recetas. Desliza una lista para borrarla (con opción de deshacer).</string>
-    <string name="help_faq_title">Preguntas frecuentes</string>
-    <string name="help_faq_q1">¿Cómo creo una lista?</string>
-    <string name="help_faq_a1">Pulsa el botón + y elige un nombre y fondo.</string>
-    <string name="help_faq_q2">¿Cómo añado productos?</string>
-    <string name="help_faq_a2">Entra en una lista y usa el buscador o los productos sugeridos.</string>
-    <string name="help_faq_q3">¿Cómo marco cantidades y comprados?</string>
-    <string name="help_faq_a3">Usa el checkbox y los botones + / - en cada producto.</string>
-    <string name="help_faq_q4">¿Puedo recuperar una lista borrada?</string>
-    <string name="help_faq_a4">Sí: al borrarla aparece “Deshacer” durante unos segundos.</string>
-    <string name="help_contact_title">Contacto</string>
-    <string name="help_contact_body">¿Algo no funciona o tienes una idea? Envíame feedback.</string>
-    <string name="help_contact_button">Enviar feedback</string>
+    <string name="help_title">Help</string>
+    <string name="help_subtitle">Quick guide and frequently asked questions</string>
+    <string name="help_quick_start_title">Quick guide</string>
+    <string name="help_quick_start_body">Create lists, add products, brand purchases and consult recipes. Swipe a list to delete it (with undo option)</string>
+    <string name="help_faq_title">Frequently asked questions</string>
+    <string name="help_faq_q1">How do I create a list?</string>
+    <string name="help_faq_a1">Press the + button and choose a name and background.</string>
+    <string name="help_faq_q2">How do I add products?</string>
+    <string name="help_faq_a2">Enter a list and use the search engine or the suggested products.</string>
+    <string name="help_faq_q3">How do I mark quantities and purchases?</string>
+    <string name="help_faq_a3">Use the checkbox and + / - buttons on each product.</string>
+    <string name="help_faq_q4">Can I recover a deleted list?</string>
+    <string name="help_faq_a4">Yes: when you delete it, “Undo” appears for a few seconds.</string>
+    <string name="help_contact_title">Contact</string>
+    <string name="help_contact_body">Is something wrong or do you have an idea? Send me feedback.</string>
+    <string name="help_contact_button">Send feedback</string>
 
     <!-- History -->
     <string name="history_title">Browsing history</string>
@@ -261,7 +261,7 @@
     <string name="suggested_list_cleaning">Cleaning</string>
 
     <!-- ListViewType -->
-    <string name="list_view_bubbles">Bubles</string>
+    <string name="list_view_bubbles">Bubbles</string>
     <string name="list_view_list">List</string>
     <string name="list_view_compact">Compact</string>
 
