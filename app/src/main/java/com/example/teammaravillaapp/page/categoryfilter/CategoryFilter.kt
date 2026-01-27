@@ -1,31 +1,38 @@
-package com.example.teammaravillaapp.page
+package com.example.teammaravillaapp.page.categoryfilter
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.data.prefs.CategoryFilterPrefs
 import com.example.teammaravillaapp.model.ProductCategory
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryFilter(
-    selectedCategories: Set<ProductCategory> = emptySet(),
-    onSave: (Set<ProductCategory>) -> Unit,
+    onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
-    var selected by remember { mutableStateOf(selectedCategories) }
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // ✅ Cargamos lo guardado en DataStore para pintar chips correctamente
+    val savedSelected by CategoryFilterPrefs.observe(ctx).collectAsState(initial = emptySet())
+
+    // ✅ Estado editable de pantalla (se sincroniza cuando cambian prefs)
+    var selected by remember(savedSelected) { mutableStateOf(savedSelected) }
 
     val allCategories = ProductCategory.entries.toSet()
     val allSelected = selected.size == allCategories.size
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.category_filter_title)) }
-            )
+            TopAppBar(title = { Text(stringResource(R.string.category_filter_title)) })
         },
         bottomBar = {
             Row(
@@ -43,7 +50,12 @@ fun CategoryFilter(
 
                 Button(
                     modifier = Modifier.weight(1f),
-                    onClick = { onSave(selected) }
+                    onClick = {
+                        scope.launch {
+                            CategoryFilterPrefs.save(ctx, selected)
+                            onSave() // normalmente navigateUp()
+                        }
+                    }
                 ) {
                     Text(stringResource(R.string.category_filter_save))
                 }
@@ -57,7 +69,6 @@ fun CategoryFilter(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             Text(
                 text = if (allSelected)
                     stringResource(R.string.category_filter_subtitle_all)

@@ -147,6 +147,14 @@ interface ListsDao {
         deleteItemsForList(listId)
         if (rebuilt.isNotEmpty()) upsertItems(rebuilt)
     }
+    @Query("DELETE FROM user_lists WHERE id = :id")
+    suspend fun deleteById(id: String)
+
+    @Transaction
+    suspend fun deleteListCascade(id: String) {
+        deleteItemsForList(id)
+        deleteById(id)
+    }
 }
 
 /**

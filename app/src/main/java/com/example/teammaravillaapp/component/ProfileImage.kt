@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,37 +33,46 @@ import com.example.teammaravillaapp.util.TAG_GLOBAL
 @Composable
 fun ProfileImage(
     imageRes: Int? = null,
+    uriString: String? = null,
     modifier: Modifier = Modifier
 ) {
     val description = stringResource(R.string.profile_image_description)
 
-    if (imageRes != null) {
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = description,
-            modifier = modifier
-                .size(110.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .clickable {
-                    Log.e(TAG_GLOBAL, "Click en imagen de perfil (real)")
-                },
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        Box(
-            modifier = modifier
-                .size(110.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = description,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(8.dp)
-            )
+    Box(
+        modifier = modifier
+            .size(110.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            !uriString.isNullOrBlank() -> {
+                coil.compose.AsyncImage(
+                    model = uriString,
+                    contentDescription = description,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            imageRes != null -> {
+                Image(
+                    painter = painterResource(imageRes),
+                    contentDescription = description,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            else -> {
+                Text(
+                    text = description,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
     }
 }

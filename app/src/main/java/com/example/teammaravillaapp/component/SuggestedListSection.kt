@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.model.SuggestedList
-import com.example.teammaravillaapp.model.SuggestedListData
+import com.example.teammaravillaapp.data.seed.SuggestedListData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**

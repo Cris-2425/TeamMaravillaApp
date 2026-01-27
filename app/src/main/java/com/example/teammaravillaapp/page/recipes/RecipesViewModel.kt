@@ -3,8 +3,8 @@ package com.example.teammaravillaapp.page.recipes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.model.RecipeWithIngredients
-import com.example.teammaravillaapp.repository.FavoritesRepository
-import com.example.teammaravillaapp.repository.RecipesRepository
+import com.example.teammaravillaapp.data.repository.FavoritesRepository
+import com.example.teammaravillaapp.data.repository.RecipesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

@@ -9,14 +9,14 @@ import com.example.teammaravillaapp.model.RecipeWithIngredients
  * Mappers de Recetas (Room -> Domain)
  *
  * IMPORTANTE:
- * - NO redefinir ProductEntity.toDomain() aquí. Ese mapper vive en ProductEntityMapper.kt
+ * - NO convertir null -> 0 (eso provoca painterResource(0) y crasheos)
  */
 
 fun RecipeEntity.toDomain(productIds: List<String>): Recipe =
     Recipe(
         id = id,
         title = title,
-        imageRes = imageRes,
+        imageRes = imageRes,          // ✅ dejamos null si no hay imagen
         instructions = instructions,
         productIds = productIds
     )
@@ -26,10 +26,9 @@ fun RecipeWithProductsRoom.toDomain(): RecipeWithIngredients =
         recipe = Recipe(
             id = recipe.id,
             title = recipe.title,
-            imageRes = recipe.imageRes,
+            imageRes = recipe.imageRes, // ✅ dejamos null si no hay imagen
             instructions = recipe.instructions,
             productIds = products.map { it.id }
         ),
-        // aquí usamos el ProductEntity.toDomain() BUENO (del ProductEntityMapper)
-        ingredients = products.map { it.toDomain() }
+        ingredients = products.map { it.toDomain() } // tu mapper de ProductEntity bueno
     )

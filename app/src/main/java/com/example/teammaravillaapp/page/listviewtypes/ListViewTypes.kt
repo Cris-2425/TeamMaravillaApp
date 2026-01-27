@@ -1,107 +1,80 @@
 package com.example.teammaravillaapp.page.listviewtypes
 
+import ViewTypeOption
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.BackButton
-import com.example.teammaravillaapp.component.CircularOption
-import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.model.ListStyle
-import com.example.teammaravillaapp.page.prefs.UserPrefsViewModel
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-
+import com.example.teammaravillaapp.model.ListViewType
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListViewTypes(
-    onCancel: () -> Unit = {},
-    onSave: () -> Unit = {},
-    vm: UserPrefsViewModel = hiltViewModel()
+    current: ListViewType = ListViewType.BUBBLES,
+    onCancel: () -> Unit,
+    onSave: (ListViewType) -> Unit
 ) {
-    val prefsState by vm.uiState.collectAsState()
+    var selected by remember { mutableStateOf(current) }
 
-    var current by rememberSaveable { mutableStateOf(ListStyle.LISTA) }
-
-    LaunchedEffect(prefsState.listStyle) {
-        current = prefsState.listStyle
-    }
-
-    Box(Modifier.fillMaxSize()) {
-        GeneralBackground(overlayAlpha = 0.15f)
-
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text(stringResource(R.string.list_view_types_title)) })
+        },
+        bottomBar = {
             Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TextButton(onClick = onCancel) {
-                    Text(text = stringResource(R.string.list_view_types_cancel))
-                }
-                Title(texto = stringResource(R.string.list_view_types_title))
-                TextButton(onClick = {
-                    vm.setListStyle(current)
-                    onSave()
-                }) {
-                    Text(text = stringResource(R.string.list_view_types_save))
-                }
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = onCancel
+                ) { Text(stringResource(R.string.common_cancel)) }
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = { onSave(selected) }
+                ) { Text(stringResource(R.string.common_save)) }
             }
-
-            Spacer(Modifier.height(24.dp))
-
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text(
                 text = stringResource(R.string.list_view_types_subtitle),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(6.dp))
 
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircularOption(
-                    label = stringResource(R.string.list_view_types_option_list),
-                    selected = current == ListStyle.LISTA
-                ) { current = ListStyle.LISTA }
+            ViewTypeOption(
+                title = stringResource(R.string.list_view_types_bubbles),
+                desc = stringResource(R.string.list_view_types_bubbles_desc),
+                selected = selected == ListViewType.BUBBLES,
+                onClick = { selected = ListViewType.BUBBLES }
+            )
 
-                CircularOption(
-                    label = stringResource(R.string.list_view_types_option_mosaic),
-                    selected = current == ListStyle.MOSAIC
-                ) { current = ListStyle.MOSAIC }
+            ViewTypeOption(
+                title = stringResource(R.string.list_view_types_list),
+                desc = stringResource(R.string.list_view_types_list_desc),
+                selected = selected == ListViewType.LIST,
+                onClick = { selected = ListViewType.LIST }
+            )
 
-                CircularOption(
-                    label = stringResource(R.string.list_view_types_option_other),
-                    selected = current == ListStyle.ETC
-                ) { current = ListStyle.ETC }
-            }
+            ViewTypeOption(
+                title = stringResource(R.string.list_view_types_compact),
+                desc = stringResource(R.string.list_view_types_compact_desc),
+                selected = selected == ListViewType.COMPACT,
+                onClick = { selected = ListViewType.COMPACT }
+            )
         }
-
-        Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton(onClick = onCancel)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewListViewTypes() {
-    TeamMaravillaAppTheme {
-        ListViewTypes()
     }
 }

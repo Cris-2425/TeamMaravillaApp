@@ -2,7 +2,6 @@ package com.example.teammaravillaapp.data.repository
 
 import com.example.teammaravillaapp.data.local.dao.FavoritesDao
 import com.example.teammaravillaapp.data.local.entity.FavoriteRecipeEntity
-import com.example.teammaravillaapp.repository.FavoritesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

@@ -12,7 +12,7 @@ data class RecipeWithProductsRoom(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
-            value = RecipeIngredientCrossRef::class,
+            value = RecipeIngredientsCrossRef::class,
             parentColumn = "recipeId",
             entityColumn = "productId"
         )

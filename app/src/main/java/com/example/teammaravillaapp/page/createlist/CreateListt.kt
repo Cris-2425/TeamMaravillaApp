@@ -1,13 +1,23 @@
 package com.example.teammaravillaapp.page.createlist
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,8 +29,8 @@ import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.BackgroundGrid
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.SuggestedListSection
-import com.example.teammaravillaapp.model.ListBackgrounds
-import com.example.teammaravillaapp.model.SuggestedListData
+import com.example.teammaravillaapp.data.seed.ListBackgrounds
+import com.example.teammaravillaapp.data.seed.SuggestedListData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
@@ -53,9 +63,11 @@ fun CreateListContent(
     val uiState by createListViewModel.uiState.collectAsState()
     val backgroundRes = ListBackgrounds.getBackgroundRes(uiState.selectedBackground)
 
-    Box(Modifier.fillMaxSize()) {
-        GeneralBackground(bgRes = backgroundRes)
-
+    // ✅ GeneralBackground ahora requiere content {}
+    GeneralBackground(
+        bgRes = backgroundRes,
+        overlayAlpha = 0.20f
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,14 +75,13 @@ fun CreateListContent(
         ) {
             Spacer(Modifier.height(18.dp))
 
-            // ---- Contenido scrollable (si quieres, luego lo pasamos a LazyColumn) ----
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = {
                     createListViewModel.onNameChange(it)
                     Log.d(TAG_GLOBAL, "Crear Lista → Nombre: '$it'")
                 },
-                placeholder = { Text(stringResource(R.string.home_quick_new_list)) },
+                placeholder = { Text(stringResource(R.string.create_list_name_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -78,7 +89,7 @@ fun CreateListContent(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Fondo de la lista",
+                text = stringResource(R.string.create_list_background_title),
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -95,7 +106,7 @@ fun CreateListContent(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Listas sugeridas",
+                text = stringResource(R.string.create_list_suggested_title),
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -106,12 +117,8 @@ fun CreateListContent(
                 Log.d(TAG_GLOBAL, "Crear Lista → Lista sugerida: '${picked.name}' (ids=${picked.productIds.size})")
             }
 
-
-
-            // Empuja los botones al fondo
             Spacer(Modifier.weight(1f))
 
-            // ---- Botonera inferior ----
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -125,7 +132,7 @@ fun CreateListContent(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.common_cancel))
                 }
 
                 Button(
@@ -135,13 +142,12 @@ fun CreateListContent(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Guardar")
+                    Text(stringResource(R.string.common_save))
                 }
             }
         }
     }
 }
-
 
 @Preview
 @Composable

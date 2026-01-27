@@ -33,4 +33,12 @@ sealed class NavRoute(val route: String) {
         fun createRoute(listId: String? = null): String =
             if (listId.isNullOrBlank()) "camera" else "camera?listId=$listId"
     }
+
+    data object Splash : NavRoute("splash")
+    object Settings : NavRoute("settings")
+    object Stats {
+        const val route = "stats"
+    }
+    object Help : NavRoute("help")
+    object History : NavRoute("history")
 }

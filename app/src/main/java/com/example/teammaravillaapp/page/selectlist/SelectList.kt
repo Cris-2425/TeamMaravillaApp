@@ -1,27 +1,22 @@
 package com.example.teammaravillaapp.page.selectlist
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
 import com.example.teammaravillaapp.ui.app.AppViewModel
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 @Composable
 fun SelectList(
@@ -31,88 +26,121 @@ fun SelectList(
     onListSelected: (String) -> Unit
 ) {
     val vm: SelectListViewModel = hiltViewModel()
-
     val uiState by vm.uiState.collectAsState()
 
     Box(Modifier.fillMaxSize()) {
-        GeneralBackground()
+        GeneralBackground(overlayAlpha = 0.20f) {
 
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
-            }
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
 
-            uiState.isRecipeNotFound -> {
-                Text(
-                    text = stringResource(R.string.recipe_not_found),
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-
-            else -> {
-                val recipe = uiState.recipe!!
-
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Spacer(Modifier.height(18.dp))
-
-                    Title(texto = stringResource(R.string.recipe_add_ingredients_button))
-
-                    Spacer(Modifier.height(8.dp))
-
-                    Text(
-                        text = "Selecciona una lista para añadir: ${recipe.title}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    if (uiState.lists.isEmpty()) {
-                        Text(
-                            text = "No tienes listas todavía.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        Button(onClick = onCreateList, modifier = Modifier.fillMaxWidth()) {
-                            Text("Crear lista")
-                        }
-                    } else {
-                        LazyColumn(
-                            contentPadding = PaddingValues(bottom = 120.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxSize()
+                uiState.isRecipeNotFound -> {
+                    Surface(
+                        shape = MaterialTheme.shapes.extraLarge,
+                        tonalElevation = 2.dp,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(horizontal = 18.dp)
+                    ) {
+                        Column(
+                            Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            items(uiState.lists) { (id, list) ->
-                                Surface(
-                                    shape = MaterialTheme.shapes.large,
-                                    tonalElevation = 2.dp,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            vm.addRecipeIngredientsToList(id)
+                            Text(
+                                text = stringResource(R.string.recipe_not_found),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    }
+                }
 
-                                            // Evento UI global (SnackBar)
-                                            appViewModel.showSnackbar("Ingredientes añadidos a la lista")
+                else -> {
+                    val recipe = uiState.recipe!!
 
-                                            // navegación
-                                            onListSelected(id)
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        Spacer(Modifier.height(8.dp))
+
+                        Title(texto = stringResource(R.string.recipe_add_ingredients_button))
+
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.select_list_subtitle, recipe.title),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(Modifier.height(14.dp))
+
+                        Surface(
+                            shape = MaterialTheme.shapes.extraLarge,
+                            tonalElevation = 2.dp,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(Modifier.padding(14.dp)) {
+
+                                if (uiState.lists.isEmpty()) {
+                                    Text(
+                                        text = stringResource(R.string.select_list_empty),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+
+                                    Spacer(Modifier.height(12.dp))
+
+                                    Button(
+                                        onClick = onCreateList,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentPadding = PaddingValues(vertical = 14.dp)
+                                    ) {
+                                        Text(stringResource(R.string.select_list_create))
+                                    }
+
+                                } else {
+                                    LazyColumn(
+                                        contentPadding = PaddingValues(bottom = 120.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        items(uiState.lists) { (id, list) ->
+                                            Surface(
+                                                shape = MaterialTheme.shapes.large,
+                                                tonalElevation = 1.dp,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        vm.addRecipeIngredientsToList(id)
+
+                                                        // Evento UI global (SnackBar)
+                                                        appViewModel.showSnackbar("Ingredientes añadidos a la lista")
+
+
+                                                        onListSelected(id)
+                                                    }
+                                            ) {
+                                                Column(Modifier.padding(14.dp)) {
+                                                    Text(
+                                                        text = list.name,
+                                                        style = MaterialTheme.typography.titleMedium
+                                                    )
+                                                    Spacer(Modifier.height(4.dp))
+                                                    Text(
+                                                        text = stringResource(
+                                                            R.string.select_list_products_count,
+                                                            list.productIds.size
+                                                        ),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            }
                                         }
-                                ) {
-                                    Column(Modifier.padding(14.dp)) {
-                                        Text(
-                                            text = list.name,
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                        Spacer(Modifier.height(4.dp))
-                                        Text(
-                                            text = "${list.productIds.size} productos",
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
                                     }
                                 }
                             }
@@ -120,10 +148,10 @@ fun SelectList(
                     }
                 }
             }
-        }
 
-        Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton(onClick = onBack)
+            Box(Modifier.align(Alignment.BottomStart)) {
+                BackButton(onClick = onBack)
+            }
         }
     }
 }

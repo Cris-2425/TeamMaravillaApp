@@ -1,7 +1,7 @@
 package com.example.teammaravillaapp.page.home
 
 import com.example.teammaravillaapp.model.UserList
-import com.example.teammaravillaapp.repository.ListProgress
+import com.example.teammaravillaapp.data.repository.ListProgress
 
 data class HomeUiState(
     val search: String = "",

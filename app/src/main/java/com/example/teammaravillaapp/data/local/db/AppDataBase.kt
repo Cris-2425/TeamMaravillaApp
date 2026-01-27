@@ -7,6 +7,7 @@ import com.example.teammaravillaapp.data.local.dao.FavoritesDao
 import com.example.teammaravillaapp.data.local.dao.ListsDao
 import com.example.teammaravillaapp.data.local.dao.ProductDao
 import com.example.teammaravillaapp.data.local.dao.RecipesDao
+import com.example.teammaravillaapp.data.local.dao.StatsDao
 import com.example.teammaravillaapp.data.local.entity.*
 import com.example.teammaravillaapp.data.local.mapper.Converters
 
@@ -17,9 +18,9 @@ import com.example.teammaravillaapp.data.local.mapper.Converters
         ListItemEntity::class,
         FavoriteRecipeEntity::class,
         RecipeEntity::class,
-        RecipeIngredientCrossRef::class
+        RecipeIngredientsCrossRef::class
     ],
-    version = 6,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -28,4 +29,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun listsDao(): ListsDao
     abstract fun favoritesDao(): FavoritesDao
     abstract fun recipesDao(): RecipesDao
+    abstract fun statsDao(): StatsDao
+
 }

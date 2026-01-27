@@ -8,7 +8,7 @@ fun ProductEntity.toDomain(): Product =
     Product(
         id = id,
         name = name,
-        imageRes = null,
+        imageRes = imageRes,
         category = runCatching { ProductCategory.valueOf(category) }
             .getOrElse { ProductCategory.OTHER },
         imageUrl = imageUrl
@@ -19,5 +19,6 @@ fun Product.toEntity(): ProductEntity =
         id = id,
         name = name,
         category = (category ?: ProductCategory.OTHER).name,
-        imageUrl = imageUrl
+        imageUrl = imageUrl,
+        imageRes = imageRes
     )

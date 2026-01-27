@@ -48,12 +48,15 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.core.splashscreen)
 
+    // Datastore
     implementation(libs.androidx.datastore.preferences)
 
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.volley)
+    implementation(libs.androidx.benchmark.traceprocessor)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -67,6 +70,9 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Crop
+    implementation(libs.ucrop)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
