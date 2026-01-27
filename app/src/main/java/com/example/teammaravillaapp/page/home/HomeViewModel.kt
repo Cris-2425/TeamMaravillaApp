@@ -19,6 +19,9 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val search = MutableStateFlow("")
+
+    // Revisar en los demás viewModels que hay private mutablestateflow
+    // y val uistate stateFlow
     private val pendingDeletes = MutableStateFlow<Set<String>>(emptySet())
 
     val uiState: StateFlow<HomeUiState> =
