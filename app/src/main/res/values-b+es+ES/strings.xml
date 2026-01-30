@@ -1,0 +1,268 @@
+<resources>
+
+    <string name="app_name">TeamMaravillaApp</string>
+    <string name="app_title">Team Maravilla</string>
+    <string name="logo_content_description">Logo Team Maravilla</string>
+
+    <!-- ******************************************************************************* -->
+    <!-- Package page -->
+    <!-- ******************************************************************************* -->
+
+    <!-- Global -->
+    <string name="common_clear">Vaciar</string>
+    <string name="common_plus">Añadir</string>
+    <string name="common_minus">Eliminar</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_save">Guardar</string>
+    <string name="common_loading">Cargando…</string>
+    <string name="common_change">Cambiar</string>
+
+    <!-- BackButton -->
+    <string name="back_button_content_description">Volver</string>
+
+    <!-- RecipesDetail -->
+    <string name="recipe_image_content_description">Imagen Receta</string>
+    <string name="recipe_image_placeholder">Foto Receta</string>
+    <string name="recipe_ingredients_title">Ingredientes</string>
+    <string name="recipe_instructions_title">Preparación</string>
+    <string name="recipe_add_ingredients_button">Añadir ingredientes a una lista de la compra</string>
+    <string name="recipe_not_found">La receta seleccionada no existe</string>
+
+    <!-- Recipes -->
+    <string name="recipes_title_all">Recetas</string>
+    <string name="recipes_title_mine">Mis recetas</string>
+    <string name="recipes_filter_all">Todas</string>
+    <string name="recipes_filter_mine">Mis recetas</string>
+
+    <!-- Profile -->
+    <string name="profile_username_placeholder">Usuario</string>
+    <string name="profile_option_lists">Mis listas</string>
+    <string name="profile_option_recipes">Mis recetas</string>
+    <string name="profile_option_settings">Austes</string>
+    <string name="profile_option_stats">Estadísticas</string>
+    <string name="profile_option_help">Ayuda</string>
+    <string name="profile_option_debug_products">Debug productos</string>
+    <string name="profile_option_login">Iniciar sesión / Cambiar usuario</string>
+    <string name="profile_logout">Cerrar sesión</string>
+    <string name="profile_status_logged_in">Logged in</string>
+    <string name="profile_status_logged_out">Invitado</string>
+    <string name="profile_change_photo">Cambiar foto</string>
+    <string name="profile_remove_photo">Eliminar foto</string>
+
+    <!-- Login -->
+    <string name="login_title">Registrarse</string>
+    <string name="login_username_placeholder">Usuario</string>
+    <string name="login_password_placeholder">Contraseña</string>
+    <string name="login_button_text">Entrar</string>
+    <string name="login_error_empty_fields">Por favor, rellena usuario y contraseña</string>
+    <string name="login_subtitle">Inicia sesión para guardar tus listas y recetas</string>
+
+    <!-- ListViewTypes -->
+    <string name="list_view_types_title">Tipos de vista de lista</string>
+    <string name="list_view_types_cancel">Cancelar</string>
+    <string name="list_view_types_save">Guardar</string>
+    <string name="list_view_types_subtitle">Elige como quieres ver tus listas</string>
+    <string name="list_view_types_option_list">Lista</string>
+    <string name="list_view_types_option_mosaic">Mosaico</string>
+    <string name="list_view_types_option_other">Otra</string>
+    <string name="list_view_types_bubbles">Burbujas</string>
+    <string name="list_view_types_bubbles_desc">Vista de burbuja</string>
+    <string name="list_view_types_list">Lista</string>
+    <string name="list_view_types_list_desc">Lista vertical con más información</string>
+    <string name="list_view_types_compact">Compacta</string>
+    <string name="list_view_types_compact_desc">Lista apretada para ver más productos</string>
+    <string name="list_detail_menu_view_type">Tipo de vista</string>
+
+    <!-- ListDetail -->
+    <string name="list_detail_empty_title">No hay listas creadas</string>
+    <string name="list_detail_empty_subtitle">Crea una nueva lista para empezar a añadir productos</string>
+    <string name="list_detail_current_products_title">Productos en la lista</string>
+    <string name="list_detail_no_products">Todavía no hay productos</string>
+    <string name="list_detail_recent_used_title">Usados recientemente</string>
+    <string name="list_detail_search_placeholder">Buscar producto…</string>
+    <string name="list_detail_search_loading">Cargando catálogo…</string>
+    <string name="list_detail_search_no_results">Sin resultados</string>
+    <string name="list_detail_search_results_title">Resultados</string>
+    <string name="list_detail_catalog_loading">Cargando catálogo…</string>
+    <string name="list_detail_catalog_empty">No hay productos disponibles</string>
+    <string name="list_detail_menu_cd">Opciones</string>
+    <string name="list_detail_menu_remove_checked">Eliminar comprados</string>
+    <string name="list_detail_menu_uncheck_all">Desmarcar todos</string>
+    <string name="list_detail_menu_clear_list">Vaciar lista</string>
+    <string name="list_detail_clear_confirm_title">Vaciar lista</string>
+    <string name="list_detail_clear_confirm_body">Todos los productos serán eliminados de la lista. Continuar?</string>
+    <string name="list_detail_clear_confirm_yes">Vaciar</string>
+    <string name="list_detail_clear_confirm_no">Cancelar</string>
+    <string name="list_detail_add_receipt_cd">Añadir recibo</string>
+    <string name="list_detail_receipt_title">Recibo</string>
+    <string name="list_detail_receipt_cd">Foto del recibo</string>
+    <string name="list_detail_receipt_remove">Eliminar recibo</string>
+    <string name="list_detail_search_clear_cd">Vaciar</string>
+    <string name="list_detail_qty_minus_cd">Menos</string>
+    <string name="list_detail_qty_plus_cd">Más</string>
+    <string name="list_detail_menu_category_filter">Filtro de categorías</string>
+    <string name="list_detail_menu_clear_category_filter">Eliminar filtro de categorías</string>
+
+    <!-- Createlistt -->
+    <string name="create_list_default_name">Nueva lista</string>
+    <string name="create_list_name_placeholder">Nombre de lista</string>
+    <string name="create_list_background_title">Lista de fondos</string>
+    <string name="create_list_suggested_title">Listas sugeridas</string>
+
+    <!-- CategoryFilter -->
+    <string name="category_filter_title">Filtro de categorías</string>
+    <string name="category_filter_cancel">Cancelar</string>
+    <string name="category_filter_save">Guardar</string>
+    <string name="category_filter_subtitle">Elige que categorías quieres mostrar</string>
+    <string name="category_filter_subtitle_active">Mostrando solo los productos de las categorías seleccionadas</string>
+    <string name="category_filter_subtitle_all">Mostrando productos de todas las categorías</string>
+    <string name="category_filter_show_all">Mostrar todos</string>
+
+    <!-- Home -->
+    <string name="home_title">Inicio</string>
+    <string name="home_search_placeholder">Buscar lista…</string>
+    <string name="home_quick_actions_title">Acciones rápidas</string>
+    <string name="home_quick_new_list">Nueva lista</string>
+    <string name="home_quick_favorites">Favoritos</string>
+    <string name="home_quick_history">Historial de navegación</string>
+    <string name="home_recent_lists_title">Listas recientes</string>
+    <string name="home_recent_lists_empty">No hay listas recientes</string>
+    <string name="home_fab_add_content_description">Añadir lista</string>
+    <string name="home_recent_list_super_img_desc">Lista de supermercado</string>
+    <string name="home_recent_list_super_title">Compra semanal</string>
+    <string name="home_recent_list_super_subtitle">Supermercado</string>
+    <string name="home_recent_list_bbq_img_desc">Lista barbacoa</string>
+    <string name="home_recent_list_bbq_title">Barbacoa sábado</string>
+    <string name="home_recent_list_bbq_subtitle">Carnicería</string>
+    <string name="home_list_subtitle_empty">0 productos</string>
+    <string name="home_list_subtitle_progress">%1$d/%2$d comprados</string>
+
+    <!-- Camera -->
+    <string name="camera_title">Cámara</string>
+    <string name="camera_action_title">Acciones</string>
+    <string name="common_back">Volver</string>
+    <string name="camera_title_generic">Imágenes</string>
+    <string name="camera_subtitle_generic">Selecciona una imagen de la galería</string>
+    <string name="camera_title_receipt">Recibo de compra</string>
+    <string name="camera_subtitle_receipt">Por favor añade una foto del recibo a la lista</string>
+    <string name="camera_no_image">No hay imagen seleccionada</string>
+    <string name="camera_image_cd">Imagen seleccionada</string>
+    <string name="camera_pick_image">Elegir imagen</string>
+    <string name="camera_save_receipt">Guardar como recibo</string>
+    <string name="camera_clear_selection">Eliminar selección</string>
+    <string name="camera_error_no_list">No hay lista asociada. Abre la cámara desde una lista</string>
+    <string name="camera_error_no_image">Selecciona una imagen primero</string>
+    <string name="camera_saved_ok">Recibo guardado ✅</string>
+
+    <!-- SelectList -->
+    <string name="select_list_empty">Todavía no tienes listas</string>
+    <string name="select_list_create">Crear lista</string>
+    <string name="select_list_added_ok">Ingredientes añadidos a la lista</string>
+    <string name="select_list_products_count">%1$d productos</string>
+    <string name="select_list_subtitle">Selecciona una lista para añadir: %1$s</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Estadísticas</string>
+    <string name="stats_subtitle">Resumen de tu actividad en la aplicación</string>
+    <string name="stats_totals">Totales</string>
+    <string name="stats_lists">Listas</string>
+    <string name="stats_products">Productos</string>
+    <string name="stats_recipes">Recetas</string>
+    <string name="stats_favorites">Favoritos</string>
+    <string name="stats_items_total">Productos en la lista</string>
+    <string name="stats_items_checked">Comprados</string>
+    <string name="stats_last7_title">Últimos 7 días</string>
+    <string name="stats_lists_created">Listas creadas</string>
+    <string name="stats_items_added">Productos añadidos</string>
+    <string name="stats_top_products">Principales productos</string>
+    <string name="stats_top_products_empty">Todavía no has añadidos productos a ninguna lista</string>
+
+    <!-- Help -->
+    <string name="help_title">Ayuda</string>
+    <string name="help_subtitle">Guía rápida y preguntas frecuentes</string>
+    <string name="help_quick_start_title">Guía rápida</string>
+    <string name="help_quick_start_body">Crea listas, añade productos, marca comprados y consulta recetas. Desliza una lista para borrarla (con opción de deshacer).</string>
+    <string name="help_faq_title">Preguntas frecuentes</string>
+    <string name="help_faq_q1">¿Cómo creo una lista?</string>
+    <string name="help_faq_a1">Pulsa el botón + y elige un nombre y fondo.</string>
+    <string name="help_faq_q2">¿Cómo añado productos?</string>
+    <string name="help_faq_a2">Entra en una lista y usa el buscador o los productos sugeridos.</string>
+    <string name="help_faq_q3">¿Cómo marco cantidades y comprados?</string>
+    <string name="help_faq_a3">Usa el checkbox y los botones + / - en cada producto.</string>
+    <string name="help_faq_q4">¿Puedo recuperar una lista borrada?</string>
+    <string name="help_faq_a4">Sí: al borrarla aparece “Deshacer” durante unos segundos.</string>
+    <string name="help_contact_title">Contacto</string>
+    <string name="help_contact_body">¿Algo no funciona o tienes una idea? Envíame un comentario.</string>
+    <string name="help_contact_button">Enviar comentario</string>
+
+    <!-- History -->
+    <string name="history_title">Historial de navegación</string>
+    <string name="history_empty">Todavía no has abierto ninguna lista</string>
+    <string name="history_clear">Vaciar historial</string>
+    <string name="history_open_again">Pulsa para abrir</string>
+    <string name="history_remove">Eliminar</string>
+
+    <!-- ******************************************************************************* -->
+    <!-- Package component -->
+    <!-- ******************************************************************************* -->
+
+    <!-- CreateListTopBar -->
+    <string name="create_list_topbar_title">Crear lista</string>
+    <string name="create_list_cancel">Cancelar</string>
+    <string name="create_list_save">Guardar</string>
+
+    <!-- BottomBar -->
+    <string name="bottom_bar_home_cd">Inicio</string>
+    <string name="bottom_bar_profile_cd">Perfil</string>
+    <string name="bottom_bar_camera_cd">Cámara</string>
+    <string name="bottom_bar_recipes_cd">Recetas</string>
+    <string name="bottom_bar_exit_cd">Salir</string>
+
+    <!-- DrawerContent -->
+    <string name="drawer_notifications">Notificaciones</string>
+    <string name="drawer_share_list">Compartir lista</string>
+    <string name="drawer_options">Ajustes</string>
+    <string name="drawer_exit">Salir</string>
+
+    <!-- ProfileImage -->
+    <string name="profile_image_description">Foto de perfil</string>
+
+    <!-- Recipes: card / favorites -->
+    <string name="recipe_no_ingredients">Sin ingredientes</string>
+    <string name="recipe_favorite_add_cd">Añadir a mis recetas</string>
+    <string name="recipe_favorite_remove_cd">Eliminar de mis recetas</string>
+
+    <!-- TopBar -->
+    <string name="topbar_menu_cd">Menú</string>
+    <string name="topbar_search_cd">Buscar</string>
+    <string name="topbar_more_cd">Más opciones</string>
+
+    <!-- ******************************************************************************* -->
+    <!-- Package model -->
+    <!-- ******************************************************************************* -->
+
+    <!-- ProductCategory -->
+    <string name="category_fruits">Frutas</string>
+    <string name="category_vegetables">Vegetales</string>
+    <string name="category_dairy">Lácteos</string>
+    <string name="category_bakery">Panadería</string>
+    <string name="category_meat">Carne</string>
+    <string name="category_fish">Pescado</string>
+    <string name="category_drinks">Bebidas</string>
+    <string name="category_pasta">Pasta</string>
+    <string name="category_rice">Arroz</string>
+    <string name="category_cleaning">Productos de limpieza</string>
+    <string name="category_other">Otros</string>
+
+    <!-- SuggestedListData -->
+    <string name="suggested_list_weekly_shop">Compra semanal</string>
+    <string name="suggested_list_bbq">Barbacoa sábado</string>
+    <string name="suggested_list_breakfast">Desayuno</string>
+    <string name="suggested_list_cleaning">Limpieza</string>
+
+    <!-- ListViewType -->
+    <string name="list_view_bubbles">Burbujas</string>
+    <string name="list_view_list">Lista</string>
+    <string name="list_view_compact">Compacta</string>
+
+</resources>
