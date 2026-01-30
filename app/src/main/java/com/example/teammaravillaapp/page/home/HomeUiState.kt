@@ -1,11 +1,11 @@
 package com.example.teammaravillaapp.page.home
 
-import com.example.teammaravillaapp.model.UserList
 import com.example.teammaravillaapp.data.repository.ListProgress
+import com.example.teammaravillaapp.model.UserList
 
 data class HomeUiState(
     val search: String = "",
-    val recentLists: List<HomeListRow> = emptyList()
+    val rows: List<HomeListRow> = emptyList()
 )
 
 data class HomeListRow(

@@ -2,26 +2,38 @@ package com.example.teammaravillaapp.page.login
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.ui.events.UiEvent
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @Composable
 fun Login(
     onBack: () -> Unit,
-    loginViewModel: LoginViewModel
+    onUiEvent: (UiEvent) -> Unit,
+    vm: LoginViewModel = hiltViewModel()
 ) {
-    val uiState by loginViewModel.uiState.collectAsState()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+    val keyboard = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(vm) {
+        vm.events.collect { onUiEvent(it) }
+    }
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.20f) {
@@ -60,7 +72,7 @@ fun Login(
                     ) {
                         OutlinedTextField(
                             value = uiState.email,
-                            onValueChange = loginViewModel::onEmailChange,
+                            onValueChange = vm::onEmailChange,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             enabled = !uiState.isLoading,
@@ -69,26 +81,25 @@ fun Login(
 
                         OutlinedTextField(
                             value = uiState.password,
-                            onValueChange = loginViewModel::onPasswordChange,
+                            onValueChange = vm::onPasswordChange,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             enabled = !uiState.isLoading,
                             visualTransformation = PasswordVisualTransformation(),
-                            placeholder = { Text(stringResource(R.string.login_password_placeholder)) }
-                        )
-
-                        uiState.errorMessage?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
+                            placeholder = { Text(stringResource(R.string.login_password_placeholder)) },
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    keyboard?.hide()
+                                    vm.onLoginClick()
+                                }
                             )
-                        }
+                        )
 
                         Button(
                             onClick = {
                                 Log.d(TAG_GLOBAL, "Login → click")
-                                loginViewModel.onLoginClick()
+                                vm.onLoginClick()
                             },
                             enabled = uiState.isLoginButtonEnabled,
                             modifier = Modifier.fillMaxWidth(),
@@ -109,19 +120,9 @@ fun Login(
                 }
             }
 
-            Box(Modifier.align(Alignment.BottomStart)) {
-                BackButton(
-                    onClick = {
-                        if (!uiState.isLoading) onBack()
-                    }
-                )
-            }
+            //Box(Modifier.align(Alignment.BottomStart)) {
+            //    BackButton(onClick = { if (!uiState.isLoading) onBack() })
+            //}
         }
     }
-}
-
-@Preview
-@Composable
-fun PreviewLogin() {
-    TeamMaravillaAppTheme { }
 }

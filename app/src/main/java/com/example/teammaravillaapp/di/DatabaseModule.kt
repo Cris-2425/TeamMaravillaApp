@@ -38,4 +38,5 @@ object DatabaseModule {
     @Provides fun provideListsDao(db: AppDatabase): ListsDao = db.listsDao()
     @Provides fun provideFavoritesDao(db: AppDatabase): FavoritesDao = db.favoritesDao()
     @Provides fun provideStatsDao(db : AppDatabase): StatsDao = db.statsDao()
+
 }

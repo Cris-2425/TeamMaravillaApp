@@ -12,21 +12,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.ui.app.AppViewModel
+import com.example.teammaravillaapp.ui.events.UiEvent
 
 @Composable
 fun SelectList(
-    appViewModel: AppViewModel,
     onBack: () -> Unit,
     onCreateList: () -> Unit,
-    onListSelected: (String) -> Unit
+    onListSelected: (String) -> Unit,
+    onUiEvent: (UiEvent) -> Unit,
+    vm: SelectListViewModel = hiltViewModel()
 ) {
-    val vm: SelectListViewModel = hiltViewModel()
-    val uiState by vm.uiState.collectAsState()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(vm) {
+        vm.events.collect { onUiEvent(it) }
+    }
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.20f) {
@@ -114,13 +119,10 @@ fun SelectList(
                                                 tonalElevation = 1.dp,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clickable {
+                                                    .clickable(
+                                                        enabled = !uiState.isSaving
+                                                    ) {
                                                         vm.addRecipeIngredientsToList(id)
-
-                                                        // Evento UI global (SnackBar)
-                                                        appViewModel.showSnackbar("Ingredientes añadidos a la lista")
-
-
                                                         onListSelected(id)
                                                     }
                                             ) {
@@ -149,9 +151,9 @@ fun SelectList(
                 }
             }
 
-            Box(Modifier.align(Alignment.BottomStart)) {
-                BackButton(onClick = onBack)
-            }
+            //Box(Modifier.align(Alignment.BottomStart)) {
+            //    BackButton(onClick = onBack)
+            //}
         }
     }
 }

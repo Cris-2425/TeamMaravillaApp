@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,18 +23,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.SectionCard
 import com.example.teammaravillaapp.component.Title
+import com.example.teammaravillaapp.ui.events.UiEvent
 
 @Composable
 fun Stats(
     onBack: () -> Unit,
-    vm: StatsViewModel = hiltViewModel()
+    vm: StatsViewModel = hiltViewModel(),
+    onUiEvent: (UiEvent) -> Unit
 ) {
-    val uiState by vm.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        vm.events.collect { onUiEvent(it) }
+    }
+
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.20f) {
@@ -54,6 +61,45 @@ fun Stats(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+
+                // --- Banner de loading / error ---
+                item {
+                    when {
+                        uiState.isLoading -> {
+                            SectionCard {
+                                Text(
+                                    text = stringResource(R.string.common_loading),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        uiState.error != null -> {
+                            SectionCard {
+                                Text(
+                                    text = stringResource(R.string.stats_error_generic),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(Modifier.height(10.dp))
+                                Text(
+                                    text = uiState.error?.message.orEmpty(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    OutlinedButton(onClick = { vm.refresh() }) {
+                                        Text(stringResource(R.string.common_retry))
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // --- Totales (2 columnas) ---
@@ -119,7 +165,7 @@ fun Stats(
                     }
                 }
 
-                // --- Últimos 7 días (opcional bonito) ---
+                // --- Últimos 7 días ---
                 item {
                     SectionCard {
                         Text(
@@ -176,90 +222,9 @@ fun Stats(
                 }
             }
 
-            Box(Modifier.align(Alignment.BottomStart)) {
-                BackButton(onClick = onBack)
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatTile(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 1.dp,
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
-private fun TopProductRow(
-    rank: Int,
-    name: String,
-    times: Int
-) {
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 0.dp,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
-    ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Surface(
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Text(
-                    text = "#$rank",
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Text(
-                text = "×$times",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            //Box(Modifier.align(Alignment.BottomStart)) {
+            //    BackButton(onClick = onBack)
+            //}
         }
     }
 }

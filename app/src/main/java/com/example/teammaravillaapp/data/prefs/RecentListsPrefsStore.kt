@@ -2,35 +2,36 @@ package com.example.teammaravillaapp.data.prefs
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import com.example.teammaravillaapp.data.prefs.PrefsKeys.KEY_RECENT_LIST_IDS
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
+import javax.inject.Inject
+import javax.inject.Singleton
 
-private val KEY_RECENT_LIST_IDS = stringPreferencesKey("recent_list_ids")
-
-object RecentListsPrefs {
-
-    fun observeIds(ctx: Context): Flow<List<String>> =
+@Singleton
+class RecentListsPrefsStore @Inject constructor(
+    @ApplicationContext private val ctx: Context
+) {
+    fun observeIds(): Flow<List<String>> =
         ctx.userPrefsDataStore.data.map { prefs ->
             val raw = prefs[KEY_RECENT_LIST_IDS].orEmpty()
             parseJsonArray(raw)
         }
 
-    suspend fun push(ctx: Context, listId: String, max: Int = 20) {
+    suspend fun push(listId: String, max: Int = 20) {
         ctx.userPrefsDataStore.edit { prefs ->
             val current = parseJsonArray(prefs[KEY_RECENT_LIST_IDS].orEmpty())
-                .filter { it != listId } // evita duplicados
+                .filter { it != listId }
                 .toMutableList()
 
-            current.add(0, listId)      // al principio = más reciente
-            val trimmed = current.take(max)
-
-            prefs[KEY_RECENT_LIST_IDS] = toJsonArray(trimmed)
+            current.add(0, listId)
+            prefs[KEY_RECENT_LIST_IDS] = toJsonArray(current.take(max))
         }
     }
 
-    suspend fun remove(ctx: Context, listId: String) {
+    suspend fun remove(listId: String) {
         ctx.userPrefsDataStore.edit { prefs ->
             val current = parseJsonArray(prefs[KEY_RECENT_LIST_IDS].orEmpty())
                 .filter { it != listId }
@@ -38,7 +39,7 @@ object RecentListsPrefs {
         }
     }
 
-    suspend fun clear(ctx: Context) {
+    suspend fun clear() {
         ctx.userPrefsDataStore.edit { prefs ->
             prefs[KEY_RECENT_LIST_IDS] = "[]"
         }

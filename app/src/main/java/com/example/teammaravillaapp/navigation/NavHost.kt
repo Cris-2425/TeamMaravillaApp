@@ -8,29 +8,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.preferences.core.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.teammaravillaapp.data.prefs.RecentListsPrefs
+import com.example.teammaravillaapp.data.prefs.PrefsKeys.LIST_VIEW_TYPE
+import com.example.teammaravillaapp.data.prefs.userPrefsDataStore
+import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.model.ProfileOption
-import com.example.teammaravillaapp.page.categoryfilter.CategoryFilter
-import com.example.teammaravillaapp.page.listviewtypes.ListViewTypes
 import com.example.teammaravillaapp.page.camera.CameraScreen
+import com.example.teammaravillaapp.page.categoryfilter.CategoryFilter
 import com.example.teammaravillaapp.page.createlist.CreateListt
 import com.example.teammaravillaapp.page.help.Help
 import com.example.teammaravillaapp.page.history.History
 import com.example.teammaravillaapp.page.home.Home
 import com.example.teammaravillaapp.page.listdetail.ListDetail
+import com.example.teammaravillaapp.page.listviewtypes.ListViewTypes
 import com.example.teammaravillaapp.page.login.Login
-import com.example.teammaravillaapp.page.login.LoginViewModel
 import com.example.teammaravillaapp.page.profile.Profile
 import com.example.teammaravillaapp.page.profile.ProfileViewModel
 import com.example.teammaravillaapp.page.recipes.Recipes
 import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
 import com.example.teammaravillaapp.page.selectlist.SelectList
+import com.example.teammaravillaapp.page.session.SessionState
 import com.example.teammaravillaapp.page.session.SessionViewModel
 import com.example.teammaravillaapp.page.settings.SettingsScreen
 import com.example.teammaravillaapp.page.splash.SplashScreen
@@ -38,13 +41,9 @@ import com.example.teammaravillaapp.page.stats.Stats
 import com.example.teammaravillaapp.ui.app.AppViewModel
 import com.example.teammaravillaapp.ui.app.ThemeViewModel
 import com.example.teammaravillaapp.ui.debug.ProductsDebugScreen
-import com.example.teammaravillaapp.page.session.SessionState
-import androidx.datastore.preferences.core.edit
-import com.example.teammaravillaapp.data.prefs.PrefsKeys.LIST_VIEW_TYPE
-import kotlinx.coroutines.launch
-import com.example.teammaravillaapp.data.prefs.userPrefsDataStore
-import com.example.teammaravillaapp.model.ListViewType
+import com.example.teammaravillaapp.ui.events.UiEvent
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @Composable
 fun TeamMaravillaNavHost(
@@ -53,12 +52,34 @@ fun TeamMaravillaNavHost(
     appViewModel: AppViewModel,
     modifier: Modifier = Modifier,
     startDestination: String = NavRoute.Splash.route,
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    onUiEvent: (UiEvent) -> Unit
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsState()
     val isLoggedIn = sessionState is SessionState.LoggedIn
-    val username = (sessionState as? SessionState.LoggedIn)?.username
 
+
+    LaunchedEffect(sessionState) {
+        when (sessionState) {
+            SessionState.Loading -> Unit
+            SessionState.LoggedOut -> {
+                if (navController.currentDestination?.route != NavRoute.Login.route) {
+                    navController.navigate(NavRoute.Login.route) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+            }
+            is SessionState.LoggedIn -> {
+                if (navController.currentDestination?.route != NavRoute.Home.route) {
+                    navController.navigate(NavRoute.Home.route) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+            }
+        }
+    }
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -78,13 +99,9 @@ fun TeamMaravillaNavHost(
                 onNavigateCamera = { navController.navigate(NavRoute.Camera.createRoute()) },
                 onNavigateRecipes = { navController.navigate(NavRoute.Recipes.route) },
                 onNavigateHistory = { navController.navigate(NavRoute.History.route) },
-                onExitApp = { /* si quieres, cierra activity desde MainActivity */ },
+                onExitApp = { },
                 onOpenList = { listId ->
-                    navController.navigate(
-                        NavRoute.ListDetail.createRoute(
-                            listId
-                        )
-                    )
+                    navController.navigate(NavRoute.ListDetail.createRoute(listId))
                 }
             )
         }
@@ -97,7 +114,8 @@ fun TeamMaravillaNavHost(
                         popUpTo(NavRoute.CreateList.route) { inclusive = true }
                         launchSingleTop = true
                     }
-                }
+                },
+                onUiEvent = onUiEvent
             )
         }
 
@@ -106,18 +124,12 @@ fun TeamMaravillaNavHost(
             arguments = listOf(navArgument(NavRoute.ListDetail.ARG_LIST_ID) {
                 type = NavType.StringType
             })
-        ) { backStackEntry ->
-            val ctx = LocalContext.current
-            val listId = backStackEntry.arguments?.getString(NavRoute.ListDetail.ARG_LIST_ID)
-            LaunchedEffect(listId) {
-                if (!listId.isNullOrBlank()) {
-                    RecentListsPrefs.push(ctx, listId)
-                }
-            }
+        ) {
             ListDetail(
                 onBack = { navController.navigateUp() },
                 onOpenCategoryFilter = { navController.navigate(NavRoute.CategoryFilter.route) },
-                onOpenListViewTypes = { navController.navigate(NavRoute.ListViewTypes.route) }
+                onOpenListViewTypes = { navController.navigate(NavRoute.ListViewTypes.route) },
+                onUiEvent = onUiEvent
             )
         }
 
@@ -132,26 +144,22 @@ fun TeamMaravillaNavHost(
 
         composable(
             route = NavRoute.RecipesDetail.route,
-            arguments = listOf(
-                navArgument(NavRoute.RecipesDetail.ARG_RECIPE_ID) { type = NavType.IntType }
-            )
+            arguments = listOf(navArgument(NavRoute.RecipesDetail.ARG_RECIPE_ID) { type = NavType.IntType })
         ) {
             RecipesDetail(
                 onBack = { navController.navigateUp() },
                 onAddToShoppingList = { recipeId ->
                     navController.navigate(NavRoute.SelectList.createRoute(recipeId))
-                }
+                },
+                onUiEvent = onUiEvent
             )
         }
 
         composable(
             route = NavRoute.SelectList.route,
-            arguments = listOf(
-                navArgument(NavRoute.SelectList.ARG_RECIPE_ID) { type = NavType.IntType }
-            )
+            arguments = listOf(navArgument(NavRoute.SelectList.ARG_RECIPE_ID) { type = NavType.IntType })
         ) {
             SelectList(
-                appViewModel = appViewModel,
                 onBack = { navController.navigateUp() },
                 onCreateList = { navController.navigate(NavRoute.CreateList.route) },
                 onListSelected = { listId ->
@@ -159,7 +167,8 @@ fun TeamMaravillaNavHost(
                         popUpTo(NavRoute.SelectList.route) { inclusive = true }
                         launchSingleTop = true
                     }
-                }
+                },
+                onUiEvent = onUiEvent
             )
         }
 
@@ -182,22 +191,22 @@ fun TeamMaravillaNavHost(
                         }
                     }
                 },
-                username = username,
                 isLoggedIn = isLoggedIn,
-                onLogout = { profileViewModel.logout() }
+                onUiEvent = onUiEvent
             )
         }
 
         composable(NavRoute.Login.route) {
-            val loginViewModel: LoginViewModel = hiltViewModel()
-            Login(onBack = { navController.navigateUp() }, loginViewModel = loginViewModel)
+            Login(
+                onBack = { navController.navigateUp() },
+                onUiEvent = onUiEvent
+            )
         }
 
         composable(NavRoute.ListViewTypes.route) {
             val ctx = LocalContext.current
             val scope = rememberCoroutineScope()
 
-            // leer actual
             val currentName by ctx.userPrefsDataStore.data
                 .map { it[LIST_VIEW_TYPE] ?: ListViewType.BUBBLES.name }
                 .collectAsState(initial = ListViewType.BUBBLES.name)
@@ -220,11 +229,11 @@ fun TeamMaravillaNavHost(
             )
         }
 
-
         composable(NavRoute.CategoryFilter.route) {
             CategoryFilter(
                 onCancel = { navController.navigateUp() },
-                onSave = { navController.navigateUp() }
+                onSave = { navController.navigateUp() },
+                onUiEvent = onUiEvent
             )
         }
 
@@ -234,20 +243,19 @@ fun TeamMaravillaNavHost(
 
         composable(
             route = NavRoute.Camera.route,
-            arguments = listOf(
-                navArgument(NavRoute.Camera.ARG_LIST_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
+            arguments = listOf(navArgument(NavRoute.Camera.ARG_LIST_ID) {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
         ) { backStackEntry ->
             val listId = backStackEntry.arguments?.getString(NavRoute.Camera.ARG_LIST_ID)
             CameraScreen(
-                listId = listId,
-                onBack = { navController.navigateUp() }
+                listId = listId, onBack = { navController.navigateUp() },
+                onUiEvent = onUiEvent
             )
         }
+
         composable(NavRoute.Splash.route) {
             LaunchedEffect(sessionState) {
                 when (sessionState) {
@@ -265,22 +273,27 @@ fun TeamMaravillaNavHost(
 
         composable(NavRoute.Settings.route) {
             SettingsScreen(
-                onBack = { navController.navigateUp() },
-                themeViewModel = themeViewModel
+                onBack = { navController.navigateUp() }
             )
         }
+
         composable(NavRoute.Stats.route) {
-            Stats(onBack = { navController.navigateUp() })
+            Stats(onBack = { navController.navigateUp() },
+                    onUiEvent = onUiEvent
+            )
         }
+
         composable(NavRoute.Help.route) {
             Help(onBack = { navController.navigateUp() })
         }
+
         composable(NavRoute.History.route) {
             History(
                 onBack = { navController.navigateUp() },
                 onOpenList = { listId ->
                     navController.navigate(NavRoute.ListDetail.createRoute(listId))
-                }
+                },
+                onUiEvent = onUiEvent
             )
         }
     }

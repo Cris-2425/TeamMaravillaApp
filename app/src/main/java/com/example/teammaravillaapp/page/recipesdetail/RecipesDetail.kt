@@ -1,6 +1,5 @@
 package com.example.teammaravillaapp.page.recipesdetail
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +19,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
@@ -28,17 +26,22 @@ import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.model.Recipe
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
+import com.example.teammaravillaapp.ui.events.UiEvent
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipesDetail(
     onBack: () -> Unit,
-    onAddToShoppingList: (Int) -> Unit
+    onAddToShoppingList: (Int) -> Unit,
+    onUiEvent: (UiEvent) -> Unit,
+    vm: RecipesDetailViewModel = hiltViewModel()
 ) {
-    val vm: RecipesDetailViewModel = hiltViewModel()
     val uiState by vm.uiState.collectAsState()
+
+    LaunchedEffect(vm) {
+        vm.events.collectLatest { onUiEvent(it) }
+    }
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.20f) {
@@ -97,7 +100,7 @@ fun RecipesDetail(
                                     maxLines = 1
                                 )
 
-                                IconButton(onClick = { vm.toggleFavorite() }) {
+                                IconButton(onClick = vm::toggleFavorite) {
                                     Icon(
                                         imageVector = if (uiState.isFavorite)
                                             Icons.Filled.Favorite
@@ -130,9 +133,7 @@ fun RecipesDetail(
                                         .fillMaxWidth()
                                         .height(190.dp)
                                         .clip(MaterialTheme.shapes.extraLarge)
-                                        .clickable {
-                                            Log.d(TAG_GLOBAL, "Imagen pulsada: ${recipe.title}")
-                                        },
+                                        .clickable { /* opcional */ },
                                     contentScale = ContentScale.Crop
                                 )
                             } else {
@@ -189,7 +190,7 @@ fun RecipesDetail(
                         Spacer(Modifier.height(18.dp))
 
                         // PREPARACIÓN
-                        if (recipe.instructions.isNotBlank()) {
+                        if (!recipe.instructions.isNullOrBlank()) {
                             Text(
                                 text = stringResource(R.string.recipe_instructions_title),
                                 style = MaterialTheme.typography.titleMedium,
@@ -226,17 +227,9 @@ fun RecipesDetail(
                 }
             }
 
-            Box(Modifier.align(Alignment.BottomStart)) {
-                BackButton(onClick = onBack)
-            }
+            //Box(Modifier.align(Alignment.BottomStart)) {
+            //    BackButton(onClick = onBack)
+            //}
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewRecipesDetail() {
-    TeamMaravillaAppTheme {
-        RecipesDetail(onBack = {}, onAddToShoppingList = {})
     }
 }

@@ -2,14 +2,19 @@ package com.example.teammaravillaapp.page.createlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.model.ListBackground
-import com.example.teammaravillaapp.data.seed.ProductData
-import com.example.teammaravillaapp.model.UserList
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.data.repository.ListsRepository
 import com.example.teammaravillaapp.data.repository.ProductRepository
+import com.example.teammaravillaapp.data.seed.ProductData
+import com.example.teammaravillaapp.model.ListBackground
+import com.example.teammaravillaapp.model.UserList
+import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,8 +26,11 @@ class CreateListViewModel @Inject constructor(
     private val productRepository: ProductRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CreateListUiState())
+    private val _uiState = MutableStateFlow(CreateListUiState(isLoadingCatalog = true))
     val uiState: StateFlow<CreateListUiState> = _uiState.asStateFlow()
+
+    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
     init {
         refreshCatalog()
@@ -30,20 +38,28 @@ class CreateListViewModel @Inject constructor(
 
     fun refreshCatalog() {
         viewModelScope.launch {
-            _uiState.update { it.copy(catalogLoading = true, catalogError = null) }
+            _uiState.update { it.copy(isLoadingCatalog = true, catalogErrorResId = null) }
 
             runCatching { productRepository.getProducts() }
                 .onSuccess { products ->
-                    _uiState.update { it.copy(catalogLoading = false, catalogProducts = products) }
-                }
-                .onFailure { e ->
                     _uiState.update {
                         it.copy(
-                            catalogLoading = false,
-                            catalogError = e.message ?: "No se pudo cargar el catálogo",
+                            isLoadingCatalog = false,
+                            catalogErrorResId = null,
+                            catalogProducts = products
+                        )
+                    }
+                }
+                .onFailure {
+                    // fallback a seed local
+                    _uiState.update {
+                        it.copy(
+                            isLoadingCatalog = false,
+                            catalogErrorResId = R.string.snackbar_catalog_seeded,
                             catalogProducts = ProductData.allProducts
                         )
                     }
+                    _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_catalog_seeded))
                 }
         }
     }
@@ -71,17 +87,27 @@ class CreateListViewModel @Inject constructor(
 
     fun save(onListCreated: (String) -> Unit) {
         val state = _uiState.value
+        val name = state.trimmedName
+
+        if (name.isBlank()) {
+            // la UI decidirá el nombre final con stringResource (más i18n)
+            // aquí solo avisamos opcionalmente
+            _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_list_name_defaulted))
+        }
 
         val newList = UserList(
             id = "",
-            name = state.finalName,
+            name = name, // lo normal: guardar lo que haya; si está vacío, el repo podría normalizar o lo haces en UI
             background = state.selectedBackground,
             productIds = state.selectedProducts.map { it.id }
         )
 
         viewModelScope.launch {
-            val id = listsRepository.add(newList) // ✅ suspend
-            onListCreated(id)
+            runCatching { listsRepository.add(newList) }
+                .onSuccess { id -> onListCreated(id) }
+                .onFailure {
+                    _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed))
+                }
         }
     }
 }

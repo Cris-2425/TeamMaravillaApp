@@ -2,14 +2,15 @@ package com.example.teammaravillaapp.page.recipes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.model.RecipeWithIngredients
 import com.example.teammaravillaapp.data.repository.FavoritesRepository
 import com.example.teammaravillaapp.data.repository.RecipesRepository
+import com.example.teammaravillaapp.model.RecipeWithIngredients
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,6 +35,8 @@ class RecipesViewModel @Inject constructor(
                 else recipes
 
             RecipesUiState(
+                isLoading = false,
+                error = null,
                 showMine = showMineNow,
                 favoriteIds = favIds,
                 visibleRecipes = visible
@@ -41,21 +44,17 @@ class RecipesViewModel @Inject constructor(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = RecipesUiState()
+            initialValue = RecipesUiState(isLoading = true)
         )
 
     init {
         viewModelScope.launch {
-            recipesRepository.seedIfEmpty()
+            runCatching { recipesRepository.seedIfEmpty() }
         }
     }
 
-    fun showAll() {
-        showMine.value = false
-    }
-
-    fun showMine() {
-        showMine.value = true
+    fun setShowMine(value: Boolean) {
+        showMine.value = value
     }
 
     fun toggleFavorite(recipeId: Int) {

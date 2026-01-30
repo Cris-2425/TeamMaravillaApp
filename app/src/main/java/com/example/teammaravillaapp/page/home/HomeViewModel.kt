@@ -1,41 +1,52 @@
 package com.example.teammaravillaapp.page.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.data.prefs.RecentListsPrefs
 import com.example.teammaravillaapp.data.repository.ListProgress
 import com.example.teammaravillaapp.data.repository.ListsRepository
+import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val listsRepository: ListsRepository
+    private val listsRepository: ListsRepository,
+    private val recentListsPrefs: com.example.teammaravillaapp.data.prefs.RecentListsPrefs
 ) : ViewModel() {
 
-    private val search = MutableStateFlow("")
+    private val _search = MutableStateFlow("")
+    private val _pendingDeletes = MutableStateFlow<Set<String>>(emptySet())
 
-    // Revisar en los demás viewModels que hay private mutablestateflow
-    // y val uistate stateFlow
-    private val pendingDeletes = MutableStateFlow<Set<String>>(emptySet())
+    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
+    val events = _events.asSharedFlow()
 
     val uiState: StateFlow<HomeUiState> =
         combine(
-            search,
+            _search,
             listsRepository.lists,
             listsRepository.observeProgress(),
-            pendingDeletes
+            _pendingDeletes
         ) { q, lists, progressMap, pending ->
 
             val trimmed = q.trim()
 
             val filtered = lists
-                .filter { (id, _) -> id !in pending }   // 👈 CLAVE
+                .filter { (id, _) -> id !in pending }
                 .let {
                     if (trimmed.isBlank()) it
                     else it.filter { (_, list) ->
@@ -47,15 +58,11 @@ class HomeViewModel @Inject constructor(
                 HomeListRow(
                     id = id,
                     list = list,
-                    progress = progressMap[id]
-                        ?: ListProgress(0, 0)
+                    progress = progressMap[id] ?: ListProgress(0, 0)
                 )
             }
 
-            HomeUiState(
-                search = q,
-                recentLists = rows
-            )
+            HomeUiState(search = q, rows = rows)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -67,34 +74,35 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onSearchChange(newValue: String) {
-        search.value = newValue
+        _search.value = newValue
     }
 
-    fun deleteList(id: String) = viewModelScope.launch {
-        listsRepository.deleteById(id)
+    fun onOpenList(id: String) {
+        viewModelScope.launch { recentListsPrefs.push(id) }
     }
 
-    // ✅ Paso 1: marcar como “pendiente” (desaparece de UI)
     fun requestDelete(id: String) {
-        pendingDeletes.value = pendingDeletes.value + id
+        _pendingDeletes.value = _pendingDeletes.value + id
     }
 
-    // ✅ Si deshace: vuelve a aparecer
     fun undoDelete(id: String) {
-        pendingDeletes.value = pendingDeletes.value - id
+        _pendingDeletes.value = _pendingDeletes.value - id
     }
 
-    // ✅ Paso 2: cuando el snackbar se cierra sin deshacer -> borra de verdad
     fun commitDelete(id: String) {
         viewModelScope.launch {
-            listsRepository.deleteById(id)
-            pendingDeletes.value = pendingDeletes.value - id // limpieza por si acaso
+            runCatching { listsRepository.deleteById(id) }
+                .onFailure { _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed)) }
+
+            _pendingDeletes.value = _pendingDeletes.value - id
+            runCatching { recentListsPrefs.remove(id) } // limpia historial también
         }
     }
 
     fun renameList(id: String, newName: String) {
         viewModelScope.launch {
-            listsRepository.rename(id, newName)
+            runCatching { listsRepository.rename(id, newName) }
+                .onFailure { _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed)) }
         }
     }
 }

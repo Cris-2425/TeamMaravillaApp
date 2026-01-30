@@ -1,5 +1,7 @@
 package com.example.teammaravillaapp.ui.app
 
+import android.os.Build
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.data.repository.ListsRepository
@@ -9,6 +11,7 @@ import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,9 +23,15 @@ class AppViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val isEmulator: Boolean =
-        android.os.Build.FINGERPRINT.contains("generic")
-                || android.os.Build.MODEL.contains("Emulator")
-                || android.os.Build.MODEL.contains("Android SDK built for x86")
+        Build.FINGERPRINT.contains("generic") ||
+                Build.MODEL.contains("Emulator") ||
+                Build.MODEL.contains("Android SDK built for x86")
+
+    private val _events = MutableSharedFlow<UiEvent>(
+        replay = 0,
+        extraBufferCapacity = 1
+    )
+    val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
     init {
         seedOnAppStart()
@@ -37,18 +46,25 @@ class AppViewModel @Inject constructor(
 
             // 🌐 solo si hay backend accesible
             if (isEmulator) {
-                productRepository.getProducts()
+                runCatching { productRepository.getProducts() }
+                // Si quieres, aquí puedes emitir snackbar si falla
             }
         }
     }
 
-    private val _events = MutableSharedFlow<UiEvent>(
-        replay = 0,
-        extraBufferCapacity = 1
-    )
-    val events: SharedFlow<UiEvent> = _events
+    fun showSnackbar(@StringRes messageResId: Int) {
+        emitSnackbar(messageResId, emptyArray())
+    }
 
-    fun showSnackbar(message: String) {
-        _events.tryEmit(UiEvent.ShowSnackbar(message))
+    fun showSnackbar(@StringRes messageResId: Int, vararg args: Any) {
+        // Evita casts raros y asegura Array<Any>
+        emitSnackbar(messageResId, args.toList().toTypedArray())
+    }
+
+    private fun emitSnackbar(
+        @StringRes messageResId: Int,
+        formatArgs: Array<Any>
+    ) {
+        _events.tryEmit(UiEvent.ShowSnackbar(messageResId, formatArgs))
     }
 }

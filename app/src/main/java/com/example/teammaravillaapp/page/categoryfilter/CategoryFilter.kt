@@ -1,34 +1,48 @@
 package com.example.teammaravillaapp.page.categoryfilter
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.prefs.CategoryFilterPrefs
 import com.example.teammaravillaapp.model.ProductCategory
-import kotlinx.coroutines.launch
+import com.example.teammaravillaapp.ui.events.UiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryFilter(
     onSave: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onUiEvent: (UiEvent) -> Unit,
+    vm: CategoryFilterViewModel = hiltViewModel()
 ) {
-    val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val uiState by vm.uiState.collectAsState()
 
-    // ✅ Cargamos lo guardado en DataStore para pintar chips correctamente
-    val savedSelected by CategoryFilterPrefs.observe(ctx).collectAsState(initial = emptySet())
-
-    // ✅ Estado editable de pantalla (se sincroniza cuando cambian prefs)
-    var selected by remember(savedSelected) { mutableStateOf(savedSelected) }
-
-    val allCategories = ProductCategory.entries.toSet()
-    val allSelected = selected.size == allCategories.size
+    LaunchedEffect(vm) {
+        vm.events.collect { onUiEvent(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -45,19 +59,15 @@ fun CategoryFilter(
                     modifier = Modifier.weight(1f),
                     onClick = onCancel
                 ) {
-                    Text(stringResource(R.string.category_filter_cancel))
+                    Text(stringResource(R.string.common_cancel))
                 }
 
                 Button(
                     modifier = Modifier.weight(1f),
-                    onClick = {
-                        scope.launch {
-                            CategoryFilterPrefs.save(ctx, selected)
-                            onSave() // normalmente navigateUp()
-                        }
-                    }
+                    enabled = !uiState.isLoading,
+                    onClick = { vm.save(onSaved = onSave) }
                 ) {
-                    Text(stringResource(R.string.category_filter_save))
+                    Text(stringResource(R.string.common_save))
                 }
             }
         }
@@ -69,20 +79,23 @@ fun CategoryFilter(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            val subtitle = if (uiState.allSelected)
+                stringResource(R.string.category_filter_subtitle_all)
+            else
+                stringResource(R.string.category_filter_subtitle_active)
+
             Text(
-                text = if (allSelected)
-                    stringResource(R.string.category_filter_subtitle_all)
-                else
-                    stringResource(R.string.category_filter_subtitle_active),
+                text = subtitle,
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(Modifier.height(8.dp))
 
             TextButton(
-                onClick = {
-                    selected = if (allSelected) emptySet() else allCategories
-                }
+                enabled = !uiState.isLoading,
+                onClick = { vm.toggleAll() },
+                contentPadding = PaddingValues(0.dp)
             ) {
                 Text(stringResource(R.string.category_filter_show_all))
             }
@@ -91,12 +104,8 @@ fun CategoryFilter(
 
             ProductCategory.entries.forEach { category ->
                 FilterChip(
-                    selected = selected.contains(category),
-                    onClick = {
-                        selected =
-                            if (selected.contains(category)) selected - category
-                            else selected + category
-                    },
+                    selected = category in uiState.selected,
+                    onClick = { vm.toggle(category) },
                     label = { Text(stringResource(id = category.labelRes)) }
                 )
             }

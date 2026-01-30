@@ -9,13 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.teammaravillaapp.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
     onFinish: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(900)
+        delay(900)
         onFinish()
     }
 
