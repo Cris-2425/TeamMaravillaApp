@@ -32,6 +32,15 @@ interface ListsDao {
     @Query("DELETE FROM user_lists")
     suspend fun clear()
 
+    @Query("DELETE FROM user_lists WHERE id = :id")
+    suspend fun deleteById(id: String)
+
+    @Transaction
+    suspend fun deleteListCascade(id: String) {
+        deleteItemsForList(id)
+        deleteById(id)
+    }
+
     // ---- ITEMS ----
 
     @Query("SELECT * FROM list_items WHERE listId = :listId ORDER BY position ASC")
@@ -39,6 +48,10 @@ interface ListsDao {
 
     @Query("SELECT * FROM list_items WHERE listId = :listId ORDER BY position ASC")
     suspend fun getItems(listId: String): List<ListItemEntity>
+
+    // ✅ NUEVO: obtener un item concreto (para qty/checked, etc.)
+    @Query("SELECT * FROM list_items WHERE listId = :listId AND productId = :productId LIMIT 1")
+    suspend fun getItem(listId: String, productId: String): ListItemEntity?
 
     @Query("SELECT position FROM list_items WHERE listId = :listId AND productId = :productId")
     suspend fun getItemPosition(listId: String, productId: String): Int?
@@ -102,23 +115,19 @@ interface ListsDao {
     suspend fun deleteChecked(listId: String)
 
     /**
-     * ✅ NUEVO: progreso por lista (checked/total) para pintar en Home.
-     * Devuelve 1 fila por listId.
-     *
-     * Nota: SUM() puede devolver null si no hay filas, por eso el COALESCE.
+     * ✅ progreso por lista (checked/total) para pintar en Home.
      */
     @Query(
         """
-    SELECT
-        listId AS listId,
-        COALESCE(SUM(CASE WHEN checked = 1 THEN 1 ELSE 0 END), 0) AS checkedCount,
-        COUNT(*) AS totalCount
-    FROM list_items
-    GROUP BY listId
-    """
+        SELECT
+            listId AS listId,
+            COALESCE(SUM(CASE WHEN checked = 1 THEN 1 ELSE 0 END), 0) AS checkedCount,
+            COUNT(*) AS totalCount
+        FROM list_items
+        GROUP BY listId
+        """
     )
     fun observeProgress(): Flow<List<ListProgressRow>>
-
 
     /**
      * Reemplazo completo de items, PRESERVANDO checked/quantity.
@@ -147,15 +156,18 @@ interface ListsDao {
         deleteItemsForList(listId)
         if (rebuilt.isNotEmpty()) upsertItems(rebuilt)
     }
-    @Query("DELETE FROM user_lists WHERE id = :id")
-    suspend fun deleteById(id: String)
 
-    @Transaction
-    suspend fun deleteListCascade(id: String) {
-        deleteItemsForList(id)
-        deleteById(id)
-    }
+    @Query("UPDATE list_items SET quantity = quantity + 1 WHERE listId = :listId AND productId = :productId")
+    suspend fun incQuantity(listId: String, productId: String)
+
+    @Query("""
+    UPDATE list_items 
+    SET quantity = CASE WHEN quantity > 1 THEN quantity - 1 ELSE 1 END
+    WHERE listId = :listId AND productId = :productId
+""")
+    suspend fun decQuantityMin1(listId: String, productId: String)
 }
+
 
 /**
  * DTO de query agregada (no es Entity).

@@ -11,6 +11,7 @@ import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.repository.UserPrefsRepository
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -24,24 +25,29 @@ class DataStoreUserPrefsRepository @Inject constructor(
     }
 
     override val listStyle: Flow<ListStyle> =
-        dataStore.data.map { prefs ->
-            val raw = prefs[Keys.LIST_STYLE] ?: ListStyle.LISTA.name
-            runCatching { ListStyle.valueOf(raw) }.getOrElse { ListStyle.LISTA }
-        }
+        dataStore.data
+            .map { prefs ->
+                val raw = prefs[Keys.LIST_STYLE] ?: ListStyle.LISTA.name
+                runCatching { ListStyle.valueOf(raw) }.getOrElse { ListStyle.LISTA }
+            }
+            .distinctUntilChanged()
 
     override val hiddenCategories: Flow<Set<ProductCategory>> =
-        dataStore.data.map { prefs ->
-            val rawSet = prefs[Keys.HIDDEN_CATEGORIES].orEmpty()
-            rawSet.mapNotNull { name ->
-                runCatching { ProductCategory.valueOf(name) }.getOrNull()
-            }.toSet()
-        }
+        dataStore.data
+            .map { prefs ->
+                prefs[Keys.HIDDEN_CATEGORIES]
+                    .orEmpty()
+                    .mapNotNull { runCatching { ProductCategory.valueOf(it) }.getOrNull() }
+                    .toSet()
+            }
+            .distinctUntilChanged()
 
     override val categoryVisibility: Flow<Map<ProductCategory, Boolean>> =
-        hiddenCategories.map { hidden ->
-            // Map completo para UI: visible si NO está oculta
-            ProductCategory.entries.associateWith { it !in hidden }
-        }
+        hiddenCategories
+            .map { hidden ->
+                ProductCategory.entries.associateWith { it !in hidden }
+            }
+            .distinctUntilChanged()
 
     override suspend fun setListStyle(style: ListStyle) {
         dataStore.edit { prefs ->

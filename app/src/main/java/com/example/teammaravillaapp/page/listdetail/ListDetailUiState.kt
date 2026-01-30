@@ -1,9 +1,16 @@
 package com.example.teammaravillaapp.page.listdetail
 
-import com.example.teammaravillaapp.data.local.entity.ListItemEntity
+import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.model.UserList
+
+data class ListItemUi(
+    val product: Product,
+    val checked: Boolean,
+    val quantity: Int,
+    val position: Int
+)
 
 data class ListDetailUiState(
     val listId: String? = null,
@@ -11,25 +18,19 @@ data class ListDetailUiState(
 
     val isLoadingCatalog: Boolean = true,
     val catalogError: String? = null,
-    val catalog: List<Product> = emptyList(),
 
-    // Productos resueltos (para pintar)
-    val productsInList: List<Product> = emptyList(),
+    val viewType: ListViewType = ListViewType.BUBBLES,
+    val selectedCategories: Set<ProductCategory> = emptySet(),
 
-    // Meta por item (checked/cantidad)
-    val itemMeta: Map<String, ListItemEntity> = emptyMap(),
+    val query: String = "",
+    val searchResults: List<Product> = emptyList(),
 
-    val recentCatalog: List<Product> = emptyList(),
-    val catalogByCategory: Map<ProductCategory, List<Product>> = emptyMap()
+    val items: List<ListItemUi> = emptyList(),
+
+    val recentAvailable: List<Product> = emptyList(),
+    val availableByCategory: Map<ProductCategory, List<Product>> = emptyMap()
 ) {
-    val isEmptyState: Boolean get() = (userList == null)
-
-    val inListIds: Set<String>
-        get() = productsInList.map { it.id }.toSet()
-
-    fun isChecked(productId: String): Boolean =
-        itemMeta[productId]?.checked ?: false
-
-    fun quantity(productId: String): Int =
-        itemMeta[productId]?.quantity ?: 1
+    val isEmptyState: Boolean get() = userList == null
+    val anyChecked: Boolean get() = items.any { it.checked }
+    val canClear: Boolean get() = items.isNotEmpty()
 }

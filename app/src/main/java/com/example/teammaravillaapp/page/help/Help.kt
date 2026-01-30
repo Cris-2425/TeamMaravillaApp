@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.page.help
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,31 +12,52 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.example.teammaravillaapp.BuildConfig
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
-import androidx.core.net.toUri
+import com.example.teammaravillaapp.ui.events.UiEvent
 
 @Composable
 fun Help(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onUiEvent: (UiEvent) -> Unit = {}
 ) {
     val ctx = LocalContext.current
 
     fun sendFeedbackEmail() {
+        val subject = ctx.getString(
+            R.string.help_feedback_subject,
+            BuildConfig.VERSION_NAME
+        )
+
+        val body = ctx.getString(
+            R.string.help_feedback_body,
+            BuildConfig.VERSION_NAME,
+            BuildConfig.VERSION_CODE
+        )
+
         val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = "mailto:".toUri() // obligatorio para apps de email
+            data = "mailto:".toUri()
             putExtra(Intent.EXTRA_EMAIL, arrayOf("teammaravillaapp@gmail.com"))
-            putExtra(Intent.EXTRA_SUBJECT, "Feedback TeamMaravillaApp (${BuildConfig.VERSION_NAME})")
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "Hola!\n\nQuería comentar lo siguiente:\n\n\n---\nVersión: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})\n"
-            )
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
         }
-        ctx.startActivity(Intent.createChooser(intent, "Enviar feedback"))
+
+        try {
+            ctx.startActivity(
+                Intent.createChooser(
+                    intent,
+                    ctx.getString(R.string.help_send_feedback_chooser)
+                )
+            )
+        } catch (_: ActivityNotFoundException) {
+            onUiEvent(UiEvent.ShowSnackbar(R.string.snackbar_email_no_app))
+        }
     }
+
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.20f) {
@@ -61,20 +83,20 @@ fun Help(
 
                 SectionCardHelp(title = stringResource(R.string.help_faq_title)) {
                     FaqItem(
-                        q = stringResource(R.string.help_faq_q1),
-                        a = stringResource(R.string.help_faq_a1)
+                        question = stringResource(R.string.help_faq_q1),
+                        answer = stringResource(R.string.help_faq_a1)
                     )
                     FaqItem(
-                        q = stringResource(R.string.help_faq_q2),
-                        a = stringResource(R.string.help_faq_a2)
+                        question = stringResource(R.string.help_faq_q2),
+                        answer = stringResource(R.string.help_faq_a2)
                     )
                     FaqItem(
-                        q = stringResource(R.string.help_faq_q3),
-                        a = stringResource(R.string.help_faq_a3)
+                        question = stringResource(R.string.help_faq_q3),
+                        answer = stringResource(R.string.help_faq_a3)
                     )
                     FaqItem(
-                        q = stringResource(R.string.help_faq_q4),
-                        a = stringResource(R.string.help_faq_a4)
+                        question = stringResource(R.string.help_faq_q4),
+                        answer = stringResource(R.string.help_faq_a4)
                     )
                 }
 
@@ -107,67 +129,8 @@ fun Help(
             }
         }
 
-        Box(Modifier.align(Alignment.BottomStart)) {
-            BackButton(onClick = onBack)
-        }
-    }
-}
-
-@Composable
-private fun HelpCard(title: String, body: String) {
-    Surface(
-        shape = MaterialTheme.shapes.extraLarge,
-        tonalElevation = 2.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(Modifier.fillMaxWidth().padding(14.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(6.dp))
-            Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-private fun SectionCardHelp(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Surface(
-        shape = MaterialTheme.shapes.extraLarge,
-        tonalElevation = 2.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            content = {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                Divider()
-                content()
-            }
-        )
-    }
-}
-
-@Composable
-private fun FaqItem(q: String, a: String) {
-    var expanded = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            TextButton(onClick = { expanded.value = !expanded.value }, contentPadding = PaddingValues(0.dp)) {
-                Text(q, style = MaterialTheme.typography.titleSmall)
-            }
-            if (expanded.value) {
-                Spacer(Modifier.height(6.dp))
-                Text(a, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
+        //Box(Modifier.align(Alignment.BottomStart)) {
+        //    BackButton(onClick = onBack)
+        //}
     }
 }

@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.teammaravillaapp.data.prefs.DataStoreUserPrefsRepository
 import com.example.teammaravillaapp.data.prefs.userPrefsDataStore
+import com.example.teammaravillaapp.page.listdetail.DataStoreListDetailPrefs
+import com.example.teammaravillaapp.page.listdetail.ListDetailPrefs
 import com.example.teammaravillaapp.repository.UserPrefsRepository
 import dagger.Module
 import dagger.Provides
@@ -28,4 +30,10 @@ object PrefsModule {
     fun provideUserPrefsRepository(
         impl: DataStoreUserPrefsRepository
     ): UserPrefsRepository = impl
+
+    @Provides
+    @Singleton
+    fun provideListDetailPrefs(
+        impl: DataStoreListDetailPrefs
+    ): ListDetailPrefs = impl
 }

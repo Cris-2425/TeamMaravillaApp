@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.page.profile
 
+import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,8 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
@@ -22,7 +24,7 @@ import com.example.teammaravillaapp.data.prefs.clearProfilePhoto
 import com.example.teammaravillaapp.data.prefs.profilePhotoFlow
 import com.example.teammaravillaapp.data.prefs.saveProfilePhoto
 import com.example.teammaravillaapp.model.ProfileOption
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
+import com.example.teammaravillaapp.ui.events.UiEvent
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import java.io.File
@@ -30,37 +32,37 @@ import java.io.File
 @Composable
 fun Profile(
     onBack: () -> Unit,
-    onNavigate: (ProfileOption) -> Unit = {},
+    onNavigate: (ProfileOption) -> Unit,
+    onUiEvent: (UiEvent) -> Unit,
     username: String? = null,
     isLoggedIn: Boolean = false,
-    onLogout: () -> Unit = {}
+    vm: ProfileViewModel = hiltViewModel()
 ) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Foto persistida (DataStore)
-    val profileUri by profilePhotoFlow(ctx).collectAsState(initial = null)
+    LaunchedEffect(vm) {
+        vm.events.collect { onUiEvent(it) }
+    }
 
-    // Menu al pulsar la foto
+    val profileUri by profilePhotoFlow(ctx).collectAsStateWithLifecycle(initialValue = null)
+
     var showMenu by remember { mutableStateOf(false) }
 
-    // Launcher crop (StartActivityForResult)
     val cropLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val data: Intent? = result.data
-        if (result.resultCode == android.app.Activity.RESULT_OK && data != null) {
+        if (result.resultCode == Activity.RESULT_OK && data != null) {
             val resultUri = UCrop.getOutput(data)
-            resultUri?.let {
-                scope.launch { saveProfilePhoto(ctx, it.toString()) }
+            resultUri?.let { uri ->
+                scope.launch { saveProfilePhoto(ctx, uri.toString()) }
             }
-        } else if (result.resultCode == UCrop.RESULT_ERROR && data != null) {
-            // Se puede mostrar snackbar con el error
-            // val error = UCrop.getError(data)
+        } else if (result.resultCode == UCrop.RESULT_ERROR) {
+            vm.onCropError()
         }
     }
 
-    // Launcher galería
     val pickImageLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -69,7 +71,6 @@ fun Profile(
                 File(ctx.cacheDir, "profile_${System.currentTimeMillis()}.jpg")
             )
 
-            // Lanza uCrop (Activity externa)
             val intent = UCrop.of(uri, destUri)
                 .withAspectRatio(1f, 1f)
                 .withMaxResultSize(700, 700)
@@ -78,8 +79,6 @@ fun Profile(
             cropLauncher.launch(intent)
         }
     }
-
-
 
     Box(Modifier.fillMaxSize()) {
         GeneralBackground(overlayAlpha = 0.20f) {
@@ -92,7 +91,6 @@ fun Profile(
             ) {
                 Spacer(Modifier.height(10.dp))
 
-                // FOTO + MENU
                 Box {
                     ProfileImage(
                         imageRes = null,
@@ -124,7 +122,6 @@ fun Profile(
 
                 Spacer(Modifier.height(14.dp))
 
-                // Tarjeta usuario
                 Surface(
                     shape = MaterialTheme.shapes.large,
                     tonalElevation = 2.dp,
@@ -164,15 +161,13 @@ fun Profile(
                     Column(Modifier.padding(14.dp)) {
                         OptionsGrid(
                             options = options.map { stringResource(it.labelRes) },
-                            onOptionClick = { index ->
-                                onNavigate(options[index])
-                            }
+                            onOptionClick = { index -> onNavigate(options[index]) }
                         )
 
                         if (isLoggedIn) {
                             Spacer(Modifier.height(10.dp))
                             OutlinedButton(
-                                onClick = onLogout,
+                                onClick = { vm.logout() },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     contentColor = MaterialTheme.colorScheme.error
@@ -190,17 +185,9 @@ fun Profile(
                 }
             }
 
-            Box(Modifier.align(Alignment.BottomStart)) {
-                BackButton(onClick = onBack)
-            }
+            //Box(Modifier.align(Alignment.BottomStart)) {
+            //    BackButton(onClick = onBack)
+            //}
         }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewProfile() {
-    TeamMaravillaAppTheme {
-        Profile(onBack = {}, username = "juan", isLoggedIn = true, onLogout = {})
     }
 }

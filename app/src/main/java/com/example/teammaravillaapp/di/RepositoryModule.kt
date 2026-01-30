@@ -10,6 +10,7 @@ import com.example.teammaravillaapp.data.repository.FavoritesRepository
 import com.example.teammaravillaapp.data.repository.ListsRepository
 import com.example.teammaravillaapp.data.repository.ProductRepository
 import com.example.teammaravillaapp.data.repository.RecipesRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,35 +19,35 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideProductRepository(
+    abstract fun provideProductRepository(
         impl: CachedProductRepository
-    ): ProductRepository = impl
+    ): ProductRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideListsRepository(
+    abstract  fun provideListsRepository(
         impl: RoomListsRepository
-    ): ListsRepository = impl
+    ): ListsRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideAuthRepository(
+    abstract fun provideAuthRepository(
         impl: FakeAuthRepository
-    ): AuthRepository = impl
+    ): AuthRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideFavoritesRepository(
+    abstract fun provideFavoritesRepository(
         impl: RoomFavoritesRepository
-    ): FavoritesRepository = impl
+    ): FavoritesRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideRecipesRepository(
+    abstract fun provideRecipesRepository(
         impl: RoomRecipesRepository
-    ): RecipesRepository = impl
+    ): RecipesRepository
 }

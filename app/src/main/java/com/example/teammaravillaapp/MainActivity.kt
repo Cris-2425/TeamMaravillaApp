@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,11 +26,11 @@ import com.example.teammaravillaapp.ui.app.ThemeViewModel
 import com.example.teammaravillaapp.ui.events.UiEvent
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // ViewModel de tema a nivel Activity (persistente entre pantallas)
     private val themeViewModel: ThemeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,22 +46,27 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.LIGHT -> false
             }
 
-            TeamMaravillaAppTheme(
-                darkTheme = darkTheme
-                // si tu Theme soporta dynamicColor:
-                // , dynamicColor = true
-            ) {
+            TeamMaravillaAppTheme(darkTheme = darkTheme) {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
 
                 val sessionViewModel: SessionViewModel = hiltViewModel()
                 val appViewModel: AppViewModel = hiltViewModel()
 
-                LaunchedEffect(Unit) {
-                    appViewModel.events.collect { event ->
-                        when (event) {
-                            is UiEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
+                suspend fun handleUiEvent(event: UiEvent) {
+                    when (event) {
+                        is UiEvent.ShowSnackbar -> {
+                            val message = getString(event.messageResId, *event.formatArgs)
+                            snackbarHostState.showSnackbar(message)
                         }
+                    }
+                }
+
+                // ✅ Eventos globales de AppViewModel
+                LaunchedEffect(appViewModel) {
+                    appViewModel.events.collect { event ->
+                        handleUiEvent(event)
                     }
                 }
 
@@ -72,8 +78,12 @@ class MainActivity : ComponentActivity() {
                         sessionViewModel = sessionViewModel,
                         appViewModel = appViewModel,
                         modifier = Modifier.padding(innerPadding),
+                        themeViewModel = themeViewModel,
 
-                        themeViewModel = themeViewModel
+                        // ✅ Bridge para que pantallas (ListDetail, etc.) disparen snackbars
+                        onUiEvent = { event ->
+                            scope.launch { handleUiEvent(event) }
+                        }
                     )
                 }
             }

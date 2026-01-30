@@ -1,6 +1,9 @@
 package com.example.teammaravillaapp.page.stats
 
 data class StatsUiState(
+    val isLoading: Boolean = false,
+    val error: Throwable? = null,
+
     val lists: Int = 0,
     val products: Int = 0,
     val recipes: Int = 0,

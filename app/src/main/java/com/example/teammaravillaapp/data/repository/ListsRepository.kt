@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface ListsRepository {
 
+    // Nota: lo ideal pro sería Flow<List<UserList>>. Aquí lo dejamos como lo tienes
+    // para no romper de golpe el resto de pantallas.
     val lists: Flow<List<Pair<String, UserList>>>
 
     suspend fun seedIfEmpty()
@@ -24,6 +26,8 @@ interface ListsRepository {
 
     fun observeItems(listId: String): Flow<List<ListItemEntity>>
 
+    suspend fun getItem(listId: String, productId: String): ListItemEntity?
+
     suspend fun addItem(listId: String, productId: String)
 
     suspend fun removeItem(listId: String, productId: String)
@@ -41,10 +45,14 @@ interface ListsRepository {
     // ---- HOME PROGRESS ----
 
     fun observeProgress(): Flow<Map<String, ListProgress>>
-    suspend fun deleteById(id: String) {
-    }
+
+    suspend fun deleteById(id: String)
 
     suspend fun rename(id: String, newName: String)
+
+    suspend fun incQuantity(listId: String, productId: String)
+
+    suspend fun decQuantityMin1(listId: String, productId: String)
 }
 
 /**

@@ -62,6 +62,9 @@ class RoomListsRepository @Inject constructor(
     override fun observeItems(listId: String): Flow<List<ListItemEntity>> =
         dao.observeItems(listId)
 
+    override suspend fun getItem(listId: String, productId: String): ListItemEntity? =
+        dao.getItem(listId, productId)
+
     override suspend fun addItem(listId: String, productId: String) {
         val existing = dao.getItems(listId)
         if (existing.any { it.productId == productId }) return
@@ -105,7 +108,7 @@ class RoomListsRepository @Inject constructor(
         // borra comprados
         dao.deleteChecked(listId)
 
-        // recompacta posiciones (porque hemos borrado filas intermedias)
+        // recompacta posiciones
         val remaining = dao.getItems(listId)
             .sortedBy { it.position }
             .mapIndexed { idx, it -> it.copy(position = idx) }
@@ -136,5 +139,13 @@ class RoomListsRepository @Inject constructor(
         val current = dao.getById(id) ?: return
         val updated = current.list.copy(name = newName)
         dao.upsert(updated)
+    }
+
+    override suspend fun incQuantity(listId: String, productId: String) {
+        dao.incQuantity(listId, productId)
+    }
+
+    override suspend fun decQuantityMin1(listId: String, productId: String) {
+        dao.decQuantityMin1(listId, productId)
     }
 }
