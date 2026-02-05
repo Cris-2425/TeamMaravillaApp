@@ -3,8 +3,8 @@ package com.example.teammaravillaapp.page.createlist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.repository.ListsRepository
-import com.example.teammaravillaapp.data.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.lists.ListsRepository
+import com.example.teammaravillaapp.data.repository.products.ProductRepository
 import com.example.teammaravillaapp.data.seed.ProductData
 import com.example.teammaravillaapp.model.ListBackground
 import com.example.teammaravillaapp.model.UserList
@@ -40,27 +40,30 @@ class CreateListViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingCatalog = true, catalogErrorResId = null) }
 
-            runCatching { productRepository.getProducts() }
-                .onSuccess { products ->
-                    _uiState.update {
-                        it.copy(
-                            isLoadingCatalog = false,
-                            catalogErrorResId = null,
-                            catalogProducts = products
-                        )
-                    }
+            val local = runCatching { productRepository.getLocalProducts() }.getOrDefault(emptyList())
+
+            _uiState.update {
+                it.copy(
+                    isLoadingCatalog = false,
+                    catalogProducts = local,
+                    catalogErrorResId = null
+                )
+            }
+
+            // Best-effort refresh (no bloquea UI)
+            val refresh = runCatching { productRepository.refreshProducts() }.isSuccess
+
+            if (!refresh && local.isEmpty()) {
+                // si no hay nada local, hacemos seed de emergencia
+                _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_catalog_seeded))
+                _uiState.update {
+                    it.copy(
+                        catalogErrorResId = R.string.snackbar_catalog_seeded,
+                        catalogProducts = ProductData.allProducts
+                    )
                 }
-                .onFailure {
-                    // fallback a seed local
-                    _uiState.update {
-                        it.copy(
-                            isLoadingCatalog = false,
-                            catalogErrorResId = R.string.snackbar_catalog_seeded,
-                            catalogProducts = ProductData.allProducts
-                        )
-                    }
-                    _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_catalog_seeded))
-                }
+                runCatching { productRepository.saveProducts(ProductData.allProducts) }
+            }
         }
     }
 

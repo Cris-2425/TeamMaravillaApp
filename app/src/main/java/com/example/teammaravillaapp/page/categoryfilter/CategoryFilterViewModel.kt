@@ -1,14 +1,12 @@
 package com.example.teammaravillaapp.page.categoryfilter
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.prefs.CategoryFilterPrefs
+import com.example.teammaravillaapp.data.local.prefs.CategoryFilterPrefs
 import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoryFilterViewModel @Inject constructor(
-    @ApplicationContext private val ctx: Context
+    private val prefs: CategoryFilterPrefs
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CategoryFilterUiState())
@@ -31,20 +29,14 @@ class CategoryFilterViewModel @Inject constructor(
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
     init {
-        // Carga y sincroniza con DataStore
         viewModelScope.launch {
-            CategoryFilterPrefs.observe(ctx).collect { saved ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        selected = saved
-                    )
-                }
+            prefs.observeSelected().collect { saved ->
+                _uiState.update { it.copy(isLoading = false, selected = saved) }
             }
         }
     }
 
-    fun toggle(category: ProductCategory) {
+    fun onToggle(category: ProductCategory) {
         _uiState.update { st ->
             val next =
                 if (category in st.selected) st.selected - category
@@ -53,18 +45,31 @@ class CategoryFilterViewModel @Inject constructor(
         }
     }
 
-    fun toggleAll() {
+    fun onToggleAll() {
         _uiState.update { st ->
             st.copy(selected = if (st.allSelected) emptySet() else st.all)
         }
     }
 
-    fun save(onSaved: () -> Unit) {
+    fun onSave(onSaved: () -> Unit) {
         val selected = _uiState.value.selected
         viewModelScope.launch {
-            runCatching { CategoryFilterPrefs.save(ctx, selected) }
-                .onSuccess { onSaved() }
-                .onFailure { _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed)) }
+            try {
+                prefs.saveSelected(selected)
+                onSaved()
+            } catch (e: Exception) {
+                _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed))
+            }
+        }
+    }
+
+    fun onClearAll() {
+        viewModelScope.launch {
+            try {
+                prefs.clear()
+            } catch (e: Exception) {
+                _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed))
+            }
         }
     }
 }

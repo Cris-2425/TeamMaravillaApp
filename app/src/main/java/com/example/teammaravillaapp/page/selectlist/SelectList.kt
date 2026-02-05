@@ -1,11 +1,25 @@
 package com.example.teammaravillaapp.page.selectlist
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -14,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.ui.events.UiEvent
@@ -106,24 +119,24 @@ fun SelectList(
                                     ) {
                                         Text(stringResource(R.string.select_list_create))
                                     }
-
                                 } else {
                                     LazyColumn(
                                         contentPadding = PaddingValues(bottom = 120.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier.fillMaxSize()
                                     ) {
-                                        items(uiState.lists) { (id, list) ->
+                                        items(
+                                            items = uiState.lists,
+                                            key = { it.id }
+                                        ) { list ->
                                             Surface(
                                                 shape = MaterialTheme.shapes.large,
                                                 tonalElevation = 1.dp,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .clickable(
-                                                        enabled = !uiState.isSaving
-                                                    ) {
-                                                        vm.addRecipeIngredientsToList(id)
-                                                        onListSelected(id)
+                                                    .clickable(enabled = !uiState.isSaving) {
+                                                        vm.addRecipeIngredientsToList(list.id)
+                                                        onListSelected(list.id)
                                                     }
                                             ) {
                                                 Column(Modifier.padding(14.dp)) {
@@ -150,10 +163,7 @@ fun SelectList(
                     }
                 }
             }
-
-            //Box(Modifier.align(Alignment.BottomStart)) {
-            //    BackButton(onClick = onBack)
-            //}
+            // Box(Modifier.align(Alignment.BottomStart)) { BackButton(onClick = onBack) }
         }
     }
 }

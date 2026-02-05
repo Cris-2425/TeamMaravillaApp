@@ -16,9 +16,18 @@ interface FavoritesDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun add(entity: FavoriteRecipeEntity)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addAll(items: List<FavoriteRecipeEntity>)
+
     @Query("DELETE FROM favorite_recipes WHERE recipeId = :recipeId")
     suspend fun remove(recipeId: Int)
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorite_recipes WHERE recipeId = :recipeId)")
     suspend fun isFavorite(recipeId: Int): Boolean
+
+    @Query("DELETE FROM favorite_recipes")
+    suspend fun clearAll()
+
+    @Query("SELECT recipeId FROM favorite_recipes")
+    suspend fun getAllIdsOnce(): List<Int>
 }

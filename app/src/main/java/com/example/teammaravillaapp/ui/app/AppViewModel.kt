@@ -4,9 +4,9 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.data.repository.ListsRepository
-import com.example.teammaravillaapp.data.repository.ProductRepository
-import com.example.teammaravillaapp.data.repository.RecipesRepository
+import com.example.teammaravillaapp.data.repository.lists.ListsRepository
+import com.example.teammaravillaapp.data.repository.products.ProductRepository
+import com.example.teammaravillaapp.data.repository.recipes.RecipesRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -46,8 +46,8 @@ class AppViewModel @Inject constructor(
 
             // 🌐 solo si hay backend accesible
             if (isEmulator) {
-                runCatching { productRepository.getProducts() }
-                // Si quieres, aquí puedes emitir snackbar si falla
+                runCatching { productRepository.refreshProducts() }
+                // emitir snackbar si falla
             }
         }
     }

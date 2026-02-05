@@ -20,7 +20,7 @@ import com.example.teammaravillaapp.data.local.mapper.Converters
         RecipeEntity::class,
         RecipeIngredientsCrossRef::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

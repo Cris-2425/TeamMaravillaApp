@@ -1,10 +1,8 @@
 package com.example.teammaravillaapp.ui.app
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.data.prefs.ThemePrefs
+import com.example.teammaravillaapp.data.local.prefs.ThemePrefs
 import com.example.teammaravillaapp.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

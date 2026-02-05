@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.repository.ListsRepository
-import com.example.teammaravillaapp.data.repository.RecipesRepository
+import com.example.teammaravillaapp.data.repository.lists.ListsRepository
+import com.example.teammaravillaapp.data.repository.recipes.RecipesRepository
 import com.example.teammaravillaapp.navigation.NavRoute
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,11 +15,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,19 +39,20 @@ class SelectListViewModel @Inject constructor(
     val uiState: StateFlow<SelectListUiState> =
         combine(
             recipesRepository.observeRecipe(recipeId),
-            listsRepository.lists,
+            listsRepository.lists, // ✅ ahora Flow<List<UserList>>
             _isSaving
         ) { recipeWithIngredients, lists, isSaving ->
-            when {
-                recipeWithIngredients == null -> SelectListUiState(
+
+            if (recipeWithIngredients == null) {
+                SelectListUiState(
                     isLoading = false,
                     isRecipeNotFound = true,
                     recipe = null,
                     lists = lists,
                     isSaving = isSaving
                 )
-
-                else -> SelectListUiState(
+            } else {
+                SelectListUiState(
                     isLoading = false,
                     isRecipeNotFound = false,
                     recipe = recipeWithIngredients.recipe,
@@ -81,7 +80,6 @@ class SelectListViewModel @Inject constructor(
 
         viewModelScope.launch {
             if (_isSaving.value) return@launch
-
             _isSaving.value = true
 
             runCatching {

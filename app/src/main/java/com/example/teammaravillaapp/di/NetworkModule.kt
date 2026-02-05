@@ -1,7 +1,10 @@
 package com.example.teammaravillaapp.di
 
-import com.example.teammaravillaapp.network.api.ImageApi
-import com.example.teammaravillaapp.network.api.ProductApi
+import com.example.teammaravillaapp.data.remote.api.ImageApi
+import com.example.teammaravillaapp.data.remote.api.JsonFilesApi
+import com.example.teammaravillaapp.data.remote.api.ListsApi
+import com.example.teammaravillaapp.data.remote.api.ProductApi
+import com.example.teammaravillaapp.data.remote.api.RecipesApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,6 +32,9 @@ object NetworkModule {
     fun provideOkHttp(logging: HttpLoggingInterceptor): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(logging)
+            .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
             .build()
 
     @Provides
@@ -49,4 +55,19 @@ object NetworkModule {
     @Singleton
     fun provideImageApi(retrofit: Retrofit): ImageApi =
         retrofit.create(ImageApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideListsApi(retrofit: Retrofit): ListsApi =
+        retrofit.create(ListsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRecipesApi(retrofit: Retrofit): RecipesApi =
+        retrofit.create(RecipesApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideJsonFilesApi(retrofit: Retrofit): JsonFilesApi =
+        retrofit.create(JsonFilesApi::class.java)
 }

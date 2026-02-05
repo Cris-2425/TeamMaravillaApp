@@ -1,8 +1,8 @@
 package com.example.teammaravillaapp.page.listdetail.usecase
 
 import com.example.teammaravillaapp.data.local.entity.ListItemEntity
-import com.example.teammaravillaapp.data.repository.ListsRepository
-import com.example.teammaravillaapp.data.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.lists.ListsRepository
+import com.example.teammaravillaapp.data.repository.products.ProductRepository
 import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
@@ -31,13 +31,17 @@ class ListDetailObserveStateUseCase @Inject constructor(
         queryFlow: StateFlow<String>
     ): Flow<ListDetailUiState> {
 
-        val currentListFlow: Flow<Pair<String, UserList>?> =
+        // ✅ ahora listsRepository.lists = Flow<List<UserList>>
+        val currentListFlow: Flow<UserList?> =
             listsRepository.lists
                 .map { lists -> resolveFrom(lists, navListId) }
                 .distinctUntilChanged()
 
-        val listIdFlow: Flow<String?> = currentListFlow.map { it?.first }.distinctUntilChanged()
-        val headerFlow: Flow<UserList?> = currentListFlow.map { it?.second }.distinctUntilChanged()
+        val listIdFlow: Flow<String?> =
+            currentListFlow.map { it?.id }.distinctUntilChanged()
+
+        val headerFlow: Flow<UserList?> =
+            currentListFlow.distinctUntilChanged()
 
         val itemsMetaFlow: Flow<List<ListItemEntity>> =
             listIdFlow
@@ -88,11 +92,11 @@ class ListDetailObserveStateUseCase @Inject constructor(
     }
 
     private fun resolveFrom(
-        lists: List<Pair<String, UserList>>,
+        lists: List<UserList>,
         navListId: String?
-    ): Pair<String, UserList>? =
+    ): UserList? =
         when {
-            navListId != null -> lists.firstOrNull { it.first == navListId }
+            !navListId.isNullOrBlank() -> lists.firstOrNull { it.id == navListId }
             else -> lists.lastOrNull()
         }
 

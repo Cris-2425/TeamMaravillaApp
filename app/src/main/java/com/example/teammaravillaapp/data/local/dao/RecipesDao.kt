@@ -8,7 +8,7 @@ import androidx.room.Transaction
 import com.example.teammaravillaapp.data.local.entity.RecipeEntity
 import com.example.teammaravillaapp.data.local.entity.RecipeIngredientsCrossRef
 import com.example.teammaravillaapp.data.local.entity.RecipeWithProductsRoom
-import com.example.teammaravillaapp.network.dto.RecipeIngredientLine
+import com.example.teammaravillaapp.data.remote.dto.RecipeIngredientLineDto
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -58,5 +58,22 @@ interface RecipesDao {
         ORDER BY ri.position ASC
         """
     )
-    fun observeIngredientLines(recipeId: Int): Flow<List<RecipeIngredientLine>>
+    fun observeIngredientLines(recipeId: Int): Flow<List<RecipeIngredientLineDto>>
+
+    @Query("SELECT * FROM recipes ORDER BY title ASC")
+    suspend fun getAllRecipeEntities(): List<RecipeEntity>
+
+    @Query("SELECT * FROM recipe_ingredients ORDER BY recipeId ASC, position ASC")
+    suspend fun getAllCrossRefs(): List<RecipeIngredientsCrossRef>
+
+    @androidx.room.Transaction
+    suspend fun replaceAll(
+        recipes: List<RecipeEntity>,
+        refs: List<RecipeIngredientsCrossRef>
+    ) {
+        clearCrossRefs()
+        clearRecipes()
+        upsertRecipes(recipes)
+        upsertCrossRefs(refs)
+    }
 }

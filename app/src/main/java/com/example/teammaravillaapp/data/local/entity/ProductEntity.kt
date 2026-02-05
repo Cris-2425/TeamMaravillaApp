@@ -9,5 +9,5 @@ data class ProductEntity(
     val name: String,
     val category: String,
     val imageUrl: String?,
-    val imageRes: Int?          // ✅ nuevo
+    val imageRes: Int?
 )

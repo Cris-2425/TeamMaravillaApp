@@ -166,6 +166,16 @@ interface ListsDao {
     WHERE listId = :listId AND productId = :productId
 """)
     suspend fun decQuantityMin1(listId: String, productId: String)
+
+    @Transaction
+    @Query("SELECT * FROM user_lists ORDER BY createdAt DESC")
+    suspend fun getAllSnapshot(): List<ListWithItemsRoom>
+
+    @Query("DELETE FROM list_items")
+    suspend fun clearItems()
+
+    @Query("DELETE FROM user_lists")
+    suspend fun clearLists()
 }
 
 

@@ -1,6 +1,6 @@
 package com.example.teammaravillaapp.page.recipesdetail.usecase
 
-import com.example.teammaravillaapp.data.repository.FavoritesRepository
+import com.example.teammaravillaapp.data.repository.favorites.FavoritesRepository
 import javax.inject.Inject
 
 class ToggleFavoriteUseCase @Inject constructor(

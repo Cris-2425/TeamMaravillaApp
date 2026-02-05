@@ -1,6 +1,6 @@
 package com.example.teammaravillaapp.page.home
 
-import com.example.teammaravillaapp.data.repository.ListProgress
+import com.example.teammaravillaapp.data.repository.lists.ListProgress
 import com.example.teammaravillaapp.model.UserList
 
 data class HomeUiState(

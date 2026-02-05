@@ -1,23 +1,15 @@
 package com.example.teammaravillaapp.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.datastore.preferences.core.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.teammaravillaapp.data.prefs.PrefsKeys.LIST_VIEW_TYPE
-import com.example.teammaravillaapp.data.prefs.userPrefsDataStore
-import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.page.camera.CameraScreen
 import com.example.teammaravillaapp.page.categoryfilter.CategoryFilter
@@ -38,82 +30,66 @@ import com.example.teammaravillaapp.page.session.SessionViewModel
 import com.example.teammaravillaapp.page.settings.SettingsScreen
 import com.example.teammaravillaapp.page.splash.SplashScreen
 import com.example.teammaravillaapp.page.stats.Stats
-import com.example.teammaravillaapp.ui.app.AppViewModel
-import com.example.teammaravillaapp.ui.app.ThemeViewModel
 import com.example.teammaravillaapp.ui.debug.ProductsDebugScreen
 import com.example.teammaravillaapp.ui.events.UiEvent
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 @Composable
 fun TeamMaravillaNavHost(
     navController: NavHostController,
     sessionViewModel: SessionViewModel,
-    appViewModel: AppViewModel,
     modifier: Modifier = Modifier,
     startDestination: String = NavRoute.Splash.route,
-    themeViewModel: ThemeViewModel,
     onUiEvent: (UiEvent) -> Unit
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsState()
     val isLoggedIn = sessionState is SessionState.LoggedIn
 
+    val actions = rememberNavActions(navController)
 
-    LaunchedEffect(sessionState) {
-        when (sessionState) {
-            SessionState.Loading -> Unit
-            SessionState.LoggedOut -> {
-                if (navController.currentDestination?.route != NavRoute.Login.route) {
-                    navController.navigate(NavRoute.Login.route) {
-                        popUpTo(0)
-                        launchSingleTop = true
-                    }
-                }
-            }
-            is SessionState.LoggedIn -> {
-                if (navController.currentDestination?.route != NavRoute.Home.route) {
-                    navController.navigate(NavRoute.Home.route) {
-                        popUpTo(0)
-                        launchSingleTop = true
-                    }
-                }
-            }
-        }
-    }
+    SessionNavEffect(
+        navController = navController,
+        sessionState = sessionState,
+        splashDelayMs = 900L
+    )
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier
     ) {
 
+        composable(NavRoute.Splash.route) {
+            SplashScreen()
+        }
+
+        composable(NavRoute.Login.route) {
+            Login(
+                onBack = { actions.up() },
+                onUiEvent = onUiEvent
+            )
+        }
+
         composable(NavRoute.Home.route) {
             Home(
-                onNavigateCreateList = { navController.navigate(NavRoute.CreateList.route) },
-                onNavigateHome = {
-                    navController.navigate(NavRoute.Home.route) {
-                        popUpTo(NavRoute.Home.route) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                },
-                onNavigateProfile = { navController.navigate(NavRoute.Profile.route) },
-                onNavigateCamera = { navController.navigate(NavRoute.Camera.createRoute()) },
-                onNavigateRecipes = { navController.navigate(NavRoute.Recipes.route) },
-                onNavigateHistory = { navController.navigate(NavRoute.History.route) },
+                onNavigateCreateList = { actions.toCreateList() },
+                onNavigateHome = { actions.toHomeSingleTop() },
+                onNavigateProfile = { actions.toProfile() },
+                onNavigateCamera = { actions.toCamera() },
+                onNavigateRecipes = { actions.toRecipes() },
+                onNavigateHistory = { actions.toHistory() },
                 onExitApp = { },
-                onOpenList = { listId ->
-                    navController.navigate(NavRoute.ListDetail.createRoute(listId))
-                }
+                onOpenList = { listId -> actions.toListDetail(listId) }
             )
         }
 
         composable(NavRoute.CreateList.route) {
             CreateListt(
-                onBack = { navController.navigateUp() },
+                onBack = { actions.up() },
                 onListCreated = { listId ->
-                    navController.navigate(NavRoute.ListDetail.createRoute(listId)) {
-                        popUpTo(NavRoute.CreateList.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    actions.toListDetailAndRemove(
+                        routeToPop = NavRoute.CreateList.route,
+                        listId = listId
+                    )
                 },
                 onUiEvent = onUiEvent
             )
@@ -121,24 +97,20 @@ fun TeamMaravillaNavHost(
 
         composable(
             route = NavRoute.ListDetail.route,
-            arguments = listOf(navArgument(NavRoute.ListDetail.ARG_LIST_ID) {
-                type = NavType.StringType
-            })
+            arguments = listOf(navArgument(NavRoute.ListDetail.ARG_LIST_ID) { type = NavType.StringType })
         ) {
             ListDetail(
-                onBack = { navController.navigateUp() },
-                onOpenCategoryFilter = { navController.navigate(NavRoute.CategoryFilter.route) },
-                onOpenListViewTypes = { navController.navigate(NavRoute.ListViewTypes.route) },
+                onBack = { actions.up() },
+                onOpenCategoryFilter = { actions.toCategoryFilter() },
+                onOpenListViewTypes = { actions.toListViewTypes() },
                 onUiEvent = onUiEvent
             )
         }
 
         composable(NavRoute.Recipes.route) {
             Recipes(
-                onBack = { navController.navigateUp() },
-                onRecipeClick = { recipeId ->
-                    navController.navigate(NavRoute.RecipesDetail.createRoute(recipeId))
-                }
+                onBack = { actions.up() },
+                onRecipeClick = { id -> actions.toRecipesDetail(id) }
             )
         }
 
@@ -147,10 +119,8 @@ fun TeamMaravillaNavHost(
             arguments = listOf(navArgument(NavRoute.RecipesDetail.ARG_RECIPE_ID) { type = NavType.IntType })
         ) {
             RecipesDetail(
-                onBack = { navController.navigateUp() },
-                onAddToShoppingList = { recipeId ->
-                    navController.navigate(NavRoute.SelectList.createRoute(recipeId))
-                },
+                onBack = { actions.up() },
+                onAddToShoppingList = { recipeId -> actions.toSelectList(recipeId) },
                 onUiEvent = onUiEvent
             )
         }
@@ -160,34 +130,33 @@ fun TeamMaravillaNavHost(
             arguments = listOf(navArgument(NavRoute.SelectList.ARG_RECIPE_ID) { type = NavType.IntType })
         ) {
             SelectList(
-                onBack = { navController.navigateUp() },
-                onCreateList = { navController.navigate(NavRoute.CreateList.route) },
+                onBack = { actions.up() },
+                onCreateList = { actions.toCreateList() },
                 onListSelected = { listId ->
-                    navController.navigate(NavRoute.ListDetail.createRoute(listId)) {
-                        popUpTo(NavRoute.SelectList.route) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    actions.toListDetailAndRemove(
+                        routeToPop = NavRoute.SelectList.route,
+                        listId = listId
+                    )
                 },
                 onUiEvent = onUiEvent
             )
         }
 
         composable(NavRoute.Profile.route) {
-            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val vm: ProfileViewModel = hiltViewModel()
 
             Profile(
-                onBack = { navController.navigateUp() },
+                onBack = { actions.up() },
                 onNavigate = { option ->
                     when (option) {
-                        ProfileOption.LISTS -> navController.navigate(NavRoute.Home.route)
-                        ProfileOption.RECIPES -> navController.navigate(NavRoute.Recipes.route)
-                        ProfileOption.SETTINGS -> navController.navigate(NavRoute.Settings.route)
-                        ProfileOption.STATS -> navController.navigate(NavRoute.Stats.route)
-                        ProfileOption.HELP -> navController.navigate(NavRoute.Help.route)
-                        ProfileOption.DEBUG_PRODUCTS -> navController.navigate(NavRoute.ProductsDebug.route)
+                        ProfileOption.LISTS -> actions.toHomeSingleTop()
+                        ProfileOption.RECIPES -> actions.toRecipes()
+                        ProfileOption.SETTINGS -> actions.toSettings()
+                        ProfileOption.STATS -> actions.toStats()
+                        ProfileOption.HELP -> actions.toHelp()
+                        ProfileOption.DEBUG_PRODUCTS -> actions.toProductsDebug()
                         ProfileOption.LOGIN -> {
-                            if (isLoggedIn) profileViewModel.logout()
-                            else navController.navigate(NavRoute.Login.route)
+                            if (isLoggedIn) vm.logout() else actions.toLogin()
                         }
                     }
                 },
@@ -196,103 +165,60 @@ fun TeamMaravillaNavHost(
             )
         }
 
-        composable(NavRoute.Login.route) {
-            Login(
-                onBack = { navController.navigateUp() },
-                onUiEvent = onUiEvent
-            )
-        }
-
         composable(NavRoute.ListViewTypes.route) {
-            val ctx = LocalContext.current
-            val scope = rememberCoroutineScope()
-
-            val currentName by ctx.userPrefsDataStore.data
-                .map { it[LIST_VIEW_TYPE] ?: ListViewType.BUBBLES.name }
-                .collectAsState(initial = ListViewType.BUBBLES.name)
-
-            val current = remember(currentName) {
-                runCatching { ListViewType.valueOf(currentName) }.getOrElse { ListViewType.BUBBLES }
-            }
-
             ListViewTypes(
-                current = current,
-                onCancel = { navController.navigateUp() },
-                onSave = { selected ->
-                    scope.launch {
-                        ctx.userPrefsDataStore.edit { prefs ->
-                            prefs[LIST_VIEW_TYPE] = selected.name
-                        }
-                        navController.navigateUp()
-                    }
-                }
+                onCancel = { actions.up() },
+                onSaved = { actions.up() },
+                onUiEvent = onUiEvent
             )
         }
 
         composable(NavRoute.CategoryFilter.route) {
             CategoryFilter(
-                onCancel = { navController.navigateUp() },
-                onSave = { navController.navigateUp() },
+                onCancel = { actions.up() },
+                onSave = { actions.up() },
                 onUiEvent = onUiEvent
             )
         }
 
         composable(NavRoute.ProductsDebug.route) {
-            ProductsDebugScreen(onBack = { navController.navigateUp() })
+            ProductsDebugScreen(onBack = { actions.up() })
         }
 
         composable(
             route = NavRoute.Camera.route,
-            arguments = listOf(navArgument(NavRoute.Camera.ARG_LIST_ID) {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            })
+            arguments = listOf(
+                navArgument(NavRoute.Camera.ARG_LIST_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { backStackEntry ->
             val listId = backStackEntry.arguments?.getString(NavRoute.Camera.ARG_LIST_ID)
             CameraScreen(
-                listId = listId, onBack = { navController.navigateUp() },
+                listId = listId,
+                onBack = { actions.up() },
                 onUiEvent = onUiEvent
             )
         }
 
-        composable(NavRoute.Splash.route) {
-            LaunchedEffect(sessionState) {
-                when (sessionState) {
-                    SessionState.Loading -> Unit
-                    SessionState.LoggedOut -> navController.navigate(NavRoute.Login.route) {
-                        popUpTo(0); launchSingleTop = true
-                    }
-                    is SessionState.LoggedIn -> navController.navigate(NavRoute.Home.route) {
-                        popUpTo(0); launchSingleTop = true
-                    }
-                }
-            }
-            SplashScreen(onFinish = { })
-        }
-
         composable(NavRoute.Settings.route) {
-            SettingsScreen(
-                onBack = { navController.navigateUp() }
-            )
+            SettingsScreen(onBack = { actions.up() })
         }
 
         composable(NavRoute.Stats.route) {
-            Stats(onBack = { navController.navigateUp() },
-                    onUiEvent = onUiEvent
-            )
+            Stats(onBack = { actions.up() }, onUiEvent = onUiEvent)
         }
 
         composable(NavRoute.Help.route) {
-            Help(onBack = { navController.navigateUp() })
+            Help(onBack = { actions.up() })
         }
 
         composable(NavRoute.History.route) {
             History(
-                onBack = { navController.navigateUp() },
-                onOpenList = { listId ->
-                    navController.navigate(NavRoute.ListDetail.createRoute(listId))
-                },
+                onBack = { actions.up() },
+                onOpenList = { listId -> actions.toListDetail(listId) },
                 onUiEvent = onUiEvent
             )
         }

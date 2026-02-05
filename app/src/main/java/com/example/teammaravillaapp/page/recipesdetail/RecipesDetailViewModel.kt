@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.repository.FavoritesRepository
-import com.example.teammaravillaapp.data.repository.ProductRepository
-import com.example.teammaravillaapp.data.repository.RecipesRepository
+import com.example.teammaravillaapp.data.repository.favorites.FavoritesRepository
+import com.example.teammaravillaapp.data.repository.products.ProductRepository
+import com.example.teammaravillaapp.data.repository.recipes.RecipesRepository
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.navigation.NavRoute
 import com.example.teammaravillaapp.page.recipesdetail.usecase.ToggleFavoriteUseCase
@@ -74,7 +74,7 @@ class RecipesDetailViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             runCatching { recipesRepository.seedIfEmpty() }
-            runCatching { productRepository.getProducts() }
+            runCatching { productRepository.refreshProducts() }
         }
     }
 

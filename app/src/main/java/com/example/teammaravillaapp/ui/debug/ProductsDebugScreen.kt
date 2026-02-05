@@ -98,6 +98,20 @@ fun ProductsDebugScreen(
                                 enabled = !uiState.isLoading && uiState.products.isNotEmpty()
                             ) { Text("Borrar 1º") }
                         }
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = vm::syncImages,
+                                enabled = !uiState.isLoading && !uiState.isSyncingImages && uiState.products.isNotEmpty()
+                            ) { Text("Sync imágenes") }
+
+                            if (uiState.isSyncingImages) {
+                                CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
+                            }
+                        }
                     }
                 }
 
@@ -117,6 +131,16 @@ fun ProductsDebugScreen(
                             modifier = Modifier.padding(12.dp),
                             style = MaterialTheme.typography.bodyMedium
                         )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+                uiState.lastSyncMessage?.let { msg ->
+                    Surface(
+                        shape = MaterialTheme.shapes.extraLarge,
+                        tonalElevation = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(msg, Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
                     }
                     Spacer(Modifier.height(12.dp))
                 }

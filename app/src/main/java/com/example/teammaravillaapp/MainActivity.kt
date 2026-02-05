@@ -76,11 +76,7 @@ class MainActivity : ComponentActivity() {
                     TeamMaravillaNavHost(
                         navController = navController,
                         sessionViewModel = sessionViewModel,
-                        appViewModel = appViewModel,
                         modifier = Modifier.padding(innerPadding),
-                        themeViewModel = themeViewModel,
-
-                        // ✅ Bridge para que pantallas (ListDetail, etc.) disparen snackbars
                         onUiEvent = { event ->
                             scope.launch { handleUiEvent(event) }
                         }

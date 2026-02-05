@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.prefs.RecentListsPrefs
+import com.example.teammaravillaapp.data.local.prefs.RecentListsPrefs
 import com.example.teammaravillaapp.navigation.NavRoute.ListDetail.ARG_LIST_ID
 import com.example.teammaravillaapp.page.listdetail.usecase.ListDetailHandleActionUseCase
 import com.example.teammaravillaapp.page.listdetail.usecase.ListDetailObserveStateUseCase
