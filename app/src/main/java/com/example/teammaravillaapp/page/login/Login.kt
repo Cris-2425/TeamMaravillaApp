@@ -12,12 +12,10 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.ui.events.UiEvent
 import com.example.teammaravillaapp.util.TAG_GLOBAL
@@ -91,7 +89,13 @@ fun Login(
                             keyboardActions = KeyboardActions(
                                 onDone = {
                                     keyboard?.hide()
-                                    vm.onLoginClick()
+                                    if (uiState.isLoginButtonEnabled) {
+                                        vm.onLoginClick()
+                                    } else {
+                                        vm.onLoginClick() // opcional: si quieres que lance snackbar "campos obligatorios"
+                                        // o si prefieres NO llamar:
+                                        // onUiEvent(UiEvent.ShowSnackbar(R.string.login_error_required_fields))
+                                    }
                                 }
                             )
                         )

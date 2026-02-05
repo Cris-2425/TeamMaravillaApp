@@ -17,16 +17,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.data.seed.ProductData
-import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.data.seed.RecipeData
+import com.example.teammaravillaapp.model.Product
+import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -39,6 +42,8 @@ fun RecipeCard(
     onToggleFavorite: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     val ingredientsTitle = stringResource(R.string.recipe_ingredients_title)
     val noIngredientsText = stringResource(R.string.recipe_no_ingredients)
     val favAddCd = stringResource(R.string.recipe_favorite_add_cd)
@@ -94,32 +99,52 @@ fun RecipeCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // Imagen (SAFE)
-            val img = recipe.imageRes
-            if (img != null && img != 0) {
-                Image(
-                    painter = painterResource(img),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(imageShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(imageShape)
-                        .background(cs.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.recipe_image_placeholder),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cs.onSurfaceVariant
+            // Imagen (URL > RES > placeholder)
+            when {
+                !recipe.imageUrl.isNullOrBlank() -> {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(recipe.imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(imageShape),
+                        placeholder = painterResource(R.drawable.logo),
+                        error = painterResource(R.drawable.logo)
                     )
+                }
+
+                recipe.imageRes != null && recipe.imageRes != 0 -> {
+                    Image(
+                        painter = painterResource(recipe.imageRes),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(imageShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                else -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .clip(imageShape)
+                            .background(cs.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.recipe_image_placeholder),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = cs.onSurfaceVariant
+                        )
+                    }
                 }
             }
 

@@ -146,4 +146,34 @@ object RoomMigrations {
         }
     }
 
+    val MIGRATION_8_9 = object : Migration(8, 9) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+
+            // 1) Crear tabla nueva con el esquema correcto
+            db.execSQL(
+                """
+            CREATE TABLE IF NOT EXISTS recipes_new (
+                id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                imageRes INTEGER,
+                instructions TEXT NOT NULL,
+                PRIMARY KEY(id)
+            )
+            """.trimIndent()
+            )
+
+            // 2) Copiar datos, arreglando posibles NULLs en instructions
+            db.execSQL(
+                """
+            INSERT INTO recipes_new (id, title, imageRes, instructions)
+            SELECT id, title, imageRes, COALESCE(instructions, '')
+            FROM recipes
+            """.trimIndent()
+            )
+
+            // 3) Reemplazar
+            db.execSQL("DROP TABLE recipes")
+            db.execSQL("ALTER TABLE recipes_new RENAME TO recipes")
+        }
+    }
 }

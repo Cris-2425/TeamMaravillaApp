@@ -14,6 +14,6 @@ data class Product(
     val id: String,
     val name: String,
     val imageRes: Int? = null,
-    val category: ProductCategory? = ProductCategory.OTHER,
+    val category: ProductCategory = ProductCategory.OTHER,
     val imageUrl: String? = null
 )

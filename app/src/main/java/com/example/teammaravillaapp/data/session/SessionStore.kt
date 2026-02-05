@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,4 +50,11 @@ class SessionStore @Inject constructor(
             prefs.remove(Keys.TOKEN)
         }
     }
+
+    // helpers
+    suspend fun getTokenOrNull(): String? = token.first()
+
+    suspend fun getUsernameOrNull(): String? = username.first()
+
+    suspend fun isLoggedInNow(): Boolean = isLoggedIn.first()
 }

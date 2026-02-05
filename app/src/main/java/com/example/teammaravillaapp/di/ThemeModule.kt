@@ -1,7 +1,7 @@
 package com.example.teammaravillaapp.di
 
 import android.content.Context
-import com.example.teammaravillaapp.data.prefs.ThemePrefs
+import com.example.teammaravillaapp.data.local.prefs.ThemePrefs
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -7,6 +7,6 @@ data class SelectListUiState(
     val isLoading: Boolean = true,
     val isRecipeNotFound: Boolean = false,
     val recipe: Recipe? = null,
-    val lists: List<Pair<String, UserList>> = emptyList(),
+    val lists: List<UserList> = emptyList(),
     val isSaving: Boolean = false
 )

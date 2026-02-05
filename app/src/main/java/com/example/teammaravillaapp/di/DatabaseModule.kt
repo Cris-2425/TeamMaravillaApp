@@ -29,7 +29,8 @@ object DatabaseModule {
                 RoomMigrations.MIGRATION_4_5,
                 RoomMigrations.MIGRATION_5_6,
                 RoomMigrations.MIGRATION_6_7,
-                RoomMigrations.MIGRATION_7_8
+                RoomMigrations.MIGRATION_7_8,
+                RoomMigrations.MIGRATION_8_9
             )
             .build()
 

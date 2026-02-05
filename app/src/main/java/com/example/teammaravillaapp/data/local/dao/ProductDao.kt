@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
-
-    // reactivo para UI (Recipes, ListDetail, etc.)
     @Query("SELECT * FROM products ORDER BY name ASC")
     fun observeAll(): Flow<List<ProductEntity>>
 

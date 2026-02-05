@@ -27,6 +27,6 @@ object ListBackgrounds {
         ListBackground.FONDO2 -> R.drawable.fondo_bbq
         ListBackground.FONDO3 -> R.drawable.fondo_desayuno
         ListBackground.FONDO4 -> R.drawable.fondo_limpieza
-        else -> R.drawable.background_app_final
+        else -> R.drawable.bg_app
     }
 }

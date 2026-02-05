@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.example.teammaravillaapp.BuildConfig
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.ui.events.UiEvent

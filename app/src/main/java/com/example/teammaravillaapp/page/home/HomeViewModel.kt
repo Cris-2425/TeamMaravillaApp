@@ -1,32 +1,27 @@
 package com.example.teammaravillaapp.page.home
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.prefs.RecentListsPrefs
-import com.example.teammaravillaapp.data.repository.ListProgress
-import com.example.teammaravillaapp.data.repository.ListsRepository
+import com.example.teammaravillaapp.data.local.prefs.RecentListsPrefs
+import com.example.teammaravillaapp.data.repository.lists.ListProgress
+import com.example.teammaravillaapp.data.repository.lists.ListsRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val listsRepository: ListsRepository,
-    private val recentListsPrefs: com.example.teammaravillaapp.data.prefs.RecentListsPrefs
+    private val recentListsPrefs: RecentListsPrefs
 ) : ViewModel() {
 
     private val _search = MutableStateFlow("")
@@ -46,15 +41,14 @@ class HomeViewModel @Inject constructor(
             val trimmed = q.trim()
 
             val filtered = lists
-                .filter { (id, _) -> id !in pending }
-                .let {
-                    if (trimmed.isBlank()) it
-                    else it.filter { (_, list) ->
-                        list.name.contains(trimmed, ignoreCase = true)
-                    }
+                .filter { it.id !in pending }
+                .let { base ->
+                    if (trimmed.isBlank()) base
+                    else base.filter { it.name.contains(trimmed, ignoreCase = true) }
                 }
 
-            val rows = filtered.map { (id, list) ->
+            val rows = filtered.map { list ->
+                val id = list.id
                 HomeListRow(
                     id = id,
                     list = list,
@@ -95,7 +89,7 @@ class HomeViewModel @Inject constructor(
                 .onFailure { _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_action_failed)) }
 
             _pendingDeletes.value = _pendingDeletes.value - id
-            runCatching { recentListsPrefs.remove(id) } // limpia historial también
+            runCatching { recentListsPrefs.remove(id) }
         }
     }
 

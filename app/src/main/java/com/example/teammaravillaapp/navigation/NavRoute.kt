@@ -24,6 +24,7 @@ sealed class NavRoute(val route: String) {
 
     data object Profile : NavRoute("profile")
     data object Login : NavRoute("login")
+
     data object ListViewTypes : NavRoute("list_view_types")
     data object CategoryFilter : NavRoute("category_filter")
     data object ProductsDebug : NavRoute("products_debug")
@@ -35,10 +36,8 @@ sealed class NavRoute(val route: String) {
     }
 
     data object Splash : NavRoute("splash")
-    object Settings : NavRoute("settings")
-    object Stats {
-        const val route = "stats"
-    }
-    object Help : NavRoute("help")
-    object History : NavRoute("history")
+    data object Settings : NavRoute("settings")
+    data object Stats : NavRoute("stats")
+    data object Help : NavRoute("help")
+    data object History : NavRoute("history")
 }

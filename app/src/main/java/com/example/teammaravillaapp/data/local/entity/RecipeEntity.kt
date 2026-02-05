@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class RecipeEntity(
     @PrimaryKey val id: Int,
     val title: String,
-    val imageRes: Int?,          // drawable id (Int)
+    val imageRes: Int?,
     val instructions: String
 )

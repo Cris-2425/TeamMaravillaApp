@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.page.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.auth.AuthRepository
+import com.example.teammaravillaapp.data.repository.users.UsersRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: UsersRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())

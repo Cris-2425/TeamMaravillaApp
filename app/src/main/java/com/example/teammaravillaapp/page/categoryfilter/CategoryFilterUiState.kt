@@ -4,8 +4,8 @@ import com.example.teammaravillaapp.model.ProductCategory
 
 data class CategoryFilterUiState(
     val isLoading: Boolean = true,
-    val selected: Set<ProductCategory> = emptySet(),
-    val all: Set<ProductCategory> = ProductCategory.entries.toSet()
+    val selected: Set<ProductCategory> = emptySet()
 ) {
-    val allSelected: Boolean get() = selected.size == all.size
+    val all: Set<ProductCategory> = ProductCategory.entries.toSet()
+    val allSelected: Boolean get() = selected.size == all.size && all.isNotEmpty()
 }

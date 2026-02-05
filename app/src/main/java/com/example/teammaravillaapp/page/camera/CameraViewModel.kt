@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.prefs.ReceiptsPrefs
+import com.example.teammaravillaapp.data.local.prefs.ReceiptsPrefs
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*

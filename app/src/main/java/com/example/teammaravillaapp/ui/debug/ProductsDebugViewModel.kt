@@ -6,7 +6,8 @@ import com.example.teammaravillaapp.data.seed.CatalogSeeder
 import com.example.teammaravillaapp.data.seed.buildSeedItemsFromProductData
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
-import com.example.teammaravillaapp.data.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.products.ProductRepository
+import com.example.teammaravillaapp.data.sync.SyncProductImagesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,13 +22,16 @@ import javax.inject.Inject
 data class ProductsDebugUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
-    val products: List<Product> = emptyList()
+    val products: List<Product> = emptyList(),
+    val isSyncingImages: Boolean = false,
+    val lastSyncMessage: String? = null
 )
 
 @HiltViewModel
 class ProductsDebugViewModel @Inject constructor(
     private val repo: ProductRepository,
-    private val catalogSeeder: CatalogSeeder
+    private val catalogSeeder: CatalogSeeder,
+    private val syncImages: SyncProductImagesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProductsDebugUiState())
@@ -71,7 +75,7 @@ class ProductsDebugViewModel @Inject constructor(
      */
     fun refresh() {
         viewModelScope.launch {
-            runCatching { repo.getProducts() }
+            runCatching { repo.refreshProducts() }
                 .onFailure { e ->
                     _uiState.update {
                         it.copy(error = e.message ?: "Error desconocido")
@@ -90,7 +94,7 @@ class ProductsDebugViewModel @Inject constructor(
                 imageUrl = null
             )
 
-            runCatching { repo.addProduct(p) }
+            runCatching { repo.upsert(p) }
                 .onFailure { e ->
                     _uiState.update { it.copy(error = e.message ?: "Error al añadir") }
                 }
@@ -100,7 +104,7 @@ class ProductsDebugViewModel @Inject constructor(
     fun deleteFirst() {
         val first = _uiState.value.products.firstOrNull() ?: return
         viewModelScope.launch {
-            runCatching { repo.deleteProduct(first.id) }
+            runCatching { repo.deleteById(first.id) }
                 .onFailure { e ->
                     _uiState.update { it.copy(error = e.message ?: "Error al borrar") }
                 }
@@ -115,7 +119,7 @@ class ProductsDebugViewModel @Inject constructor(
                 category = first.category ?: ProductCategory.OTHER
             )
 
-            runCatching { repo.updateProduct(updated) }
+            runCatching { repo.upsert(updated) }
                 .onFailure { e ->
                     _uiState.update { it.copy(error = e.message ?: "Error al actualizar") }
                 }
@@ -131,6 +135,32 @@ class ProductsDebugViewModel @Inject constructor(
             }.onFailure { e ->
                 _uiState.update { it.copy(error = e.message ?: "Error en seed") }
             }
+        }
+    }
+
+    fun syncImages() {
+        viewModelScope.launch {
+            if (_uiState.value.isSyncingImages) return@launch
+
+            _uiState.update { it.copy(isSyncingImages = true, error = null, lastSyncMessage = null) }
+
+            syncImages.execute()
+                .onSuccess { changed ->
+                    _uiState.update {
+                        it.copy(
+                            isSyncingImages = false,
+                            lastSyncMessage = "Sync OK · imageUrl actualizadas: $changed"
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isSyncingImages = false,
+                            error = e.message ?: "Error sync imágenes"
+                        )
+                    }
+                }
         }
     }
 }

@@ -7,7 +7,7 @@ fun buildSeedItemsFromProductData(): List<SeedItem> =
         SeedItem(
             id = p.id,
             name = p.name,
-            category = p.category ?: ProductCategory.OTHER,
+            category = p.category,
             imageRes = p.imageRes
         )
     }

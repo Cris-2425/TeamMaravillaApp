@@ -2,7 +2,6 @@ package com.example.teammaravillaapp.page.categoryfilter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,8 +19,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +43,8 @@ fun CategoryFilter(
         vm.events.collect { onUiEvent(it) }
     }
 
+    val allSelected = uiState.allSelected
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(stringResource(R.string.category_filter_title)) })
@@ -57,17 +58,18 @@ fun CategoryFilter(
             ) {
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
-                    onClick = onCancel
+                    onClick = onCancel,
+                    enabled = !uiState.isLoading
                 ) {
-                    Text(stringResource(R.string.common_cancel))
+                    Text(stringResource(R.string.category_filter_cancel))
                 }
 
                 Button(
                     modifier = Modifier.weight(1f),
-                    enabled = !uiState.isLoading,
-                    onClick = { vm.save(onSaved = onSave) }
+                    onClick = { vm.onSave(onSave) },
+                    enabled = !uiState.isLoading
                 ) {
-                    Text(stringResource(R.string.common_save))
+                    Text(stringResource(R.string.category_filter_save))
                 }
             }
         }
@@ -79,23 +81,27 @@ fun CategoryFilter(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            val subtitle = if (uiState.allSelected)
-                stringResource(R.string.category_filter_subtitle_all)
-            else
-                stringResource(R.string.category_filter_subtitle_active)
+            if (uiState.isLoading) {
+                Text(
+                    text = stringResource(R.string.common_loading),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                return@Column
+            }
 
             Text(
-                text = subtitle,
+                text = if (allSelected)
+                    stringResource(R.string.category_filter_subtitle_all)
+                else
+                    stringResource(R.string.category_filter_subtitle_active),
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Spacer(Modifier.height(8.dp))
 
             TextButton(
-                enabled = !uiState.isLoading,
-                onClick = { vm.toggleAll() },
-                contentPadding = PaddingValues(0.dp)
+                onClick = { vm.onToggleAll() }
             ) {
                 Text(stringResource(R.string.category_filter_show_all))
             }
@@ -105,7 +111,7 @@ fun CategoryFilter(
             ProductCategory.entries.forEach { category ->
                 FilterChip(
                     selected = category in uiState.selected,
-                    onClick = { vm.toggle(category) },
+                    onClick = { vm.onToggle(category) },
                     label = { Text(stringResource(id = category.labelRes)) }
                 )
             }

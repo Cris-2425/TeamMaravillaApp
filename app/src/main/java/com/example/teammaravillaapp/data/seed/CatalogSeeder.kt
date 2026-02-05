@@ -1,14 +1,14 @@
 package com.example.teammaravillaapp.data.seed
 
-import com.example.teammaravillaapp.data.repository.RemoteImageRepository
+import com.example.teammaravillaapp.data.remote.datasource.images.RemoteImageDataSourceImpl
 import com.example.teammaravillaapp.model.Product
-import com.example.teammaravillaapp.data.repository.ProductRepository
+import com.example.teammaravillaapp.data.repository.products.ProductRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CatalogSeeder @Inject constructor(
-    private val imageRepo: RemoteImageRepository,
+    private val imageRepo: RemoteImageDataSourceImpl,
     private val productRepo: ProductRepository
 ) {
     /**

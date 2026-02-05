@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.page.stats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.repository.StatsRepository
+import com.example.teammaravillaapp.data.local.repository.stats.StatsRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

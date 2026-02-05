@@ -13,7 +13,8 @@ import androidx.annotation.DrawableRes
 data class Recipe(
     val id: Int,
     val title: String,
-    @DrawableRes val imageRes: Int? = null,
-    val productIds: List<String> = emptyList(),
-    val instructions: String = ""
+    val productIds: List<String>,
+    val instructions: String,
+    val imageRes: Int? = null,
+    val imageUrl: String? = null
 )

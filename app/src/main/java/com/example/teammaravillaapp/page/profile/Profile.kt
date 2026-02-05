@@ -20,13 +20,9 @@ import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.OptionsGrid
 import com.example.teammaravillaapp.component.ProfileImage
-import com.example.teammaravillaapp.data.prefs.clearProfilePhoto
-import com.example.teammaravillaapp.data.prefs.profilePhotoFlow
-import com.example.teammaravillaapp.data.prefs.saveProfilePhoto
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.ui.events.UiEvent
 import com.yalantis.ucrop.UCrop
-import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -39,13 +35,12 @@ fun Profile(
     vm: ProfileViewModel = hiltViewModel()
 ) {
     val ctx = LocalContext.current
-    val scope = rememberCoroutineScope()
+
+    val photoUri by vm.photoUri.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {
         vm.events.collect { onUiEvent(it) }
     }
-
-    val profileUri by profilePhotoFlow(ctx).collectAsStateWithLifecycle(initialValue = null)
 
     var showMenu by remember { mutableStateOf(false) }
 
@@ -53,11 +48,10 @@ fun Profile(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val data: Intent? = result.data
+
         if (result.resultCode == Activity.RESULT_OK && data != null) {
             val resultUri = UCrop.getOutput(data)
-            resultUri?.let { uri ->
-                scope.launch { saveProfilePhoto(ctx, uri.toString()) }
-            }
+            resultUri?.let { vm.savePhoto(it.toString()) }
         } else if (result.resultCode == UCrop.RESULT_ERROR) {
             vm.onCropError()
         }
@@ -91,10 +85,11 @@ fun Profile(
             ) {
                 Spacer(Modifier.height(10.dp))
 
+                // Foto + menú
                 Box {
                     ProfileImage(
                         imageRes = null,
-                        uriString = profileUri,
+                        uriString = photoUri,
                         modifier = Modifier.clickable { showMenu = true }
                     )
 
@@ -111,10 +106,10 @@ fun Profile(
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.profile_remove_photo)) },
-                            enabled = !profileUri.isNullOrBlank(),
+                            enabled = !photoUri.isNullOrBlank(),
                             onClick = {
                                 showMenu = false
-                                scope.launch { clearProfilePhoto(ctx) }
+                                vm.clearPhoto()
                             }
                         )
                     }
@@ -122,6 +117,7 @@ fun Profile(
 
                 Spacer(Modifier.height(14.dp))
 
+                // Tarjeta usuario
                 Surface(
                     shape = MaterialTheme.shapes.large,
                     tonalElevation = 2.dp,
@@ -172,17 +168,15 @@ fun Profile(
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     contentColor = MaterialTheme.colorScheme.error
                                 ),
-                                border = ButtonDefaults.outlinedButtonBorder.copy(
-                                    brush = androidx.compose.ui.graphics.SolidColor(
-                                        MaterialTheme.colorScheme.error
-                                    )
-                                )
+                                border = ButtonDefaults.outlinedButtonBorder
                             ) {
                                 Text(stringResource(R.string.profile_logout))
                             }
                         }
                     }
                 }
+
+                Spacer(Modifier.height(90.dp))
             }
 
             //Box(Modifier.align(Alignment.BottomStart)) {
