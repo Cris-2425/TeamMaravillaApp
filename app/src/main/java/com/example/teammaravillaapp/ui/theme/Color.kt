@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
  * - Superficies suaves
  * - Primario oscuro elegante
  */
-val primaryLight = Color(0xFF3E2A47)              // ciruela oscura
+val primaryLight = Color(0xFFFAFAFA)              // ciruela oscura
 val onPrimaryLight = Color(0xFFFFFFFF)
 
 val primaryContainerLight = Color(0xFFEFE4F6)     // lavanda muy suave
@@ -31,10 +31,10 @@ val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFF9DEDC)
 val onErrorContainerLight = Color(0xFF410E0B)
 
-val backgroundLight = Color(0xFFFBFAFC)           // blanco cálido
+val backgroundLight = Color(0xFFF7F7F7)           // blanco cálido
 val onBackgroundLight = Color(0xFF1C1B1E)
 
-val surfaceLight = Color(0xFFFBFAFC)
+val surfaceLight = Color(0xFFFAFAFA)
 val onSurfaceLight = Color(0xFF1C1B1E)
 
 val surfaceVariantLight = Color(0xFFE9E6EC)
@@ -59,7 +59,7 @@ val surfaceContainerHighestLight = Color(0xFFE7E1EA)
 
 // ------------------ DARK ------------------
 
-val primaryDark = Color(0xFFDABBE9)
+val primaryDark = Color(0xFF1E1E1E)
 val onPrimaryDark = Color(0xFF2B1634)
 
 val primaryContainerDark = Color(0xFF3E2A47)
@@ -82,10 +82,10 @@ val onErrorDark = Color(0xFF601410)
 val errorContainerDark = Color(0xFF8C1D18)
 val onErrorContainerDark = Color(0xFFF9DEDC)
 
-val backgroundDark = Color(0xFF121114)
+val backgroundDark = Color(0xFF121212)
 val onBackgroundDark = Color(0xFFE7E1EA)
 
-val surfaceDark = Color(0xFF121114)
+val surfaceDark = Color(0xFF1E1E1E)
 val onSurfaceDark = Color(0xFFE7E1EA)
 
 val surfaceVariantDark = Color(0xFF494552)

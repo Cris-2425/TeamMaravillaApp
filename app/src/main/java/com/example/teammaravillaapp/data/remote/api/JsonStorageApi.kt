@@ -6,7 +6,11 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-interface JsonFilesApi {
+/**
+ * API genérica para leer/escribir ficheros JSON en el backend:
+ * /json/{folder}/{id}
+ */
+interface JsonStorageApi {
 
     @GET("json/{folder}/{id}")
     suspend fun getFile(

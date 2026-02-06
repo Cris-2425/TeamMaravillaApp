@@ -1,28 +1,46 @@
-package com.example.teammaravillaapp.page.login
+package com.example.teammaravillaapp.page.register
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import com.example.teammaravillaapp.R
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.ui.events.UiEvent
 
 @Composable
-fun Login(
-    onGoRegister: () -> Unit,
-    onLoggedIn: () -> Unit,
+fun Register(
+    onBackToLogin: () -> Unit,
+    onRegistered: () -> Unit,
     onUiEvent: (UiEvent) -> Unit,
-    vm: LoginViewModel = hiltViewModel()
+    vm: RegisterViewModel = hiltViewModel()
 ) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
-
     LaunchedEffect(vm) { vm.events.collect(onUiEvent) }
 
     GeneralBackground(overlayAlpha = 0.20f) {
@@ -34,10 +52,10 @@ fun Login(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text(text = stringResource(R.string.login_title), style = MaterialTheme.typography.headlineSmall)
+            Text(text = stringResource(R.string.register_title), style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(6.dp))
             Text(
-                text = stringResource(R.string.login_subtitle),
+                text = stringResource(R.string.register_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -55,14 +73,22 @@ fun Login(
                         .padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
                     OutlinedTextField(
                         value = uiState.username,
+                        onValueChange = vm::onUsernameChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = !uiState.isLoading,
+                        label = { Text(stringResource(R.string.register_username)) }
+                    )
+
+                    OutlinedTextField(
+                        value = uiState.email,
                         onValueChange = vm::onEmailChange,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !uiState.isLoading,
-                        label = { Text(stringResource(R.string.login_username_placeholder)) }
+                        label = { Text(stringResource(R.string.register_email)) }
                     )
 
                     OutlinedTextField(
@@ -72,16 +98,13 @@ fun Login(
                         singleLine = true,
                         enabled = !uiState.isLoading,
                         visualTransformation = PasswordVisualTransformation(),
-                        label = { Text(stringResource(R.string.login_password_placeholder)) }
+                        label = { Text(stringResource(R.string.register_password)) }
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Checkbox(
                             checked = uiState.rememberMe,
-                            onCheckedChange = { vm.onRememberMeChange(it) },
+                            onCheckedChange = vm::onRememberMeChange,
                             enabled = !uiState.isLoading
                         )
                         Spacer(Modifier.width(6.dp))
@@ -89,8 +112,8 @@ fun Login(
                     }
 
                     Button(
-                        onClick = { vm.onLoginClick(onLoggedIn) },
-                        enabled = uiState.isLoginButtonEnabled,
+                        onClick = { vm.onRegisterClick(onRegistered) },
+                        enabled = uiState.isRegisterEnabled,
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 14.dp)
                     ) {
@@ -99,23 +122,12 @@ fun Login(
                             Spacer(Modifier.width(10.dp))
                             Text(stringResource(R.string.common_loading))
                         } else {
-                            Text(stringResource(R.string.login_button_text))
+                            Text(stringResource(R.string.register_button))
                         }
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.login_no_account),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        TextButton(onClick = onGoRegister, enabled = !uiState.isLoading) {
-                            Text(stringResource(R.string.login_go_register))
-                        }
+                    TextButton(onClick = onBackToLogin, enabled = !uiState.isLoading) {
+                        Text(stringResource(R.string.register_back_to_login))
                     }
                 }
             }

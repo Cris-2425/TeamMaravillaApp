@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.page.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.local.prefs.RecentListsPrefs
+import com.example.teammaravillaapp.data.local.prefs.user.RecentListsPrefs
 import com.example.teammaravillaapp.data.repository.lists.ListsRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel

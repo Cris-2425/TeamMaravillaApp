@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.data.local.prefs
+package com.example.teammaravillaapp.data.local.prefs.user
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

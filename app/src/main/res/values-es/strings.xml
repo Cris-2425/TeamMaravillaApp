@@ -55,16 +55,34 @@
     <string name="profile_remove_photo">Eliminar foto</string>
 
     <!-- Login -->
-    <string name="login_title">Registrarse</string>
-    <string name="login_username_placeholder">Usuario</string>
-    <string name="login_password_placeholder">Contraseña</string>
-    <string name="login_button_text">Entrar</string>
     <string name="login_error_empty_fields">Por favor, rellena usuario y contraseña</string>
-    <string name="login_subtitle">Inicia sesión para guardar tus listas y recetas</string>
-    <string name="login_error_required_fields">Rellena correo electrónico y contraseña</string>
-    <string name="login_error_invalid_credentials">Credenciales incorrectas</string>
     <string name="profile_logout_ok">Sesión cerrada</string>
     <string name="profile_crop_error">No se pudo recortar la imagen</string>
+    <string name="login_title">Iniciar sesión</string>
+    <string name="login_subtitle">Accede a tu cuenta para sincronizar tu contenido</string>
+    <string name="login_username_label">Usuario</string>
+    <string name="login_username_placeholder">Tu nombre de usuario</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">Tu contraseña</string>
+    <string name="login_button_text">Entrar</string>
+    <string name="login_error_required_fields">Completa usuario y contraseña</string>
+    <string name="login_error_password_short">La contraseña debe tener al menos 4 caracteres</string>
+    <string name="login_error_invalid_credentials">Credenciales incorrectas</string>
+    <string name="login_error_network">Error de red. Inténtalo de nuevo</string>
+    <string name="login_remember_me">Mantener sesión iniciada</string>
+    <string name="login_no_account">¿No tienes cuenta?</string>
+    <string name="login_go_register">Crear cuenta</string>
+
+    <!-- Register -->
+    <string name="register_title">Crear cuenta</string>
+    <string name="register_subtitle">Regístrate para sincronizar tu catálogo</string>
+    <string name="register_username">Nombre de usuario</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Contraseña</string>
+    <string name="register_button">Registrarme</string>
+    <string name="register_back_to_login">Volver al login</string>
+    <string name="register_error_required_fields">Completa todos los campos</string>
+    <string name="register_error_failed">No se pudo registrar</string>
 
     <!-- ListViewTypes -->
     <string name="list_view_types_title">Tipos de vista de lista</string>
@@ -161,11 +179,24 @@
     <string name="camera_no_image">No hay imagen seleccionada</string>
     <string name="camera_image_cd">Imagen seleccionada</string>
     <string name="camera_pick_image">Elegir imagen</string>
-    <string name="camera_save_receipt">Guardar como recibo</string>
+    <string name="camera_save_receipt">Guardar recibo</string>
     <string name="camera_clear_selection">Eliminar selección</string>
     <string name="camera_error_no_list">No hay lista asociada. Abre la cámara desde una lista</string>
     <string name="camera_error_no_image">Selecciona una imagen primero</string>
     <string name="camera_saved_ok">Recibo guardado ✅</string>
+    <string name="camera_permission_denied">Permiso de cámara denegado.</string>
+
+    <!-- Opcionales UI CameraX -->
+    <string name="camera_back">Volver</string>
+    <string name="camera_grant_permission">Dar permiso</string>
+    <string name="camera_no_permission_desc">No hay permiso de cámara.</string>
+    <string name="camera_retake">Repetir</string>
+    <string name="camera_saving">Guardando…</string>
+    <string name="camera_capture">Capturar</string>
+    <string name="camera_switch_lens">Cambiar cámara</string>
+    <string name="camera_flash">Flash</string>
+    <string name="camera_torch">Linterna</string>
+    <string name="camera_zoom">Zoom</string>
 
     <!-- SelectList -->
     <string name="select_list_empty">Todavía no tienes listas</string>

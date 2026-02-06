@@ -1,7 +1,7 @@
 package com.example.teammaravillaapp.page.listdetail
 
-import com.example.teammaravillaapp.data.local.prefs.CategoryFilterPrefs
-import com.example.teammaravillaapp.data.local.prefs.ListViewTypePrefs
+import com.example.teammaravillaapp.data.local.prefs.user.CategoryFilterPrefs
+import com.example.teammaravillaapp.data.local.prefs.user.ListViewTypePrefs
 import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.model.ProductCategory
 import kotlinx.coroutines.flow.Flow

@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.page.categoryfilter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.data.local.prefs.CategoryFilterPrefs
+import com.example.teammaravillaapp.data.local.prefs.user.CategoryFilterPrefs
 import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel

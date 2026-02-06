@@ -24,6 +24,7 @@ import com.example.teammaravillaapp.page.profile.Profile
 import com.example.teammaravillaapp.page.profile.ProfileViewModel
 import com.example.teammaravillaapp.page.recipes.Recipes
 import com.example.teammaravillaapp.page.recipesdetail.RecipesDetail
+import com.example.teammaravillaapp.page.register.Register
 import com.example.teammaravillaapp.page.selectlist.SelectList
 import com.example.teammaravillaapp.page.session.SessionState
 import com.example.teammaravillaapp.page.session.SessionViewModel
@@ -64,7 +65,16 @@ fun TeamMaravillaNavHost(
 
         composable(NavRoute.Login.route) {
             Login(
-                onBack = { actions.up() },
+                onGoRegister = { actions.toRegister() },
+                onLoggedIn = { actions.toHome() },
+                onUiEvent = onUiEvent
+            )
+        }
+
+        composable(NavRoute.Register.route) {
+            Register(
+                onBackToLogin = { actions.up() },
+                onRegistered = { actions.toHome() },
                 onUiEvent = onUiEvent
             )
         }

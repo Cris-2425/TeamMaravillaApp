@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.data.repository.users.UsersRepository
-import com.example.teammaravillaapp.data.local.prefs.ProfilePhotoPrefs
+import com.example.teammaravillaapp.data.local.prefs.user.ProfilePhotoPrefs
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
