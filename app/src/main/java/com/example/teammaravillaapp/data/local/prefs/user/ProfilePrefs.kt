@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.data.local.prefs
+package com.example.teammaravillaapp.data.local.prefs.user
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
@@ -6,7 +6,6 @@ import com.example.teammaravillaapp.data.local.prefs.datastore.userPrefsDataStor
 import com.example.teammaravillaapp.data.local.prefs.keys.PrefKeys.KEY_PROFILE_PHOTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.collections.get
 
 fun profilePhotoFlow(ctx: Context): Flow<String?> =
     ctx.userPrefsDataStore.data.map { it[KEY_PROFILE_PHOTO] }

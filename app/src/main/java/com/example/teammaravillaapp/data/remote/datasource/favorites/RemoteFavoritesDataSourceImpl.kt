@@ -1,6 +1,6 @@
 package com.example.teammaravillaapp.data.remote.datasource.favorites
 
-import com.example.teammaravillaapp.data.remote.api.JsonFilesApi
+import com.example.teammaravillaapp.data.remote.api.JsonStorageApi
 import com.example.teammaravillaapp.data.remote.dto.FavoritesDto
 import com.google.gson.Gson
 import javax.inject.Inject
@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class RemoteFavoritesDataSourceImpl @Inject constructor(
-    private val api: JsonFilesApi
+    private val api: JsonStorageApi
 ) : RemoteFavoritesDataSource {
 
     private val gson = Gson()

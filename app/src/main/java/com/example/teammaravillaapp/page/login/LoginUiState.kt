@@ -1,11 +1,11 @@
 package com.example.teammaravillaapp.page.login
 
 data class LoginUiState(
-    val email: String = "",
+    val username: String = "",
     val password: String = "",
-    val passwordVisible: Boolean = false,
+    val rememberMe: Boolean = true,
     val isLoading: Boolean = false
 ) {
     val isLoginButtonEnabled: Boolean
-        get() = email.isNotBlank() && password.isNotBlank() && !isLoading
+        get() = username.isNotBlank() && password.length >= 4 && !isLoading
 }

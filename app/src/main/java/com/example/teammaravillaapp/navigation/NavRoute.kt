@@ -40,4 +40,5 @@ sealed class NavRoute(val route: String) {
     data object Stats : NavRoute("stats")
     data object Help : NavRoute("help")
     data object History : NavRoute("history")
+    data object Register : NavRoute("register")
 }

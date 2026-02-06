@@ -24,8 +24,11 @@ class SessionStore @Inject constructor(
         val LOGGED_IN: Preferences.Key<Boolean> = booleanPreferencesKey("logged_in")
         val USERNAME: Preferences.Key<String> = stringPreferencesKey("username")
         val TOKEN: Preferences.Key<String> = stringPreferencesKey("token")
+        val REMEMBER_ME = booleanPreferencesKey("remember_me")
     }
 
+    val rememberMe: Flow<Boolean> =
+        appContext.dataStore.data.map { it[Keys.REMEMBER_ME] ?: true }
     val isLoggedIn: Flow<Boolean> =
         appContext.dataStore.data.map { prefs -> prefs[Keys.LOGGED_IN] ?: false }
 
@@ -35,10 +38,11 @@ class SessionStore @Inject constructor(
     val token: Flow<String?> =
         appContext.dataStore.data.map { prefs -> prefs[Keys.TOKEN] }
 
-    suspend fun saveSession(username: String, token: String? = null) {
+    suspend fun saveSession(username: String, token: String? = null, rememberMe: Boolean) {
         appContext.dataStore.edit { prefs ->
             prefs[Keys.LOGGED_IN] = true
             prefs[Keys.USERNAME] = username
+            prefs[Keys.REMEMBER_ME] = rememberMe
             if (token != null) prefs[Keys.TOKEN] = token else prefs.remove(Keys.TOKEN)
         }
     }
@@ -48,13 +52,13 @@ class SessionStore @Inject constructor(
             prefs[Keys.LOGGED_IN] = false
             prefs.remove(Keys.USERNAME)
             prefs.remove(Keys.TOKEN)
+            prefs[Keys.REMEMBER_ME] = true
         }
     }
 
+    suspend fun shouldAutoLoginNow(): Boolean =
+        isLoggedIn.first() && rememberMe.first()
+
     // helpers
     suspend fun getTokenOrNull(): String? = token.first()
-
-    suspend fun getUsernameOrNull(): String? = username.first()
-
-    suspend fun isLoggedInNow(): Boolean = isLoggedIn.first()
 }

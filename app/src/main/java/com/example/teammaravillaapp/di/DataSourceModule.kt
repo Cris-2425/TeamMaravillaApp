@@ -10,8 +10,8 @@ import com.example.teammaravillaapp.data.remote.datasource.products.RemoteProduc
 import com.example.teammaravillaapp.data.remote.datasource.products.RemoteProductDataSourceImpl
 import com.example.teammaravillaapp.data.remote.datasource.recipes.RemoteRecipesDataSource
 import com.example.teammaravillaapp.data.remote.datasource.recipes.RemoteRecipesDataSourceImpl
-import com.example.teammaravillaapp.data.remote.datasource.users.RemoteUsersDataSource
-import com.example.teammaravillaapp.data.remote.datasource.users.RemoteUsersDataSourceImpl
+import com.example.teammaravillaapp.data.remote.datasource.users.RemoteAuthDataSource
+import com.example.teammaravillaapp.data.remote.datasource.users.RemoteAuthDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -42,12 +42,6 @@ abstract class DataSourceModule {
 
     @Binds
     @Singleton
-    abstract fun bindRemoteUsersDataSource(
-        impl: RemoteUsersDataSourceImpl
-    ): RemoteUsersDataSource
-
-    @Binds
-    @Singleton
     abstract fun bindRemoteFavoritesDataSource(
         impl: RemoteFavoritesDataSourceImpl
     ): RemoteFavoritesDataSource
@@ -57,4 +51,9 @@ abstract class DataSourceModule {
     abstract fun bindRemoteImageDataSource(
         impl: RemoteImageDataSourceImpl
     ): RemoteImageDataSource
+
+    @Binds @Singleton
+    abstract fun bindRemoteAuthDataSource(
+        impl: RemoteAuthDataSourceImpl
+    ): RemoteAuthDataSource
 }

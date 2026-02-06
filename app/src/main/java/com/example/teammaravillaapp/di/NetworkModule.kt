@@ -1,7 +1,8 @@
 package com.example.teammaravillaapp.di
 
+import com.example.teammaravillaapp.data.remote.api.AuthApi
 import com.example.teammaravillaapp.data.remote.api.ImageApi
-import com.example.teammaravillaapp.data.remote.api.JsonFilesApi
+import com.example.teammaravillaapp.data.remote.api.JsonStorageApi
 import com.example.teammaravillaapp.data.remote.api.ListsApi
 import com.example.teammaravillaapp.data.remote.api.ProductApi
 import com.example.teammaravillaapp.data.remote.api.RecipesApi
@@ -66,8 +67,12 @@ object NetworkModule {
     fun provideRecipesApi(retrofit: Retrofit): RecipesApi =
         retrofit.create(RecipesApi::class.java)
 
+    @Provides @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi =
+        retrofit.create(AuthApi::class.java)
+
     @Provides
     @Singleton
-    fun provideJsonFilesApi(retrofit: Retrofit): JsonFilesApi =
-        retrofit.create(JsonFilesApi::class.java)
+    fun provideJsonStorageApi(retrofit: Retrofit): JsonStorageApi =
+        retrofit.create(JsonStorageApi::class.java)
 }

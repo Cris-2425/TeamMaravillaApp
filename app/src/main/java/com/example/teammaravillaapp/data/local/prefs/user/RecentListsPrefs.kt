@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.data.local.prefs
+package com.example.teammaravillaapp.data.local.prefs.user
 
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

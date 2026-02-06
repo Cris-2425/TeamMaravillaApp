@@ -84,4 +84,9 @@ class NavActions(private val navController: NavHostController) {
             popUpTo(routeToPop) { inclusive = true }
             launchSingleTop = true
         }
+    fun toRegister() {
+        navController.navigate(NavRoute.Register.route) {
+            launchSingleTop = true
+        }
+    }
 }
