@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.page.listdetail
+package com.example.teammaravillaapp.page.listdetail.usecase
 
 /**
  * Acciones (intenciones) que el usuario puede realizar en la pantalla de detalle de lista.
@@ -22,7 +22,7 @@ package com.example.teammaravillaapp.page.listdetail
  * }
  * }
  *
- * @see com.example.teammaravillaapp.page.listdetail.usecase.ListDetailHandleActionUseCase
+ * @see ListDetailHandleActionUseCase
  */
 sealed interface ListDetailAction {
 

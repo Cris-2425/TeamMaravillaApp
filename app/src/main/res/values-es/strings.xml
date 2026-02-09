@@ -279,6 +279,17 @@
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Oscuro</string>
 
+
+    <string name="camera_permission_missing">No hay permiso de cámara.</string>
+    <string name="camera_permission_grant">Dar permiso</string>
+
+    <string name="camera_cd_toggle_lens">Cambiar cámara</string>
+    <string name="camera_cd_capture">Capturar</string>
+    <string name="camera_cd_flash">Flash</string>
+
+    <string name="camera_captured_image_cd">Foto capturada</string>
+    <string name="camera_preview_placeholder">Preview de cámara (solo diseño)</string>
+
     <!-- ******************************************************************************* -->
     <!-- Package component -->
     <!-- ******************************************************************************* -->
@@ -326,6 +337,12 @@
     <string name="topbar_menu_settings">Ajustes</string>
     <string name="topbar_menu_stats">Estadísticas</string>
     <string name="topbar_menu_help">Ayuda</string>
+
+
+    <string name="camera_cd_torch">Linterna</string>
+    <string name="camera_zoom_label">Zoom</string>
+    <string name="camera_zoom_value">x%.1f</string>
+
 
     <!-- ******************************************************************************* -->
     <!-- Package model -->

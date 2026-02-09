@@ -1,6 +1,5 @@
 package com.example.teammaravillaapp.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,7 +13,7 @@ import androidx.navigation.navArgument
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.page.camera.CameraScreen
 import com.example.teammaravillaapp.page.categoryfilter.CategoryFilter
-import com.example.teammaravillaapp.page.createlist.CreateListt
+import com.example.teammaravillaapp.page.createlist.CreateList
 import com.example.teammaravillaapp.page.help.Help
 import com.example.teammaravillaapp.page.history.History
 import com.example.teammaravillaapp.page.home.Home
@@ -95,7 +94,7 @@ fun TeamMaravillaNavHost(
             }
 
             composable(NavRoute.CreateList.route) {
-                CreateListt(
+                CreateList(
                     onBack = { actions.up() },
                     onListCreated = { listId ->
                         actions.toListDetailAndRemove(

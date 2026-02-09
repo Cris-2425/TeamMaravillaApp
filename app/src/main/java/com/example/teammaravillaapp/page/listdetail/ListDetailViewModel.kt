@@ -7,6 +7,7 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.data.local.prefs.listdetail.ListDetailPrefs
 import com.example.teammaravillaapp.data.local.prefs.user.RecentListsPrefs
 import com.example.teammaravillaapp.navigation.NavRoute.ListDetail.ARG_LIST_ID
+import com.example.teammaravillaapp.page.listdetail.usecase.ListDetailAction
 import com.example.teammaravillaapp.page.listdetail.usecase.ListDetailHandleActionUseCase
 import com.example.teammaravillaapp.page.listdetail.usecase.ListDetailObserveStateUseCase
 import com.example.teammaravillaapp.page.listdetail.usecase.RefreshCatalogUseCase
@@ -28,7 +29,7 @@ import javax.inject.Inject
  *
  * Responsabilidades:
  * - Exponer un [StateFlow] inmutable de [ListDetailUiState] para que la UI pinte sin lógica de negocio.
- * - Gestionar acciones del usuario mediante [ListDetailAction]:
+ * - Gestionar acciones del usuario mediante [com.example.teammaravillaapp.page.listdetail.usecase.ListDetailAction]:
  *   - Acciones de UI (ej. búsqueda) actualizan estado local (query).
  *   - Acciones de dominio/persistencia delegan en [ListDetailHandleActionUseCase].
  * - Emitir eventos de un solo uso (snackbars) a través de [events] con [UiEvent].
@@ -132,7 +133,7 @@ class ListDetailViewModel @Inject constructor(
      * Punto de entrada único para gestionar acciones del usuario.
      *
      * Reglas:
-     * - [ListDetailAction.QueryChanged] actualiza solo el estado local (no toca repositorio).
+     * - [com.example.teammaravillaapp.page.listdetail.usecase.ListDetailAction.QueryChanged] actualiza solo el estado local (no toca repositorio).
      * - El resto de acciones requieren un `listId` real; si no existe, se ignoran.
      * - Tras acciones relevantes, se emiten snackbars informativos.
      *

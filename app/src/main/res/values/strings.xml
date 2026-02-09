@@ -328,6 +328,21 @@
     <string name="topbar_menu_help">Help</string>
 
 
+    <string name="camera_permission_missing">Camera permission is missing.</string>
+    <string name="camera_permission_grant">Grant permission</string>
+
+
+    <string name="camera_cd_toggle_lens">Switch camera</string>
+    <string name="camera_cd_capture">Capture</string>
+    <string name="camera_cd_flash">Flash</string>
+
+    <string name="camera_captured_image_cd">Captured photo</string>
+    <string name="camera_preview_placeholder">Camera preview (design only)</string>
+
+    <string name="camera_cd_torch">Linterna</string>
+    <string name="camera_zoom_label">Zoom</string>
+    <string name="camera_zoom_value">x%.1f</string>
+
     <!-- ******************************************************************************* -->
     <!-- Package model -->
     <!-- ******************************************************************************* -->
