@@ -75,7 +75,7 @@ fun ListCard(
                 Text(
                     text = cardInfo.subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = cs.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )

@@ -35,6 +35,7 @@ class AppViewModel @Inject constructor(
 
     init {
         seedOnAppStart()
+
     }
 
     private fun seedOnAppStart() {

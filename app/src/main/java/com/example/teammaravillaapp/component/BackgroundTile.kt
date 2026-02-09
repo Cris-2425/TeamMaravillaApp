@@ -1,6 +1,6 @@
 package com.example.teammaravillaapp.component
 
-import android.util.Log
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,45 +25,50 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.teammaravillaapp.model.ListBackground
-import com.example.teammaravillaapp.data.seed.ListBackgrounds
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Tarjeta individual de un **fondo** seleccionable.
+ * Tarjeta individual de un fondo seleccionable.
  *
- * @param selected si está seleccionado (pinta borde grueso + check).
- * @param bg fondo representado.
- * @param onClick acción al pulsar.
+ * Se utiliza dentro de una cuadrícula de selección. Si [selected] es `true`,
+ * se muestra un borde resaltado y un icono de confirmación.
+ *
+ * @param modifier Modificador para ajustar tamaño, padding y comportamiento de layout.
+ * @param selected Indica si esta opción está seleccionada.
+ * @param title Texto visible sobre la tarjeta (por ejemplo, el nombre del fondo).
+ * @param imageRes Recurso drawable a mostrar como imagen de fondo.
+ * @param onClick Acción a ejecutar cuando el usuario pulsa la tarjeta.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * BackgroundTile(
+ *   selected = uiState.selectedBackground == bg,
+ *   title = bg.name,
+ *   imageRes = ListBackgrounds.getBackgroundRes(bg),
+ *   onClick = { viewModel.onBackgroundSelected(bg) }
+ * )
+ * }
  */
 @Composable
 fun BackgroundTile(
-    selected: Boolean = false,
-    bg: ListBackground,
-    onClick: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    selected: Boolean,
+    title: String,
+    @DrawableRes imageRes: Int,
+    onClick: () -> Unit
 ) {
-    val imageRes = ListBackgrounds.getBackgroundRes(bg)
-
     Box(
-        modifier = Modifier
+        modifier = modifier
             .height(76.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.background)
             .border(
-                width =
-                    if (selected) 2.dp
-                    else 1.dp,
-                color =
-                    if (selected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.secondary,
+                width = if (selected) 2.dp else 1.dp,
+                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                 shape = RoundedCornerShape(12.dp)
             )
-            .clickable {
-                Log.e(TAG_GLOBAL, "Fondo pulsado: $bg (selected=$selected)")
-                onClick()
-            },
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Image(
@@ -75,7 +80,7 @@ fun BackgroundTile(
 
         if (selected) {
             Icon(
-                Icons.Default.Check,
+                imageVector = Icons.Default.Check,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier
@@ -88,19 +93,34 @@ fun BackgroundTile(
         }
 
         Text(
-            text = bg.name,
+            text = title,
             color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewBackgroundTile() {
+private fun BackgroundTileSelectedPreview() {
     TeamMaravillaAppTheme {
         BackgroundTile(
             selected = true,
-            bg = ListBackground.FONDO1
+            title = "FONDO1",
+            imageRes = android.R.drawable.ic_menu_gallery,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BackgroundTileUnselectedPreview() {
+    TeamMaravillaAppTheme {
+        BackgroundTile(
+            selected = false,
+            title = "FONDO1",
+            imageRes = android.R.drawable.ic_menu_gallery,
+            onClick = {}
         )
     }
 }

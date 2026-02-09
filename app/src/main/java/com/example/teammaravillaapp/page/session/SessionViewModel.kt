@@ -13,12 +13,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SessionViewModel @Inject constructor(
-    sessionStore: SessionStore
+    private val sessionStore: SessionStore
 ) : ViewModel() {
 
     val sessionState: StateFlow<SessionState> =
-        combine(sessionStore.isLoggedIn, sessionStore.username) { loggedIn, username ->
-            if (loggedIn) SessionState.LoggedIn(username) else SessionState.LoggedOut
+        combine(
+            sessionStore.isLoggedIn,
+            sessionStore.rememberMe,
+            sessionStore.username
+        ) { loggedIn, rememberMe, username ->
+            if (loggedIn && rememberMe) SessionState.LoggedIn(username)
+            else SessionState.LoggedOut
         }
             .distinctUntilChanged()
             .stateIn(
