@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.data.local.prefs.keys
 
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 
@@ -21,4 +22,7 @@ object PrefKeys {
     val KEY_RECENT_LIST_IDS = stringPreferencesKey("recent_list_ids_json")
 
     val KEY_LIST_STYLE = stringPreferencesKey("list_style")
+
+    private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+
 }

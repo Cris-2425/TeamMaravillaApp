@@ -168,6 +168,13 @@
     <string name="home_list_subtitle_progress">%1$d/%2$d comprados</string>
     <string name="home_snackbar_list_deleted">Lista eliminada</string>
 
+    <!-- NavHost -->
+
+    <string name="nav_title_lists">Listas</string>
+    <string name="nav_title_recipes">Recetas</string>
+    <string name="nav_title_history">Historial</string>
+    <string name="nav_title_profile">Perfil</string>
+
     <!-- Camera -->
     <string name="camera_title">Cámara</string>
     <string name="camera_action_title">Acciones</string>
@@ -185,6 +192,7 @@
     <string name="camera_error_no_image">Selecciona una imagen primero</string>
     <string name="camera_saved_ok">Recibo guardado ✅</string>
     <string name="camera_permission_denied">Permiso de cámara denegado.</string>
+    <string name="fab_open_camera_cd">Abrir cámara-</string>
 
     <!-- Opcionales UI CameraX -->
     <string name="camera_back">Volver</string>
@@ -281,6 +289,11 @@
     <string name="create_list_save">Guardar</string>
 
     <!-- BottomBar -->
+    <string name="bottom_bar_home_label">Inicio</string>
+    <string name="bottom_bar_recipes_label">Recetas</string>
+    <string name="bottom_bar_history_label">Historial</string>
+    <string name="bottom_bar_profile_label">Perfil</string>
+    <string name="bottom_bar_history_cd">Ir al historial</string>
     <string name="bottom_bar_home_cd">Inicio</string>
     <string name="bottom_bar_profile_cd">Perfil</string>
     <string name="bottom_bar_camera_cd">Cámara</string>
@@ -292,6 +305,11 @@
     <string name="drawer_share_list">Compartir lista</string>
     <string name="drawer_options">Ajustes</string>
     <string name="drawer_exit">Salir</string>
+    <string name="drawer_not_implemented">Aún no implementado.</string>
+    <string name="drawer_exit_hint">Puedes cerrar sesión desde Perfil.</string>
+    <string name="drawer_share_title">Compartir</string>
+    <string name="drawer_share_text">Mira mi lista en TeamMaravillaApp 🧺✨</string>
+    <string name="search_hint">Usa el buscador de arriba para filtrar tus listas.</string>
 
     <!-- ProfileImage -->
     <string name="profile_image_description">Foto de perfil</string>
@@ -305,6 +323,9 @@
     <string name="topbar_menu_cd">Menú</string>
     <string name="topbar_search_cd">Buscar</string>
     <string name="topbar_more_cd">Más opciones</string>
+    <string name="topbar_menu_settings">Ajustes</string>
+    <string name="topbar_menu_stats">Estadísticas</string>
+    <string name="topbar_menu_help">Ayuda</string>
 
     <!-- ******************************************************************************* -->
     <!-- Package model -->

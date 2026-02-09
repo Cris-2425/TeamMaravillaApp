@@ -7,9 +7,5 @@ package com.example.teammaravillaapp.model
  * pero se mantiene el identificador actual para no romper código.
  */
 enum class OptionButton {
-    HOME,
-    PROFILE,
-    CAMERA,
-    RECIPES,
-    EXIT
+    HOME, RECIPES, HISTORY, PROFILE
 }

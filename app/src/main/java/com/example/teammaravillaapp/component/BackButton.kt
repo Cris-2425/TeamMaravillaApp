@@ -1,7 +1,5 @@
 package com.example.teammaravillaapp.component
 
-import android.util.Log
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.FloatingActionButton
@@ -11,28 +9,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Botón flotante de volver atrás.
+ * Botón flotante para volver a la pantalla anterior.
  *
- * @param onClick acción al pulsar (usualmente navController.navigateUp()).
+ * Este componente representa una acción de navegación “volver atrás” de forma consistente
+ * con Material Design 3. No contiene lógica de navegación interna: delega la acción en
+ * el callback [onClick] para mantener la UI como presentación pura.
+ *
+ * @param modifier Modificador de Compose para personalizar posición, padding, tamaño o accesibilidad.
+ * @param onClick Acción a ejecutar al pulsar el botón (por ejemplo, `navController.navigateUp()`).
+ *
+ * @see FloatingActionButton
+ *
+ * Ejemplo de uso:
+ * {@code
+ * BackButton(
+ *   modifier = Modifier.padding(start = 16.dp, bottom = 16.dp),
+ *   onClick = { navController.navigateUp() }
+ * )
+ * }
  */
 @Composable
 fun BackButton(
-    onClick: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     FloatingActionButton(
-        onClick = {
-            Log.d(TAG_GLOBAL, "Volver atrás")
-            onClick()
-        },
+        onClick = onClick,
         containerColor = MaterialTheme.colorScheme.secondary,
         contentColor = MaterialTheme.colorScheme.onSecondary,
-        modifier = Modifier.padding(start = 16.dp, bottom = 120.dp)
+        modifier = modifier
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -41,10 +50,10 @@ fun BackButton(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewBackButton() {
+private fun BackButtonPreview() {
     TeamMaravillaAppTheme {
-        BackButton()
+        BackButton(onClick = {})
     }
 }

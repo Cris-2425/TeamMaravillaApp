@@ -70,11 +70,6 @@ class NavActions(private val navController: NavHostController) {
 
     // -------- SingleTop helpers (opcional) --------
 
-    fun toHomeSingleTop() = navigate(NavRoute.Home.route) {
-        popUpTo(NavRoute.Home.route) { inclusive = false }
-        launchSingleTop = true
-    }
-
     fun toCreateListAndClearFromBackStack() = navigate(NavRoute.CreateList.route) {
         launchSingleTop = true
     }
@@ -89,4 +84,31 @@ class NavActions(private val navController: NavHostController) {
             launchSingleTop = true
         }
     }
+
+    // -------- Tabs: singleTop + restoreState --------
+
+    fun toHomeSingleTop() = navigate(NavRoute.Home.route) {
+        popUpTo(NavRoute.Home.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+
+    fun toRecipesSingleTop() = navigate(NavRoute.Recipes.route) {
+        popUpTo(NavRoute.Home.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+
+    fun toHistorySingleTop() = navigate(NavRoute.History.route) {
+        popUpTo(NavRoute.Home.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+
+    fun toProfileSingleTop() = navigate(NavRoute.Profile.route) {
+        popUpTo(NavRoute.Home.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+
 }
