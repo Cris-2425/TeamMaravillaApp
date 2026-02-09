@@ -1,9 +1,13 @@
-package com.example.teammaravillaapp.component
+package com.example.teammaravillaapp.component.legacy
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -19,16 +23,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.model.QuickActionData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Botón compacto de **acción rápida** (icono redondo + etiqueta).
+ * Botón compacto de acción rápida (icono circular + etiqueta).
  *
- * @param quickActionButtonData datos visuales + enabled.
- * @param onClick callback al pulsar.
+ * Componente de presentación: representa una acción “rápida” (por ejemplo, crear lista).
+ * El estado habilitado se controla mediante [quickActionButtonData.enabled] y la interacción
+ * se delega a [onClick] para mantener la separación de responsabilidades (MVVM).
+ *
+ * @param quickActionButtonData Datos visuales de la acción (icono, etiqueta y estado enabled).
+ * @param modifier Modificador de Compose para controlar tamaño/posición del componente.
+ * @param onClick Acción a ejecutar al pulsar (solo se invoca si la acción está habilitada).
+ *
+ * Ejemplo de uso:
+ * {@code
+ * QuickActionButton(
+ *   quickActionButtonData = QuickActionData(Icons.Default.ShoppingCart, stringResource(R.string.quick_action_new_list)),
+ *   onClick = { viewModel.onNewListClick() }
+ * )
+ * }
  */
-
-
 @Composable
 fun QuickActionButton(
     quickActionButtonData: QuickActionData,
@@ -44,10 +58,7 @@ fun QuickActionButton(
                 .size(56.dp)
                 .clickable(
                     enabled = quickActionButtonData.enabled,
-                    onClick = {
-                        Log.e(TAG_GLOBAL, "Click en '${quickActionButtonData.label}'")
-                        onClick()
-                    }
+                    onClick = onClick
                 )
         ) {
             Box(
@@ -62,7 +73,9 @@ fun QuickActionButton(
                 )
             }
         }
+
         Spacer(Modifier.height(6.dp))
+
         Text(
             text = quickActionButtonData.label,
             color = MaterialTheme.colorScheme.primary,
@@ -73,12 +86,15 @@ fun QuickActionButton(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewQuickActionButton() {
+private fun QuickActionButtonPreview() {
     TeamMaravillaAppTheme {
         QuickActionButton(
-            QuickActionData(icon = Icons.Default.ShoppingCart, label = "Nueva lista")
+            quickActionButtonData = QuickActionData(
+                icon = Icons.Default.ShoppingCart,
+                label = "Nueva lista"
+            )
         )
     }
 }

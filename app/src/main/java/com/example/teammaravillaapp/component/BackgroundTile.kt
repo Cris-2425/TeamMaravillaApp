@@ -25,6 +25,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
@@ -106,7 +107,7 @@ private fun BackgroundTileSelectedPreview() {
         BackgroundTile(
             selected = true,
             title = "FONDO1",
-            imageRes = android.R.drawable.ic_menu_gallery,
+            imageRes = R.drawable.list_supermarket,
             onClick = {}
         )
     }
@@ -119,7 +120,7 @@ private fun BackgroundTileUnselectedPreview() {
         BackgroundTile(
             selected = false,
             title = "FONDO1",
-            imageRes = android.R.drawable.ic_menu_gallery,
+            imageRes = R.drawable.list_bbq,
             onClick = {}
         )
     }

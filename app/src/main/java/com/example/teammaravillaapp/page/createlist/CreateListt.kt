@@ -78,10 +78,8 @@ fun CreateListt(
 
                 BackgroundGrid(
                     selectedBg = uiState.selectedBackground,
-                    onSelect = { chosen ->
-                        vm.onBackgroundSelect(chosen)
-                        Log.d(TAG_GLOBAL, "Crear Lista → Fondo elegido: $chosen")
-                    }
+                    imageResProvider = { ListBackgrounds.getBackgroundRes(it) },
+                    onSelect = vm::onBackgroundSelect
                 )
 
                 Spacer(Modifier.height(16.dp))

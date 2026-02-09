@@ -1,6 +1,5 @@
-package com.example.teammaravillaapp.component
+package com.example.teammaravillaapp.component.legacy
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,34 +19,42 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
 /**
- * Opción circular seleccionable (por ejemplo: estilo de lista).
+ * Opción circular seleccionable.
  *
- * @param label texto dentro del círculo.
- * @param selected si está activa (pinta color/ícono).
- * @param onClick acción al pulsar.
+ * Se utiliza para representar una elección simple (por ejemplo, un “tipo de vista” o “estilo de lista”).
+ * El componente no gestiona estado interno: recibe [selected] como entrada y delega la interacción a [onClick].
+ *
+ * @param modifier Modificador de Compose para controlar tamaño, padding o alineación. Por defecto aplica un tamaño circular.
+ * @param label Texto mostrado dentro del círculo. Recomendado: corto (1–2 palabras) para evitar cortes.
+ * @param selected Indica si la opción está seleccionada. Cuando es `true` se muestra un check y estilos de énfasis.
+ * @param onClick Acción a ejecutar al pulsar la opción.
+ *
+ * @see Surface
+ *
+ * Ejemplo de uso:
+ * {@code
+ * CircularOption(
+ *   label = "Lista",
+ *   selected = uiState.viewType == ViewType.LIST,
+ *   onClick = { viewModel.onViewTypeSelected(ViewType.LIST) }
+ * )
+ * }
  */
 @Composable
 fun CircularOption(
+    modifier: Modifier = Modifier,
     label: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
     Surface(
-        onClick = {
-            Log.e(TAG_GLOBAL, "CircularOption click")
-            onClick()
-        },
+        onClick = onClick,
         shape = CircleShape,
-        color =
-            if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.secondary,
-        contentColor =
-            if (selected) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSecondary,
-        modifier = Modifier.size(92.dp)
+        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary,
+        modifier = modifier.size(92.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -56,7 +63,7 @@ fun CircularOption(
                     Spacer(Modifier.height(4.dp))
                 }
                 Text(
-                    label,
+                    text = label,
                     style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center
                 )
@@ -65,22 +72,14 @@ fun CircularOption(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewCircularOption() {
+private fun CircularOptionPreview() {
     TeamMaravillaAppTheme {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularOption(
-                "Seleccionado",
-                true
-            ) {}
-
+            CircularOption(label = "Seleccionado", selected = true, onClick = {})
             Spacer(Modifier.height(16.dp))
-
-            CircularOption(
-                "No seleccionado",
-                false
-            ) {}
+            CircularOption(label = "No seleccionado", selected = false, onClick = {})
         }
     }
 }

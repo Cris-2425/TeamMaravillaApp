@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.BackButton
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.model.Recipe
@@ -190,7 +189,7 @@ fun RecipesDetail(
                         Spacer(Modifier.height(18.dp))
 
                         // PREPARACIÓN
-                        if (!recipe.instructions.isNullOrBlank()) {
+                        if (recipe.instructions.isNotBlank()) {
                             Text(
                                 text = stringResource(R.string.recipe_instructions_title),
                                 style = MaterialTheme.typography.titleMedium,

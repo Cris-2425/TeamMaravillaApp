@@ -1,11 +1,8 @@
-package com.example.teammaravillaapp.page.stats
+package com.example.teammaravillaapp.page.stats.component
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -14,42 +11,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
-@Composable
-internal fun StatTile(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 1.dp,
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
+/**
+ * Fila de ranking para mostrar un producto "top" en la pantalla de estadísticas.
+ *
+ * @param rank Posición en el ranking (1, 2, 3...).
+ * @param name Nombre del producto.
+ * @param times Número de veces registrado (por ejemplo, comprado o añadido).
+ *
+ * Ejemplo de uso:
+ * {@code
+ * TopProductRow(
+ *   rank = 1,
+ *   name = "Manzana",
+ *   times = 24
+ * )
+ * }
+ */
 @Composable
 internal fun TopProductRow(
     rank: Int,
@@ -89,10 +72,22 @@ internal fun TopProductRow(
             )
 
             Text(
-                text = "×$times",
+                text = stringResource(R.string.stats_times_format, times),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TopProductRowPreview() {
+    TeamMaravillaAppTheme {
+        TopProductRow(
+            rank = 1,
+            name = "Manzana Golden",
+            times = 24
+        )
     }
 }

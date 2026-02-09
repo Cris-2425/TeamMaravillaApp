@@ -356,4 +356,16 @@
     <string name="list_view_list">List</string>
     <string name="list_view_compact">Compact</string>
 
+
+    <string name="rename_list_title">Rename list</string>
+    <string name="rename_list_placeholder">List name</string>
+
+    <string name="search_placeholder_products_lists">Search product or list</string>
+
+    <string name="swipe_action_rename">Rename</string>
+    <string name="swipe_action_delete">Delete</string>
+
+    <string name="stats_times_format">×%1$d</string>
+
+
 </resources>

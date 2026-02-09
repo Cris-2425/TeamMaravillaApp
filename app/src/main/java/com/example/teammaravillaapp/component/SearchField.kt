@@ -7,11 +7,33 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.SearchFieldData
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Campo de búsqueda reutilizable.
+ *
+ * Renderiza un `OutlinedTextField` configurado para búsqueda. Si [onSearch] no es nulo,
+ * el teclado mostrará la acción "Search" y la ejecutará al pulsarla.
+ *
+ * @param searchData Datos del campo (valor actual y placeholder).
+ * @param modifier Modificador de Compose para controlar el layout.
+ * @param onValueChange Callback que notifica cambios en el texto.
+ * @param onSearch Acción opcional al disparar la búsqueda desde el teclado.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * SearchField(
+ *   searchData = uiState.search,
+ *   onValueChange = viewModel::onSearchTextChange,
+ *   onSearch = viewModel::onSearch
+ * )
+ * }
+ */
 @Composable
 fun SearchField(
     searchData: SearchFieldData,
@@ -26,18 +48,19 @@ fun SearchField(
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = if (onSearch != null) ImeAction.Search else ImeAction.Done),
-        keyboardActions = KeyboardActions(
-            onSearch = { onSearch?.invoke() }
-        )
+        keyboardActions = KeyboardActions(onSearch = { onSearch?.invoke() })
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewSearchFieldEmpty() {
+private fun SearchFieldPreviewEmpty() {
     TeamMaravillaAppTheme {
         SearchField(
-            searchData = SearchFieldData(value = "", placeholder = "Buscar producto o lista"),
+            searchData = SearchFieldData(
+                value = "",
+                placeholder = stringResource(R.string.search_placeholder_products_lists)
+            ),
             onValueChange = {},
             onSearch = {}
         )
@@ -46,10 +69,13 @@ private fun PreviewSearchFieldEmpty() {
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewSearchFieldTyped() {
+private fun SearchFieldPreviewTyped() {
     TeamMaravillaAppTheme {
         SearchField(
-            searchData = SearchFieldData(value = "pasta", placeholder = "Buscar producto o lista"),
+            searchData = SearchFieldData(
+                value = "pasta",
+                placeholder = stringResource(R.string.search_placeholder_products_lists)
+            ),
             onValueChange = {},
             onSearch = {}
         )
