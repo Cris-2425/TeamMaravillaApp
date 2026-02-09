@@ -15,17 +15,37 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
- * Fondo oficial de la app (pro).
+ * Fondo general reutilizable para pantallas de la aplicación.
  *
- * - Fondo por defecto: bg_app (gradiente + noise)
- * - Permite imagen alternativa (ej: fondos de listas)
- * - Halo superior sutil
- * - Overlay configurable para mejorar contraste
+ * Proporciona un fondo visual consistente (imagen base + grano sutil + overlay) y opcionalmente
+ * un “halo” superior para dar profundidad. Permite sustituir la imagen base con [bgRes] para
+ * casos como fondos personalizados de listas.
+ *
+ * Recomendación: mantener [overlayAlpha] y [haloAlpha] en el rango 0..1 para evitar resultados
+ * visuales inesperados.
+ *
+ * @param modifier Modificador de Compose para controlar tamaño/posición del contenedor.
+ * @param bgRes Recurso drawable opcional para usar como fondo. Si es `null`, se usa el fondo oficial de la app.
+ * @param overlayColor Color del overlay usado para mejorar contraste del contenido.
+ * @param overlayAlpha Opacidad del overlay (0 = sin overlay, 1 = opaco).
+ * @param showTopHalo Indica si se muestra el halo superior.
+ * @param haloHeight Altura del halo superior.
+ * @param haloAlpha Opacidad del halo (0 = transparente, 1 = opaco).
+ * @param content Contenido composable que se dibuja por encima del fondo.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * GeneralBackground {
+ *   Scaffold { padding ->  ... }
+ * }
+ * }
  */
 @Composable
 fun GeneralBackground(
@@ -66,7 +86,7 @@ fun GeneralBackground(
             )
         }
 
-        // Grain
+        // Grain / noise
         Image(
             painter = painterResource(R.drawable.bg_noise),
             contentDescription = null,
@@ -75,7 +95,7 @@ fun GeneralBackground(
             alpha = 0.035f
         )
 
-        // Overlay
+        // Overlay para contraste
         if (overlayAlpha > 0f) {
             Box(
                 Modifier
@@ -85,5 +105,15 @@ fun GeneralBackground(
         }
 
         content()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GeneralBackgroundPreview() {
+    TeamMaravillaAppTheme {
+        GeneralBackground {
+            Box(modifier = Modifier.fillMaxSize())
+        }
     }
 }

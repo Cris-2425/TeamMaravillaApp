@@ -13,21 +13,37 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
- * Grid fluido para **burbujas de opciones** (perfil).
+ * Grid fluido de burbujas de opciones.
  *
- * Ahora soporta callback de click con índice.
+ * Renderiza una lista de etiquetas mediante [OptionBubble] distribuidas en filas con un máximo
+ * de 3 elementos por fila. La interacción se comunica al exterior mediante [onOptionClick].
+ *
+ * @param modifier Modificador de Compose para controlar layout, padding y tamaño.
+ * @param options Lista de textos a mostrar en cada burbuja.
+ * @param onOptionClick Callback invocado al pulsar una opción. Se proporciona el índice de la opción pulsada.
+ *
+ * @see OptionBubble
+ *
+ * Ejemplo de uso:
+ * {@code
+ * OptionsGrid(
+ *   options = uiState.profileOptions,
+ *   onOptionClick = { index -> viewModel.onProfileOptionClick(index) }
+ * )
+ * }
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OptionsGrid(
+    modifier: Modifier = Modifier,
     options: List<String>,
-    onOptionClick: (Int) -> Unit = {}
+    onOptionClick: (Int) -> Unit
 ) {
     FlowRow(
         maxItemsInEachRow = 3,
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         options.forEachIndexed { index, text ->
             OptionBubble(
@@ -38,16 +54,13 @@ fun OptionsGrid(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewOptionsGrid() {
+private fun OptionsGridPreview() {
     TeamMaravillaAppTheme {
         OptionsGrid(
-            listOf(
-                "Historial",
-                "Favoritos",
-                "Configuración"
-            )
+            options = listOf("Historial", "Favoritos", "Configuración"),
+            onOptionClick = {}
         )
     }
 }

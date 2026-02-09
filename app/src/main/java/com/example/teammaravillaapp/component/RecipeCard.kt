@@ -1,17 +1,25 @@
 package com.example.teammaravillaapp.component
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,17 +38,41 @@ import com.example.teammaravillaapp.data.seed.ProductData
 import com.example.teammaravillaapp.data.seed.RecipeData
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.Recipe
-import com.example.teammaravillaapp.util.TAG_GLOBAL
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Tarjeta de receta con imagen, título y listado de ingredientes en formato burbuja.
+ *
+ * Componente de presentación: no contiene lógica de negocio ni navegación.
+ * La interacción se delega a [onClick] y [onToggleFavorite].
+ *
+ * @param modifier Modificador para controlar layout, padding y comportamiento.
+ * @param recipe Receta a mostrar (título e imagen).
+ * @param ingredients Ingredientes ya resueltos (modelo de dominio), renderizados como burbujas.
+ * @param isFavorite Indica si la receta está marcada como favorita.
+ * @param onToggleFavorite Acción al pulsar el icono de favorito.
+ * @param onClick Acción al pulsar la tarjeta completa.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * RecipeCard(
+ *   recipe = recipe,
+ *   ingredients = uiState.ingredients,
+ *   isFavorite = uiState.isFavorite,
+ *   onToggleFavorite = { viewModel.onToggleFavorite(recipe.id) },
+ *   onClick = { navController.navigate(Screen.RecipeDetail.createRoute(recipe.id)) }
+ * )
+ * }
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipeCard(
+    modifier: Modifier = Modifier,
     recipe: Recipe,
     ingredients: List<Product>,
-    modifier: Modifier = Modifier,
     isFavorite: Boolean = false,
-    onToggleFavorite: () -> Unit = {},
-    onClick: () -> Unit = {}
+    onToggleFavorite: () -> Unit,
+    onClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -58,10 +90,7 @@ fun RecipeCard(
         contentColor = cs.onSecondary,
         modifier = modifier
             .fillMaxWidth()
-            .clickable {
-                Log.d(TAG_GLOBAL, "Click en '${recipe.title}'")
-                onClick()
-            }
+            .clickable(onClick = onClick)
     ) {
         Column(Modifier.padding(14.dp)) {
 
@@ -71,7 +100,7 @@ fun RecipeCard(
                 color = cs.surface,
                 contentColor = cs.onSurface
             ) {
-                Row(
+                androidx.compose.foundation.layout.Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
@@ -131,7 +160,7 @@ fun RecipeCard(
                 }
 
                 else -> {
-                    Box(
+                    androidx.compose.foundation.layout.Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(140.dp)
@@ -170,25 +199,29 @@ fun RecipeCard(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    ingredients.forEach { ProductBubble(it) }
+                    ingredients.forEach { ingredient ->
+                        ProductBubble(ingredient)
+                    }
                 }
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewRecipeCard() {
+private fun RecipeCardPreview() {
     val r = RecipeData.recipes.first()
     val byId = ProductData.allProducts.associateBy { it.id }
     val ing = r.productIds.mapNotNull { byId[it] }
 
-    MaterialTheme {
+    TeamMaravillaAppTheme {
         RecipeCard(
             recipe = r,
             ingredients = ing,
-            isFavorite = true
+            isFavorite = true,
+            onToggleFavorite = {},
+            onClick = {}
         )
     }
 }

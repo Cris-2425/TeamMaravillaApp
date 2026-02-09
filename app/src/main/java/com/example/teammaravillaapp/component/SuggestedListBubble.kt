@@ -3,7 +3,10 @@ package com.example.teammaravillaapp.component
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -22,17 +25,31 @@ import com.example.teammaravillaapp.model.SuggestedList
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
- * Burbuja circular para **lista sugerida** (imagen + etiqueta).
+ * Burbuja circular para representar una lista sugerida (imagen + etiqueta).
  *
- * @param suggested modelo con nombre + imagen.
+ * Componente de presentación: muestra una imagen circular y, sobre ella, una banda inferior con el nombre.
+ * La interacción se delega a [onClick].
+ *
+ * @param suggested Modelo con el nombre e imagen de la lista sugerida.
+ * @param modifier Modificador de Compose para controlar tamaño/posición. Por defecto aplica un tamaño compacto.
+ * @param onClick Acción a ejecutar cuando el usuario pulsa la burbuja.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * SuggestedListBubble(
+ *   suggested = item,
+ *   onClick = { viewModel.onSuggestedListSelected(item) }
+ * )
+ * }
  */
 @Composable
 fun SuggestedListBubble(
     suggested: SuggestedList,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .size(72.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick),
@@ -67,14 +84,14 @@ fun SuggestedListBubble(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewSuggestedListBubble() {
+private fun SuggestedListBubblePreview() {
     TeamMaravillaAppTheme {
         SuggestedListBubble(
-            SuggestedList(
-                "BBQ sábado",
-                R.drawable.fondo_bbq
+            suggested = SuggestedList(
+                name = "BBQ sábado",
+                imageRes = R.drawable.fondo_bbq
             )
         )
     }

@@ -27,6 +27,8 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.SectionCard
 import com.example.teammaravillaapp.component.Title
+import com.example.teammaravillaapp.page.stats.component.StatTile
+import com.example.teammaravillaapp.page.stats.component.TopProductRow
 import com.example.teammaravillaapp.ui.events.UiEvent
 
 @Composable

@@ -7,7 +7,7 @@ import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.model.UserList
-import com.example.teammaravillaapp.page.listdetail.ListDetailPrefs
+import com.example.teammaravillaapp.data.local.prefs.listdetail.ListDetailPrefs
 import com.example.teammaravillaapp.page.listdetail.ListDetailUiState
 import com.example.teammaravillaapp.page.listdetail.ListItemUi
 import kotlinx.coroutines.flow.Flow
@@ -20,18 +20,51 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
+/**
+ * Caso de uso que construye el estado observable de la pantalla de detalle de lista.
+ *
+ * Su responsabilidad es producir un [Flow] de [ListDetailUiState] combinando:
+ * - Lista actual seleccionada (desde [ListsRepository.lists])
+ * - Items de la lista (Room / persistencia local)
+ * - Catálogo de productos (Room “source of truth”)
+ * - Preferencias de UI (tipo de vista y categorías seleccionadas) desde [ListDetailPrefs]
+ * - Query de búsqueda (aportada por el ViewModel mediante [StateFlow])
+ *
+ * Ventajas:
+ * - La Screen no “calcula” nada: solo pinta el [ListDetailUiState].
+ * - La composición de estado es reactiva: cualquier cambio en DB/prefs/query actualiza la UI.
+ *
+ * @property listsRepository Repositorio de listas.
+ * @property productRepository Repositorio de productos/catálogo.
+ * @property prefs Preferencias específicas de ListDetail (viewType, categorías seleccionadas).
+ *
+ * Ejemplo de uso:
+ * {@code
+ * val uiStateFlow = observeStateUseCase.execute(navListId, queryFlow)
+ *   .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ListDetailUiState())
+ * }
+ */
 class ListDetailObserveStateUseCase @Inject constructor(
     private val listsRepository: ListsRepository,
     private val productRepository: ProductRepository,
     private val prefs: ListDetailPrefs
 ) {
 
+    /**
+     * Devuelve un flujo reactivo de [ListDetailUiState] para pintar la pantalla.
+     *
+     * @param navListId Id de lista recibido desde navegación. Si es nulo, se usa la última lista.
+     * @param queryFlow Flow de texto de búsqueda controlado por ViewModel (StateFlow).
+     *
+     * @return Un [Flow] que emite estados completos listos para UI.
+     *
+     * @throws Exception En caso de que alguno de los repositorios lance excepciones no controladas.
+     */
     fun execute(
         navListId: String?,
         queryFlow: StateFlow<String>
     ): Flow<ListDetailUiState> {
 
-        // ✅ ahora listsRepository.lists = Flow<List<UserList>>
         val currentListFlow: Flow<UserList?> =
             listsRepository.lists
                 .map { lists -> resolveFrom(lists, navListId) }
@@ -91,6 +124,16 @@ class ListDetailObserveStateUseCase @Inject constructor(
         }
     }
 
+    /**
+     * Resuelve qué lista es la “actual” en base al id de navegación.
+     *
+     * - Si hay [navListId], devuelve la lista con ese id (si existe).
+     * - Si no hay id, devuelve la última lista (caso típico: “lista reciente”).
+     *
+     * @param lists Listas existentes del usuario.
+     * @param navListId Id de navegación opcional.
+     * @return La lista seleccionada o null si no hay ninguna.
+     */
     private fun resolveFrom(
         lists: List<UserList>,
         navListId: String?
@@ -100,6 +143,24 @@ class ListDetailObserveStateUseCase @Inject constructor(
             else -> lists.lastOrNull()
         }
 
+    /**
+     * Compone un [ListDetailUiState] completo a partir de fuentes de datos y filtros.
+     *
+     * Reglas principales:
+     * - Los items de la lista se construyen haciendo join (itemsMeta.productId ↔ catálogo.id).
+     * - La búsqueda excluye productos ya presentes en la lista.
+     * - El filtro por categoría aplica tanto a búsqueda como a secciones de sugerencias.
+     *
+     * @param listId Id actual de lista (puede ser null si no existe lista seleccionada).
+     * @param header Modelo de la lista (nombre, fondo, etc).
+     * @param itemsMeta Items persistidos (id producto, checked, qty, position).
+     * @param catalog Catálogo de productos (source of truth local).
+     * @param viewType Preferencia de tipo de vista.
+     * @param selectedCats Categorías seleccionadas para filtrar (puede estar vacío).
+     * @param query Texto de búsqueda actual.
+     *
+     * @return Estado final listo para UI.
+     */
     private fun composeUiState(
         listId: String?,
         header: UserList?,
@@ -111,10 +172,8 @@ class ListDetailObserveStateUseCase @Inject constructor(
     ): ListDetailUiState {
 
         val isFilterActive = selectedCats.isNotEmpty()
-        fun categoryAllowed(cat: ProductCategory?): Boolean {
-            val c = cat ?: ProductCategory.OTHER
-            return !isFilterActive || c in selectedCats
-        }
+        fun categoryAllowed(cat: ProductCategory): Boolean =
+            !isFilterActive || cat in selectedCats
 
         val byId = catalog.associateBy { it.id }
 
@@ -152,7 +211,7 @@ class ListDetailObserveStateUseCase @Inject constructor(
                 .toList()
 
         val availableByCategory =
-            catalog.groupBy { it.category ?: ProductCategory.OTHER }
+            catalog.groupBy { it.category }
                 .mapValues { (_, list) ->
                     list.filter { it.id !in inListIds }
                         .filter { categoryAllowed(it.category) }
@@ -174,6 +233,10 @@ class ListDetailObserveStateUseCase @Inject constructor(
         )
     }
 
+    /**
+     * Contenedor interno para agrupar 5 flujos base y evitar un combine enorme.
+     * Es que no aceptaba los 8, básicamente.
+     */
     private data class Base5(
         val listId: String?,
         val header: UserList?,

@@ -1,8 +1,13 @@
 package com.example.teammaravillaapp.component
 
-import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,8 +22,27 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.model.Manzana
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Burbuja de producto reutilizable (icono + nombre).
+ *
+ * Muestra un producto como “burbuja” clicable, ideal para selección rápida en la pantalla de listas.
+ * El componente es de presentación: no contiene lógica de negocio ni logs; delega la interacción a [onClick].
+ *
+ * @param modifier Modificador de Compose para controlar tamaño/posición.
+ * @param product Producto a representar. Se utiliza su nombre e imagen (URL o recurso local).
+ * @param onClick Acción a ejecutar cuando el usuario pulsa la burbuja.
+ *
+ * @see ProductImage
+ *
+ * Ejemplo de uso:
+ * {@code
+ * ProductBubble(
+ *   product = product,
+ *   onClick = { viewModel.onProductSelected(product.id) }
+ * )
+ * }
+ */
 @Composable
 fun ProductBubble(
     product: Product,
@@ -35,10 +59,7 @@ fun ProductBubble(
             modifier = Modifier
                 .size(64.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .clickable {
-                    Log.d(TAG_GLOBAL, "Producto pulsado: ${product.name}")
-                    onClick()
-                }
+                .clickable(onClick = onClick)
         ) {
             ProductImage(
                 name = product.name,
@@ -63,8 +84,8 @@ fun ProductBubble(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewProductBubble() {
+private fun ProductBubblePreview() {
     TeamMaravillaAppTheme {
-        ProductBubble(Manzana)
+        ProductBubble(product = Manzana, onClick = {})
     }
 }

@@ -355,4 +355,15 @@
     <string name="list_view_list">Lista</string>
     <string name="list_view_compact">Compacta</string>
 
+
+    <string name="rename_list_title">Renombrar lista</string>
+    <string name="rename_list_placeholder">Nombre de la lista</string>
+
+    <string name="search_placeholder_products_lists">Buscar producto o lista</string>
+
+    <string name="swipe_action_rename">Renombrar</string>
+    <string name="swipe_action_delete">Borrar</string>
+
+    <string name="stats_times_format">×%1$d</string>
+
 </resources>

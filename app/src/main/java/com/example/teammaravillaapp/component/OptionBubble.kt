@@ -15,20 +15,32 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
- * Burbuja circular de opción simple (perfil).
+ * Burbuja circular para mostrar una opción rápida (por ejemplo, en la pantalla de perfil).
  *
- * Solo pinta; el click se gestiona desde fuera.
+ * Es un componente de presentación: no incorpora lógica de click por sí mismo.
+ * Si se necesita interacción, se recomienda envolverlo con `Modifier.clickable { ... }`.
+ *
+ * @param modifier Modificador de Compose para controlar tamaño, padding y comportamiento de layout.
+ * @param label Texto mostrado dentro de la burbuja. Recomendado: corto (1–2 palabras).
+ *
+ * Ejemplo de uso:
+ * {@code
+ * OptionBubble(
+ *   label = stringResource(R.string.profile_my_lists),
+ *   modifier = Modifier.clickable { viewModel.onMyListsClick() }
+ * )
+ * }
  */
 @Composable
 fun OptionBubble(
-    label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    label: String
 ) {
     Surface(
         modifier = modifier.size(90.dp),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -40,10 +52,10 @@ fun OptionBubble(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewOptionBubble() {
+private fun OptionBubblePreview() {
     TeamMaravillaAppTheme {
-        OptionBubble("Mis listas")
+        OptionBubble(label = "Mis listas")
     }
 }

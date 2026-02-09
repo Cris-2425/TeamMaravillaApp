@@ -19,19 +19,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
- * Imagen de perfil (real o placeholder).
+ * Imagen de perfil con soporte para:
+ * - URI remota/local (string) mediante Coil
+ * - Recurso drawable local
+ * - Placeholder textual si no hay imagen disponible
  *
- * @param imageRes si es `null`, muestra un cuadro con texto.
+ * @param modifier Modificador para controlar tamaño/posición del contenedor.
+ * @param imageRes Drawable local opcional para mostrar como imagen de perfil.
+ * @param uriString URI en formato String (por ejemplo, resultado de CameraX o galería).
+ *
+ * Ejemplo de uso:
+ * {@code
+ * ProfileImage(
+ *   uriString = uiState.profilePhotoUri,
+ *   modifier = Modifier.padding(16.dp)
+ * )
+ * }
  */
 @Composable
 fun ProfileImage(
+    modifier: Modifier = Modifier,
     imageRes: Int? = null,
-    uriString: String? = null,
-    modifier: Modifier = Modifier
+    uriString: String? = null
 ) {
     val description = stringResource(R.string.profile_image_description)
 
@@ -44,7 +58,7 @@ fun ProfileImage(
     ) {
         when {
             !uriString.isNullOrBlank() -> {
-                coil.compose.AsyncImage(
+                AsyncImage(
                     model = uriString,
                     contentDescription = description,
                     modifier = Modifier.fillMaxSize(),
@@ -74,9 +88,9 @@ fun ProfileImage(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewProfileImage() {
+private fun ProfileImagePreview() {
     TeamMaravillaAppTheme {
         ProfileImage()
     }

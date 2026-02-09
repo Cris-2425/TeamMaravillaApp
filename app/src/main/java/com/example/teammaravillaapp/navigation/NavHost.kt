@@ -114,7 +114,6 @@ fun TeamMaravillaNavHost(
                 })
             ) {
                 ListDetail(
-                    onBack = { actions.up() },
                     onOpenCategoryFilter = { actions.toCategoryFilter() },
                     onOpenListViewTypes = { actions.toListViewTypes() },
                     onUiEvent = onUiEvent

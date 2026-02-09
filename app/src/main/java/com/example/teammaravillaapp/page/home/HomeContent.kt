@@ -1,7 +1,12 @@
 package com.example.teammaravillaapp.page.home
 
-import RenameListDialog
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
@@ -9,7 +14,12 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -20,17 +30,68 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ListCard
 import com.example.teammaravillaapp.component.QuickActionsRow
+import com.example.teammaravillaapp.component.RenameListDialog
 import com.example.teammaravillaapp.component.SearchField
 import com.example.teammaravillaapp.component.SectionCard
 import com.example.teammaravillaapp.component.SwipeRowActions
+import com.example.teammaravillaapp.model.CardInfo
 import com.example.teammaravillaapp.model.QuickActionData
 import com.example.teammaravillaapp.model.SearchFieldData
-import com.example.teammaravillaapp.ui.events.UiEvent
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Contenido de la pantalla **Home** (presentación pura).
+ *
+ * Este Composable pinta la UI de Home sin depender de ViewModels ni repositorios.
+ * Toda la información entra por parámetros, lo que:
+ * - Facilita previews y pruebas.
+ * - Permite reutilizar el layout en distintos flujos (por ejemplo, modo demo).
+ * - Garantiza separación de responsabilidades (MVVM).
+ *
+ * Incluye comportamiento de UI local:
+ * - Manejo de diálogo de renombrado (estado temporal del texto).
+ * - Solicitud de foco al campo de búsqueda (si se solicita desde fuera).
+ *
+ * @param uiState Estado ya preparado para pintar. No debe ser nulo.
+ * @param requestFocusSearch Si es {@code true}, solicita foco en el buscador en cuanto el TextField esté compuesto.
+ * @param onFocusSearchConsumed Callback para marcar el foco como consumido y evitar repetición.
+ * @param onSearchChange Callback cuando cambia el texto del buscador. Debe aceptar cualquier String (incluido vacío).
+ * @param onNavigateCreateList Acción principal para crear una lista.
+ * @param onNavigateRecipes Acción rápida para ir a Recetas.
+ * @param onNavigateHistory Acción rápida para ir a Historial.
+ * @param onOpenList Acción al pulsar una tarjeta de lista. Recibe {@code id} no nulo y no vacío.
+ * @param onDelete Acción para solicitar borrado de una lista. Recibe {@code id} no nulo y no vacío.
+ * @param onRename Acción para renombrar una lista. Recibe:
+ *        - {@code id} no nulo/no vacío
+ *        - {@code newName} recomendado ya validado (trim y no blank).
+ * @param modifier Modificador Compose para personalizar layout (padding, tamaño, etc.).
+ *
+ * @throws IllegalArgumentException Puede lanzarse por la capa superior (ViewModel/Repo)
+ *         si {@code onRename} recibe un nombre inválido (por ejemplo, vacío o solo espacios).
+ *         Este Composable evita confirmación si el texto está en blanco, pero la validación final
+ *         debe estar en dominio/datos.
+ *
+ * @see Home
+ * @see HomeUiState
+ * @see RenameListDialog
+ * @see SwipeRowActions
+ *
+ * Ejemplo de uso:
+ * {@code
+ * HomeContent(
+ *   uiState = state,
+ *   requestFocusSearch = true,
+ *   onFocusSearchConsumed = { /* marcar bandera */ },
+ *   onSearchChange = { vm.onSearchChange(it) },
+ *   onNavigateCreateList = { nav.navigate("createList") },
+ *   onOpenList = { id -> nav.navigate("listDetail/$id") },
+ *   onDelete = { id -> vm.requestDelete(id) },
+ *   onRename = { id, newName -> vm.renameList(id, newName) }
+ * )
+ * }
+ */
 @Composable
 fun HomeContent(
-    modifier: Modifier = Modifier,
     uiState: HomeUiState,
     requestFocusSearch: Boolean,
     onFocusSearchConsumed: () -> Unit,
@@ -41,15 +102,15 @@ fun HomeContent(
     onOpenList: (String) -> Unit,
     onDelete: (String) -> Unit,
     onRename: (String, String) -> Unit,
-    onUiEvent: (UiEvent) -> Unit
+    modifier: Modifier = Modifier
 ) {
     var renameTarget by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var renameText by remember { mutableStateOf("") }
 
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(requestFocusSearch) {
         if (requestFocusSearch) {
-            // Espera mínima a que compose pinte el TextField
             focusRequester.requestFocus()
             onFocusSearchConsumed()
         }
@@ -77,6 +138,7 @@ fun HomeContent(
                 style = MaterialTheme.typography.headlineMedium
             )
 
+            // Buscador + Acciones rápidas
             SectionCard {
                 SearchField(
                     modifier = Modifier.focusRequester(focusRequester),
@@ -94,13 +156,14 @@ fun HomeContent(
                     onClick = { action ->
                         when (action.label) {
                             labelNewList -> onNavigateCreateList()
-                            labelFavorites -> onNavigateRecipes
-                            labelHistory -> onNavigateHistory
+                            labelFavorites -> onNavigateRecipes()
+                            labelHistory -> onNavigateHistory()
                         }
                     }
                 )
             }
 
+            // Listas recientes
             SectionCard {
                 Text(
                     text = stringResource(R.string.home_recent_lists_title),
@@ -133,13 +196,13 @@ fun HomeContent(
                             }
 
                             SwipeRowActions(
-                                id = id,
+                                rowKey = id,
                                 onEdit = { renameTarget = id to list.name },
                                 onDelete = { onDelete(id) }
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     ListCard(
-                                        cardInfo = com.example.teammaravillaapp.model.CardInfo(
+                                        cardInfo = CardInfo(
                                             imageID = R.drawable.list_supermarket,
                                             imageDescription = list.name,
                                             title = list.name,
@@ -163,13 +226,20 @@ fun HomeContent(
             }
         }
 
+        // Diálogo de renombrado (UI local controlada)
         renameTarget?.let { (listId, currentName) ->
+            LaunchedEffect(currentName) { renameText = currentName }
+
             RenameListDialog(
-                currentName = currentName,
+                nameValue = renameText,
+                onNameChange = { renameText = it },
                 onDismiss = { renameTarget = null },
-                onConfirm = { newName ->
+                onConfirm = {
+                    val trimmed = renameText.trim()
+                    if (trimmed.isNotBlank()) {
+                        onRename(listId, trimmed)
+                    }
                     renameTarget = null
-                    onRename(listId, newName)
                 }
             )
         }
@@ -178,13 +248,10 @@ fun HomeContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewHomeContent() {
+private fun PreviewHomeContentEmpty() {
     TeamMaravillaAppTheme {
         HomeContent(
-            uiState = HomeUiState(
-                search = "carne",
-                rows = emptyList()
-            ),
+            uiState = HomeUiState(search = "", rows = emptyList()),
             requestFocusSearch = false,
             onFocusSearchConsumed = {},
             onSearchChange = {},
@@ -193,8 +260,7 @@ private fun PreviewHomeContent() {
             onNavigateHistory = {},
             onOpenList = {},
             onDelete = {},
-            onRename = { _, _ -> },
-            onUiEvent = {}
+            onRename = { _, _ -> }
         )
     }
 }

@@ -4,9 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.teammaravillaapp.data.local.prefs.datastore.userPrefsDataStore
-import com.example.teammaravillaapp.page.listdetail.DataStoreListDetailPrefs
-import com.example.teammaravillaapp.page.listdetail.ListDetailPrefs
-import com.example.teammaravillaapp.data.local.prefs.repository.UserPrefsRepository
+import com.example.teammaravillaapp.data.local.prefs.listdetail.DataStoreListDetailPrefs
+import com.example.teammaravillaapp.data.local.prefs.listdetail.ListDetailPrefs
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

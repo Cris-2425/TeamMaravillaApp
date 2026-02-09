@@ -1,9 +1,15 @@
 package com.example.teammaravillaapp.component
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,13 +25,30 @@ import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.CardInfo
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
-import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * Tarjeta reutilizable para mostrar una lista (o elemento similar) en formato “card”.
+ *
+ * Presenta una imagen/ícono, título y subtítulo. Es un componente puramente visual:
+ * no contiene lógica de negocio ni navegación, delegando la interacción al callback [onClick].
+ *
+ * @param modifier Modificador de Compose para controlar layout, padding y comportamiento.
+ * @param cardInfo Información a renderizar (imagen, título, subtítulo y descripción accesible).
+ * @param onClick Acción a ejecutar cuando el usuario pulsa la tarjeta.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * ListCard(
+ *   cardInfo = uiState.cards[i],
+ *   onClick = { viewModel.onListClicked(uiState.cards[i].id) }
+ * )
+ * }
+ */
 @Composable
 fun ListCard(
-    cardInfo: CardInfo,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    cardInfo: CardInfo,
+    onClick: () -> Unit
 ) {
     val cs = MaterialTheme.colorScheme
 
@@ -33,16 +56,13 @@ fun ListCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
-            .clickable {
-                Log.d(TAG_GLOBAL, "Lista: ${cardInfo.title}")
-                onClick()
-            },
+            .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
         color = cs.surfaceContainerLow,
         tonalElevation = 4.dp
     ) {
         Row(
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -71,11 +91,11 @@ fun ListCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.padding(top = 2.dp))
                 Text(
                     text = cardInfo.subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
+                    color = cs.onSurfaceVariant.copy(alpha = 0.90f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -84,18 +104,19 @@ fun ListCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewListCard() {
+private fun ListCardPreview() {
     TeamMaravillaAppTheme {
         ListCard(
-            CardInfo(
+            cardInfo = CardInfo(
                 imageID = R.drawable.list_supermarket,
                 imageDescription = "Lista supermercado",
                 title = "Compra semanal",
                 subtitle = "2/12 comprados"
             ),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            onClick = {}
         )
     }
 }
