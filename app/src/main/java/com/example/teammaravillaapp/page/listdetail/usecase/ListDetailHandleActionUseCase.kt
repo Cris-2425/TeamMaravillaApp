@@ -78,7 +78,7 @@ class ListDetailHandleActionUseCase @Inject constructor(
             ListDetailAction.ClearList ->
                 listsRepository.updateProductIds(listId, emptyList())
 
-            // Acción de UI: se gestiona en ViewModel (StateFlow), no toca repositorio.
+            // Esto supongo que no va aquí o si, pero era por refactorizar completo ya
             is ListDetailAction.QueryChanged -> Unit
         }
     }

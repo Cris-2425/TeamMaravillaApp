@@ -1,19 +1,48 @@
 package com.example.teammaravillaapp.page.login
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.ui.events.UiEvent
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Pantalla contenedora de Login.
+ *
+ * Responsabilidades:
+ * - Resolver el [LoginViewModel] mediante Hilt.
+ * - Recolectar [LoginViewModel.uiState] como fuente de verdad.
+ * - Escuchar [LoginViewModel.events] (one-shot) y reenviarlos a [onUiEvent].
+ * - Delegar la UI pura a [LoginContent] para facilitar testeo y @Preview.
+ *
+ * @param onGoRegister Navegación hacia la pantalla de registro.
+ * Restricciones:
+ * - No nulo.
+ * - Debe ejecutarse rápido (UI thread).
+ * @param onLoggedIn Navegación/callback que se ejecuta cuando el login finaliza con éxito.
+ * Restricciones:
+ * - No nulo.
+ * - Debe encargarse de cambiar de pantalla (ej. ir a Home).
+ * @param onUiEvent Consumidor de eventos de UI (snackbars, etc.).
+ * Restricciones:
+ * - No nulo.
+ * @param vm ViewModel inyectado por Hilt. Se permite override para tests.
+ *
+ * @see LoginContent Render de presentación.
+ * @see LoginViewModel Lógica de login y validaciones.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * LoginScreen(
+ *   onGoRegister = { navController.navigate("register") },
+ *   onLoggedIn = { navController.navigate("home") { popUpTo("login") { inclusive = true } } },
+ *   onUiEvent = { event -> handleUiEvent(event) }
+ * )
+ * }
+ */
 @Composable
 fun Login(
     onGoRegister: () -> Unit,
@@ -25,100 +54,57 @@ fun Login(
 
     LaunchedEffect(vm) { vm.events.collect(onUiEvent) }
 
-    GeneralBackground(overlayAlpha = 0.20f) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    LoginContent(
+        uiState = uiState,
+        onUsernameChange = vm::onEmailChange,
+        onPasswordChange = vm::onPasswordChange,
+        onRememberMeChange = vm::onRememberMeChange,
+        onLogin = { vm.onLoginClick(onLoggedIn) },
+        onGoRegister = onGoRegister
+    )
+}
 
-            Text(text = stringResource(R.string.login_title), style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.login_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+@Preview(showBackground = true)
+@Composable
+private fun PreviewLogin_Empty() {
+    TeamMaravillaAppTheme {
+        LoginContent(
+            uiState = LoginUiState(),
+            onUsernameChange = {},
+            onPasswordChange = {},
+            onRememberMeChange = {},
+            onLogin = {},
+            onGoRegister = {}
+        )
+    }
+}
 
-            Spacer(Modifier.height(18.dp))
+@Preview(showBackground = true)
+@Composable
+private fun PreviewLogin_Loading() {
+    TeamMaravillaAppTheme {
+        LoginContent(
+            uiState = LoginUiState(username = "cris", password = "1234", isLoading = true),
+            onUsernameChange = {},
+            onPasswordChange = {},
+            onRememberMeChange = {},
+            onLogin = {},
+            onGoRegister = {}
+        )
+    }
+}
 
-            Surface(
-                shape = MaterialTheme.shapes.extraLarge,
-                tonalElevation = 2.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-
-                    OutlinedTextField(
-                        value = uiState.username,
-                        onValueChange = vm::onEmailChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !uiState.isLoading,
-                        label = { Text(stringResource(R.string.login_username_placeholder)) }
-                    )
-
-                    OutlinedTextField(
-                        value = uiState.password,
-                        onValueChange = vm::onPasswordChange,
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !uiState.isLoading,
-                        visualTransformation = PasswordVisualTransformation(),
-                        label = { Text(stringResource(R.string.login_password_placeholder)) }
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = uiState.rememberMe,
-                            onCheckedChange = { vm.onRememberMeChange(it) },
-                            enabled = !uiState.isLoading
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(text = stringResource(R.string.login_remember_me))
-                    }
-
-                    Button(
-                        onClick = { vm.onLoginClick(onLoggedIn) },
-                        enabled = uiState.isLoginButtonEnabled,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 14.dp)
-                    ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(10.dp))
-                            Text(stringResource(R.string.common_loading))
-                        } else {
-                            Text(stringResource(R.string.login_button_text))
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.login_no_account),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        TextButton(onClick = onGoRegister, enabled = !uiState.isLoading) {
-                            Text(stringResource(R.string.login_go_register))
-                        }
-                    }
-                }
-            }
-        }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewLogin_ReadyEnabled() {
+    TeamMaravillaAppTheme {
+        LoginContent(
+            uiState = LoginUiState(username = "cris", password = "1234", rememberMe = true, isLoading = false),
+            onUsernameChange = {},
+            onPasswordChange = {},
+            onRememberMeChange = {},
+            onLogin = {},
+            onGoRegister = {}
+        )
     }
 }

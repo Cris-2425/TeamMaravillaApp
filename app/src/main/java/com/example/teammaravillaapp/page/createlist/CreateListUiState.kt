@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.page.createlist
 import androidx.annotation.StringRes
 import com.example.teammaravillaapp.model.ListBackground
 import com.example.teammaravillaapp.model.Product
-
+import com.example.teammaravillaapp.component.BackgroundGrid
 /**
  * Estado de UI para la pantalla de **creación de listas**.
  *
@@ -19,7 +19,7 @@ import com.example.teammaravillaapp.model.Product
  * @property selectedProducts Productos que se añadirán al crear la lista (por ejemplo desde sugeridas).
  *
  * @see CreateListViewModel
- * @see com.example.teammaravillaapp.component.BackgroundGrid
+ * @see BackgroundGrid
  */
 data class CreateListUiState(
     val name: String = "",

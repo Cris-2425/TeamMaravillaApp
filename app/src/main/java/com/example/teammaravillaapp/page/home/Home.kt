@@ -75,6 +75,7 @@ fun Home(
     val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     // Eventos one-shot (snackbar, navegación puntual, etc.)
+    // Preguntar si se puede hacer a nivel global esto
     LaunchedEffect(vm) {
         vm.events.collectLatest { onUiEvent(it) }
     }
@@ -88,7 +89,6 @@ fun Home(
         onNavigateRecipes = onNavigateRecipes,
         onNavigateHistory = onNavigateHistory,
         onOpenList = { id ->
-            // Guarda “recientes” en VM y navega hacia fuera
             vm.onOpenList(id)
             onOpenList(id)
         },

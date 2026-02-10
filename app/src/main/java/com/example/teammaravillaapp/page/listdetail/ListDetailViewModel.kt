@@ -106,7 +106,7 @@ class ListDetailViewModel @Inject constructor(
     val uiState: StateFlow<ListDetailUiState> = _uiState
 
     init {
-        // 1) Guardar en “recientes” si venimos con un id explícito.
+        // 1) Guardar en recientes si venimos con un id explícito.
         navListId?.let { id ->
             viewModelScope.launch { recentListsPrefs.push(id) }
         }

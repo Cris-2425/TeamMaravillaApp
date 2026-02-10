@@ -52,23 +52,23 @@ class RefreshCatalogUseCase @Inject constructor(
      */
     suspend fun executeBestEffort(): UiResult<Unit> = withContext(io) {
 
-        // 1) Intentamos refrescar (Result<Unit>)
+        // 1) Intenta refrescar (Result<Unit>)
         val refresh = productRepository.refreshProducts()
 
         if (refresh.isSuccess) {
             return@withContext UiResult.Success(Unit)
         }
 
-        // 2) Si falla, miramos si hay cache en Room (source of truth)
+        // 2) Si falla, mira si hay cache en Room
         val cached = runCatching { productRepository.observeProducts().first() }
             .getOrDefault(emptyList())
 
         if (cached.isNotEmpty()) {
-            // Hay datos: no molestamos al usuario
+            // Hay datos: no molesta al usuario
             return@withContext UiResult.Success(Unit)
         }
 
-        // 3) Si no hay cache, intentamos seed forzado local
+        // 3) Si no hay cache, intenta seed forzado local
         val seeded = productRepository.forceSeed().isSuccess
 
         UiResult.Error(
