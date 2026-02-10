@@ -2,7 +2,7 @@ package com.example.teammaravillaapp.page.listdetail.usecase
 
 import com.example.teammaravillaapp.data.repository.lists.ListsRepository
 import com.example.teammaravillaapp.di.IoDispatcher
-import com.example.teammaravillaapp.page.listdetail.ListDetailAction
+import com.example.teammaravillaapp.page.listdetail.usecase.ListDetailAction
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

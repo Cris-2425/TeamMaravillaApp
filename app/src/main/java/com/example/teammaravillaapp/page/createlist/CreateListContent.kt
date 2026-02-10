@@ -16,38 +16,60 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.BackgroundGrid
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.SuggestedListSection
 import com.example.teammaravillaapp.data.seed.ListBackgrounds
 import com.example.teammaravillaapp.data.seed.SuggestedListData
-import com.example.teammaravillaapp.ui.events.UiEvent
+import com.example.teammaravillaapp.model.ListBackground
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import com.example.teammaravillaapp.util.TAG_GLOBAL
 
+/**
+ * UI pura de la pantalla **CreateList**.
+ *
+ * Motivo:
+ * - Facilita Previews (rúbrica).
+ * - Evita dependencias a Hilt/Nav.
+ * - Permite reutilización y testing.
+ *
+ * @param uiState Estado actual a renderizar.
+ * @param onBack Acción de cancelar/volver.
+ * @param onNameChange Callback al cambiar el nombre.
+ * @param onBackgroundSelect Callback al seleccionar fondo.
+ * @param onSuggestedPick Callback al elegir una sugerida (nombre + ids).
+ * @param onSave Acción al guardar.
+ *
+ * Ejemplo:
+ * {@code
+ * CreateListContent(
+ *   uiState = state,
+ *   onBack = { nav.popBackStack() },
+ *   onNameChange = vm::onNameChange,
+ *   onBackgroundSelect = vm::onBackgroundSelect,
+ *   onSuggestedPick = vm::onSuggestedPicked,
+ *   onSave = { vm.save { ... } }
+ * )
+ * }
+ */
 @Composable
-fun CreateListt(
-    onBack: () -> Unit = {},
-    onListCreated: (String) -> Unit = {},
-    onUiEvent: (UiEvent) -> Unit = {},
-    vm: CreateListViewModel = hiltViewModel()
+fun CreateListContent(
+    uiState: CreateListUiState,
+    onBack: () -> Unit,
+    onNameChange: (String) -> Unit,
+    onBackgroundSelect: (ListBackground) -> Unit,
+    onSuggestedPick: (String, List<String>) -> Unit,
+    onSave: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val uiState by vm.uiState.collectAsState()
-
-    LaunchedEffect(vm) {
-        vm.events.collect { onUiEvent(it) }
-    }
-
     val backgroundRes = ListBackgrounds.getBackgroundRes(uiState.selectedBackground)
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         GeneralBackground(bgRes = backgroundRes, overlayAlpha = 0.20f) {
             Column(
                 modifier = Modifier
@@ -59,8 +81,8 @@ fun CreateListt(
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = {
-                        vm.onNameChange(it)
-                        Log.d(TAG_GLOBAL, "Crear Lista → Nombre: '$it'")
+                        onNameChange(it)
+                        Log.d(TAG_GLOBAL, "CreateList → Name='$it'")
                     },
                     placeholder = { Text(stringResource(R.string.create_list_name_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -79,7 +101,7 @@ fun CreateListt(
                 BackgroundGrid(
                     selectedBg = uiState.selectedBackground,
                     imageResProvider = { ListBackgrounds.getBackgroundRes(it) },
-                    onSelect = vm::onBackgroundSelect
+                    onSelect = onBackgroundSelect
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -92,8 +114,8 @@ fun CreateListt(
                 Spacer(Modifier.height(8.dp))
 
                 SuggestedListSection(items = SuggestedListData.items) { picked ->
-                    vm.onSuggestedPicked(picked.name, picked.productIds)
-                    Log.d(TAG_GLOBAL, "Crear Lista → Lista sugerida: '${picked.name}' (ids=${picked.productIds.size})")
+                    onSuggestedPick(picked.name, picked.productIds)
+                    Log.d(TAG_GLOBAL, "CreateList → Suggested='${picked.name}' (ids=${picked.productIds.size})")
                 }
 
                 Spacer(Modifier.weight(1f))
@@ -106,7 +128,7 @@ fun CreateListt(
                 ) {
                     OutlinedButton(
                         onClick = {
-                            Log.d(TAG_GLOBAL, "Crear Lista → Cancelar")
+                            Log.d(TAG_GLOBAL, "CreateList → Cancel")
                             onBack()
                         },
                         modifier = Modifier.weight(1f)
@@ -114,17 +136,14 @@ fun CreateListt(
 
                     Button(
                         onClick = {
-                            Log.d(TAG_GLOBAL, "Crear Lista → Guardar")
-                            vm.save(onListCreated)
+                            Log.d(TAG_GLOBAL, "CreateList → Save")
+                            onSave()
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        enabled = uiState.trimmedName.isNotBlank()
                     ) { Text(stringResource(R.string.common_save)) }
                 }
             }
         }
-
-        //Box(modifier = Modifier.align(Alignment.BottomStart)) {
-        //    BackButton(onClick = onBack)
-        //}
     }
 }
