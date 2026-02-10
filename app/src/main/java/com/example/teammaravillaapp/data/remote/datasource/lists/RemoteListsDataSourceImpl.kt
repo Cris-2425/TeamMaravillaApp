@@ -9,6 +9,20 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementación de [RemoteListsDataSource] usando Retrofit ([ListsApi]).
+ *
+ * Se encarga de:
+ * - Obtener todas las listas del backend.
+ * - Sobrescribir completamente las listas en el backend.
+ *
+ * Usa un [Mutex] para serializar las operaciones que modifican el estado remoto
+ * y evitar condiciones de carrera.
+ *
+ * Anotado con [Singleton] para que Hilt provea una sola instancia.
+ *
+ * @property api Interfaz de Retrofit para llamadas de listas.
+ */
 @Singleton
 class RemoteListsDataSourceImpl @Inject constructor(
     private val api: ListsApi
