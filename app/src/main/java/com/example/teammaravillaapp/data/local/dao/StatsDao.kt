@@ -3,10 +3,14 @@ package com.example.teammaravillaapp.data.local.dao
 import androidx.room.Dao
 import androidx.room.Query
 
+/**
+ * DAO para estadísticas y métricas de la base de datos local.
+ *
+ * Proporciona conteos de listas, productos, recetas, favoritos y items,
+ * además de consultas específicas como top productos y recientes.
+ */
 @Dao
 interface StatsDao {
-
-    // --- Totales ---
     @Query("SELECT COUNT(*) FROM user_lists")
     suspend fun countLists(): Int
 
@@ -26,37 +30,35 @@ interface StatsDao {
     @Query("SELECT COUNT(*) FROM list_items WHERE checked = 1")
     suspend fun countCheckedItems(): Int
 
-    // --- Últimos 7 días ---
-    @Query(
-        """
+    @Query("""
         SELECT COUNT(*) FROM user_lists
         WHERE createdAt >= :from
-        """
-    )
+    """)
     suspend fun countListsSince(from: Long): Int
 
-    @Query(
-        """
+    @Query("""
         SELECT COUNT(*) FROM list_items
         WHERE addedAt >= :from
-        """
-    )
+    """)
     suspend fun countItemsSince(from: Long): Int
 
-    // --- Top productos ---
-    @Query(
-        """
+    @Query("""
         SELECT p.name AS name, COUNT(li.productId) AS times
         FROM list_items li
         JOIN products p ON p.id = li.productId
         GROUP BY li.productId
         ORDER BY times DESC
         LIMIT 5
-        """
-    )
+    """)
     suspend fun topProducts(): List<TopProductRow>
 }
 
+/**
+ * DTO para representar un producto más utilizado en las listas.
+ *
+ * @property name Nombre del producto.
+ * @property times Veces que el producto aparece en listas.
+ */
 data class TopProductRow(
     val name: String,
     val times: Int

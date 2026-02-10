@@ -4,6 +4,10 @@ import com.example.teammaravillaapp.data.local.entity.ProductEntity
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
 
+/**
+ * Convierte un [ProductEntity] (Room) a [Product] de dominio.
+ * Maneja conversión segura del enum [ProductCategory] usando valor por defecto.
+ */
 fun ProductEntity.toDomain(): Product =
     Product(
         id = id,
@@ -14,6 +18,9 @@ fun ProductEntity.toDomain(): Product =
         imageUrl = imageUrl
     )
 
+/**
+ * Convierte un [Product] de dominio a [ProductEntity] para almacenamiento en Room.
+ */
 fun Product.toEntity(): ProductEntity =
     ProductEntity(
         id = id,

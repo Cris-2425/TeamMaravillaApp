@@ -6,7 +6,16 @@ import com.example.teammaravillaapp.R
 /**
  * Categorías de productos disponibles en la app.
  *
- * @property labelRes recurso de texto para mostrar la categoría en UI.
+ * Cada categoría tiene un recurso de string asociado, usado en la UI
+ * para mostrar etiquetas legibles por el usuario.
+ *
+ * Ejemplo de uso:
+ * ```kotlin
+ * val category = ProductCategory.FRUITS
+ * val label = context.getString(category.labelRes)
+ * ```
+ *
+ * @property labelRes Recurso de texto que describe la categoría para la UI.
  */
 enum class ProductCategory(@StringRes val labelRes: Int) {
     FRUITS(R.string.category_fruits),

@@ -9,23 +9,25 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Implementación de [ListDetailPrefs] basada en DataStore (Preferences).
+ * Implementación de [ListDetailPrefs] usando DataStore (Preferences).
  *
- * Delega en:
- * - [CategoryFilterPrefs] para persistir/observar el filtro de categorías.
- * - [ListViewTypePrefs] para persistir/observar el tipo de vista.
+ * Funciona como un repositorio de configuración de listas de usuario.
  *
- * Se marca como [Singleton] para reutilizar la misma instancia y evitar lecturas duplicadas.
+ * Delegaciones:
+ * - [CategoryFilterPrefs]: persistencia y observación del filtro de categorías.
+ * - [ListViewTypePrefs]: persistencia y observación del tipo de vista de listas.
  *
- * Ejemplo de uso:
+ * Se marca como [Singleton] para garantizar una única instancia en toda la app.
+ *
+ * Ejemplo de inyección:
  * {@code
  * @Inject lateinit var prefs: ListDetailPrefs
  *
- * val viewType = prefs.observeViewType()
- * val selectedCategories = prefs.observeSelectedCategories()
+ * val viewTypeFlow = prefs.observeViewType()
+ * val selectedCategoriesFlow = prefs.observeSelectedCategories()
  * }
  *
- * @see ListDetailPrefs
+ * @see ListDetailPrefs Interfaz que define el contrato de preferencias para la pantalla de detalle de listas.
  */
 @Singleton
 class DataStoreListDetailPrefs @Inject constructor(
@@ -34,19 +36,23 @@ class DataStoreListDetailPrefs @Inject constructor(
 ) : ListDetailPrefs {
 
     /**
-     * Observa categorías seleccionadas desde DataStore.
+     * Observa las categorías seleccionadas desde DataStore.
+     *
+     * @return [Flow] de conjunto de [ProductCategory] seleccionadas.
      */
     override fun observeSelectedCategories(): Flow<Set<ProductCategory>> =
         categoryFilterPrefs.observeSelected()
 
     /**
-     * Observa el tipo de vista desde DataStore.
+     * Observa el tipo de vista de la lista (Grid/List) desde DataStore.
+     *
+     * @return [Flow] de [ListViewType].
      */
     override fun observeViewType(): Flow<ListViewType> =
         listViewTypePrefs.observe()
 
     /**
-     * Limpia el filtro de categorías persistido.
+     * Limpia el filtro de categorías persistido en DataStore.
      */
     override suspend fun clearCategoryFilter() {
         categoryFilterPrefs.clear()

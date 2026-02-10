@@ -3,14 +3,22 @@ package com.example.teammaravillaapp.model
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * Datos para un botón de acción rápida (QuickActionButton).
+ * Datos para un botón de acción rápida (**QuickActionButton**).
  *
- * Usado en la pantalla Home para representar accesos directos como
- * “Nueva lista”, “Favoritos” o “Historial”.
+ * Este modelo se utiliza en la **pantalla Home** para representar accesos directos,
+ * como “Nueva lista”, “Favoritos” o “Historial”.
  *
- * @property icon Icono que se mostrará en el botón.
- * @property label Texto del botón que describe su función.
- * @property enabled Indica si el botón está activo o deshabilitado.
+ * Ejemplo de uso:
+ * ```kotlin
+ * val quickAction = QuickActionData(
+ *     icon = Icons.Default.Add,
+ *     label = "Nueva lista"
+ * )
+ * ```
+ *
+ * @property icon Icono vectorial que se mostrará en el botón (Compose `ImageVector`).
+ * @property label Texto descriptivo de la acción del botón.
+ * @property enabled Indica si el botón está activo o deshabilitado. Por defecto es `true`.
  */
 data class QuickActionData(
     val icon: ImageVector,
