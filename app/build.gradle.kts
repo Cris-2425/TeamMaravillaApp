@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.volley)
     implementation(libs.androidx.benchmark.traceprocessor)
+    implementation(libs.androidx.foundation.layout)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 

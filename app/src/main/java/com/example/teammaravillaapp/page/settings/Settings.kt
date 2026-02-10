@@ -1,21 +1,45 @@
 package com.example.teammaravillaapp.page.settings
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.component.ThemeModeRow
-import com.example.teammaravillaapp.component.Title
 import com.example.teammaravillaapp.model.ThemeMode
 import com.example.teammaravillaapp.ui.app.ThemeViewModel
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Pantalla contenedora de Ajustes.
+ *
+ * Responsabilidades:
+ * - Recolectar el estado de tema desde [ThemeViewModel].
+ * - Traducir interacciones de UI (selección de tema) a acciones del ViewModel.
+ * - Delegar el render a [SettingsContent] (presentación pura) para mejorar testeo y previews.
+ *
+ * Motivo:
+ * - Separar responsabilidades: UI pura vs capa que conoce ViewModels/Hilt.
+ * - Facilitar previews sin depender de Hilt/DataStore.
+ *
+ * @param onBack Callback de navegación hacia atrás.
+ * Restricciones:
+ * - No nulo.
+ * - Debe ser rápido (se ejecuta en UI thread).
+ * @param vm ViewModel de tema inyectado por Hilt. Se permite override para tests.
+ *
+ * @throws IllegalStateException No se lanza directamente, pero puede ocurrir si Hilt no puede proveer [ThemeViewModel]
+ * en un entorno incorrecto (por ejemplo, previews sin configuración).
+ *
+ * @see SettingsContent UI pura de Ajustes.
+ * @see ThemeViewModel Fuente de verdad del modo de tema.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * SettingsScreen(
+ *   onBack = navController::popBackStack
+ * )
+ * }
+ */
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -23,61 +47,46 @@ fun SettingsScreen(
 ) {
     val mode by vm.themeMode.collectAsStateWithLifecycle()
 
-    Box(Modifier.fillMaxSize()) {
-        GeneralBackground(overlayAlpha = 0.20f) {
+    SettingsContent(
+        mode = mode,
+        onBack = onBack,
+        onSelectMode = vm::setThemeMode
+    )
+}
 
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Title(texto = stringResource(R.string.settings_title))
 
-                Surface(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    tonalElevation = 2.dp
-                ) {
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.settings_theme_title),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = stringResource(R.string.settings_theme_subtitle),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSettings_System() {
+    TeamMaravillaAppTheme {
+        SettingsContent(
+            mode = ThemeMode.SYSTEM,
+            onBack = {},
+            onSelectMode = {}
+        )
+    }
+}
 
-                        Spacer(Modifier.height(6.dp))
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSettings_Light() {
+    TeamMaravillaAppTheme {
+        SettingsContent(
+            mode = ThemeMode.LIGHT,
+            onBack = {},
+            onSelectMode = {}
+        )
+    }
+}
 
-                        ThemeModeRow(
-                            title = stringResource(R.string.settings_theme_system),
-                            selected = mode == ThemeMode.SYSTEM,
-                            onClick = { vm.setThemeMode(ThemeMode.SYSTEM) }
-                        )
-                        ThemeModeRow(
-                            title = stringResource(R.string.settings_theme_light),
-                            selected = mode == ThemeMode.LIGHT,
-                            onClick = { vm.setThemeMode(ThemeMode.LIGHT) }
-                        )
-                        ThemeModeRow(
-                            title = stringResource(R.string.settings_theme_dark),
-                            selected = mode == ThemeMode.DARK,
-                            onClick = { vm.setThemeMode(ThemeMode.DARK) }
-                        )
-                    }
-                }
-            }
-
-            //Box(Modifier.align(Alignment.BottomStart)) {
-            //    BackButton(onClick = onBack)
-            //}
-        }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewSettings_Dark() {
+    TeamMaravillaAppTheme {
+        SettingsContent(
+            mode = ThemeMode.DARK,
+            onBack = {},
+            onSelectMode = {}
+        )
     }
 }

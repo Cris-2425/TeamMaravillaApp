@@ -1,34 +1,45 @@
 package com.example.teammaravillaapp.page.recipesdetail
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.component.ProductBubble
+import com.example.teammaravillaapp.model.Product
+import com.example.teammaravillaapp.model.ProductCategory
 import com.example.teammaravillaapp.model.Recipe
 import com.example.teammaravillaapp.ui.events.UiEvent
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * Contenedor de la pantalla de detalle de receta.
+ *
+ * Responsabilidades:
+ * - Recolectar estado desde [RecipesDetailViewModel].
+ * - Escuchar eventos one-shot y reenviarlos a [onUiEvent].
+ * - Delegar el render de UI a [RecipesDetailContent].
+ *
+ * @param onBack Navegación hacia atrás.
+ * Restricciones: no nulo.
+ * @param onAddToShoppingList Acción al pulsar “Añadir ingredientes”.
+ * Restricciones:
+ * - Debe aceptar un id de receta válido (>0).
+ * @param onUiEvent Consumidor de eventos one-shot (snackbars).
+ * @param vm ViewModel inyectado por Hilt (override permitido en tests).
+ *
+ * @see RecipesDetailContent Presentación pura.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * RecipesDetail(
+ *   onBack = navController::popBackStack,
+ *   onAddToShoppingList = { recipeId -> ... },
+ *   onUiEvent = { event -> ... }
+ * )
+ * }
+ */
 @Composable
 fun RecipesDetail(
     onBack: () -> Unit,
@@ -42,193 +53,69 @@ fun RecipesDetail(
         vm.events.collectLatest { onUiEvent(it) }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        GeneralBackground(overlayAlpha = 0.20f) {
+    RecipesDetailContent(
+        uiState = uiState,
+        onToggleFavorite = vm::toggleFavorite,
+        onAddToShoppingList = onAddToShoppingList,
+        onBack = onBack
+    )
+}
 
-            when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
-                }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewRecipesDetail_Loading() {
+    TeamMaravillaAppTheme {
+        RecipesDetailContent(
+            uiState = RecipesDetailUiState(isLoading = true),
+            onToggleFavorite = {},
+            onAddToShoppingList = {},
+            onBack = {}
+        )
+    }
+}
 
-                uiState.isNotFound -> {
-                    Surface(
-                        shape = MaterialTheme.shapes.extraLarge,
-                        tonalElevation = 2.dp,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(horizontal = 18.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.recipe_not_found),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewRecipesDetail_NotFound() {
+    TeamMaravillaAppTheme {
+        RecipesDetailContent(
+            uiState = RecipesDetailUiState(isLoading = false, isNotFound = true),
+            onToggleFavorite = {},
+            onAddToShoppingList = {},
+            onBack = {}
+        )
+    }
+}
 
-                else -> {
-                    val recipe: Recipe = uiState.recipe ?: return@GeneralBackground
+@Preview(showBackground = true)
+@Composable
+private fun PreviewRecipesDetail_Content() {
+    val recipe = Recipe(
+        id = 1,
+        title = "Tortilla de patatas",
+        productIds = listOf("p1", "p2", "p3"),
+        instructions = "1) Pelar patatas\n2) Freír\n3) Mezclar con huevo\n4) Cuajar",
+        imageRes = null,
+        imageUrl = null
+    )
 
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                    ) {
-                        Spacer(Modifier.height(10.dp))
+    val ingredients = listOf(
+        Product(id = "p1", name = "Patatas", category = ProductCategory.OTHER),
+        Product(id = "p2", name = "Huevos", category = ProductCategory.OTHER),
+        Product(id = "p3", name = "Cebolla", category = ProductCategory.OTHER)
+    )
 
-                        // HEADER
-                        Surface(
-                            shape = RoundedCornerShape(28.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            tonalElevation = 2.dp,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Text(
-                                    text = recipe.title,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.weight(1f),
-                                    maxLines = 1
-                                )
-
-                                IconButton(onClick = vm::toggleFavorite) {
-                                    Icon(
-                                        imageVector = if (uiState.isFavorite)
-                                            Icons.Filled.Favorite
-                                        else
-                                            Icons.Outlined.FavoriteBorder,
-                                        contentDescription = null,
-                                        tint = if (uiState.isFavorite)
-                                            MaterialTheme.colorScheme.primary
-                                        else
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.height(16.dp))
-
-                        // IMAGEN (SAFE)
-                        Surface(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            tonalElevation = 2.dp,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val img = recipe.imageRes
-                            if (img != null && img != 0) {
-                                Image(
-                                    painter = painterResource(img),
-                                    contentDescription = stringResource(R.string.recipe_image_content_description),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(190.dp)
-                                        .clip(MaterialTheme.shapes.extraLarge)
-                                        .clickable { /* opcional */ },
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(190.dp)
-                                        .clip(MaterialTheme.shapes.extraLarge)
-                                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.recipe_image_placeholder),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.height(18.dp))
-
-                        // INGREDIENTES
-                        Text(
-                            text = stringResource(R.string.recipe_ingredients_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Start
-                        )
-
-                        Spacer(Modifier.height(10.dp))
-
-                        Surface(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            tonalElevation = 1.dp,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            FlowRow(
-                                maxItemsInEachRow = 3,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp)
-                            ) {
-                                uiState.ingredients.forEach { product ->
-                                    ProductBubble(product)
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.height(18.dp))
-
-                        // PREPARACIÓN
-                        if (recipe.instructions.isNotBlank()) {
-                            Text(
-                                text = stringResource(R.string.recipe_instructions_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(Modifier.height(8.dp))
-
-                            Surface(
-                                shape = MaterialTheme.shapes.extraLarge,
-                                tonalElevation = 1.dp,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = recipe.instructions,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(14.dp)
-                                )
-                            }
-
-                            Spacer(Modifier.height(18.dp))
-                        }
-
-                        Button(
-                            onClick = { onAddToShoppingList(recipe.id) },
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(vertical = 14.dp)
-                        ) {
-                            Text(text = stringResource(R.string.recipe_add_ingredients_button))
-                        }
-
-                        Spacer(Modifier.height(100.dp))
-                    }
-                }
-            }
-
-            //Box(Modifier.align(Alignment.BottomStart)) {
-            //    BackButton(onClick = onBack)
-            //}
-        }
+    TeamMaravillaAppTheme {
+        RecipesDetailContent(
+            uiState = RecipesDetailUiState(
+                isLoading = false,
+                recipe = recipe,
+                ingredients = ingredients,
+                isFavorite = true
+            ),
+            onToggleFavorite = {},
+            onAddToShoppingList = {},
+            onBack = {}
+        )
     }
 }

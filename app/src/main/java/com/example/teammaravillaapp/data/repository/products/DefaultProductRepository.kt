@@ -65,7 +65,7 @@ class DefaultProductRepository @Inject constructor(
         // Lanzar sync de imágenes best-effort (si quieres)
         // appScope.launch { syncProductImagesUseCase.execute() }
     }
-    
+
     private suspend fun refreshIfStale() {
         val now = System.currentTimeMillis()
         if (now - lastRefreshMs < refreshMinIntervalMs) return
@@ -75,19 +75,38 @@ class DefaultProductRepository @Inject constructor(
             if (nowLocked - lastRefreshMs < refreshMinIntervalMs) return
 
             runCatching { forceRefresh() }
+                .onFailure {
+                    // backoff: evita reintentos constantes si no hay backend
+                    lastRefreshMs = System.currentTimeMillis()
+                }
         }
     }
 
     private suspend fun forceRefresh() {
         val remoteList = remote.fetchAll()
-        local.saveProducts(remoteList)
+
+        // Productos actuales de Room (pueden tener imageRes del seed)
+        val localById = local.getProducts().associateBy { it.id }
+
+        val merged = remoteList.map { r ->
+            val l = localById[r.id]
+            r.copy(
+                imageRes = r.imageRes ?: l?.imageRes,
+                imageUrl = r.imageUrl ?: l?.imageUrl,
+                // opcional: si tu backend no manda category bien, conserva la local
+                category = if (r.category == com.example.teammaravillaapp.model.ProductCategory.OTHER)
+                    (l?.category ?: r.category)
+                else r.category
+            )
+        }
+
+        local.saveProducts(merged)
         lastRefreshMs = System.currentTimeMillis()
     }
 
-    override suspend fun forceSeed(): Result<Unit> =
-        runCatching {
-            val seed = ProductData.allProducts
-            local.saveProducts(seed)
-            lastRefreshMs = System.currentTimeMillis()
-        }
+    override suspend fun forceSeed(): Result<Unit> = runCatching {
+        val seed = ProductData.allProducts
+        local.saveProducts(seed)
+        lastRefreshMs = System.currentTimeMillis()
+    }
 }

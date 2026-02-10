@@ -26,6 +26,20 @@ import com.example.teammaravillaapp.ui.events.UiEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Scaffold principal de la aplicación.
+ *
+ * Responsabilidades:
+ * - Proveer estructura común: TopBar, BottomBar, Drawer, FAB y Snackbars globales.
+ * - Delegar el contenido real a [content] (normalmente un NavHost).
+ * - Centralizar “plataforma/UI”: permisos de cámara, share intent, snackbars.
+ *
+ * @param navController Controlador de navegación.
+ * @param modifier Modifier para el Scaffold.
+ * @param content Contenido de pantalla. Recibe:
+ *  - `innerModifier`: padding del Scaffold
+ *  - `onUiEvent`: callback para emitir [UiEvent] globales (snackbars, etc.)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScaffold(
@@ -40,30 +54,34 @@ fun MainScaffold(
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
 
-    // ----- Route actual -----
+    // ----- Ruta actual -----
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
     // ----- Rutas sin barras/drawer -----
-    val authRoutes = setOf(
-        NavRoute.Splash.route,
-        NavRoute.Login.route,
-        NavRoute.Register.route
-    )
+    val authRoutes = remember {
+        setOf(
+            NavRoute.Splash.route,
+            NavRoute.Login.route,
+            NavRoute.Register.route
+        )
+    }
 
     // Tabs con bottom bar
-    val bottomTabs = setOf(
-        NavRoute.Home.route,
-        NavRoute.Recipes.route,
-        NavRoute.History.route,
-        NavRoute.Profile.route
-    )
+    val bottomTabs = remember {
+        setOf(
+            NavRoute.Home.route,
+            NavRoute.Recipes.route,
+            NavRoute.History.route,
+            NavRoute.Profile.route
+        )
+    }
 
     val showBars = currentRoute !in authRoutes
     val showBottomBar = showBars && currentRoute in bottomTabs
     val showTopBar = showBars && currentRoute in bottomTabs
 
-    // No enseñes FAB en la propia cámara
+    // No poner el FAB con la cámara activa
     val isCameraRoute = currentRoute?.startsWith("camera") == true
     val showFab = showBottomBar && !isCameraRoute
 
@@ -85,17 +103,14 @@ fun MainScaffold(
 
     // ----- Drawer global -----
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val enableDrawer = showBars // drawer solo fuera de auth
+    val enableDrawer = showBars
 
     // ----- Permiso cámara runtime -----
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) {
-            actions.toCamera()
-        } else {
-            uiEvents.tryEmit(UiEvent.ShowSnackbar(R.string.camera_permission_denied))
-        }
+        if (granted) actions.toCamera()
+        else uiEvents.tryEmit(UiEvent.ShowSnackbar(R.string.camera_permission_denied))
     }
 
     fun openCameraWithPermission() {
@@ -146,12 +161,16 @@ fun MainScaffold(
                         onShare = {
                             scope.launch { drawerState.close() }
 
-                            // Share real
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
                                 putExtra(Intent.EXTRA_TEXT, ctx.getString(R.string.drawer_share_text))
                             }
-                            ctx.startActivity(Intent.createChooser(intent, ctx.getString(R.string.drawer_share_title)))
+                            ctx.startActivity(
+                                Intent.createChooser(
+                                    intent,
+                                    ctx.getString(R.string.drawer_share_title)
+                                )
+                            )
                         },
                         onOptions = {
                             scope.launch { drawerState.close() }
@@ -174,14 +193,10 @@ fun MainScaffold(
                 if (showTopBar) {
                     TopBar(
                         title = ctx.getString(titleRes),
-                        onMenuClick = {
-                            scope.launch { drawerState.open() }
-                        },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onSearchClick = {
-                            // 1) Navega a Home
                             actions.toHomeSingleTop()
 
-                            // 2) Pide focus al search en la entry de Home (robusto)
                             val homeEntry = runCatching {
                                 navController.getBackStackEntry(NavRoute.Home.route)
                             }.getOrNull()
@@ -209,9 +224,7 @@ fun MainScaffold(
             },
             floatingActionButton = {
                 if (showFab) {
-                    FloatingActionButton(
-                        onClick = { openCameraWithPermission() }
-                    ) {
+                    FloatingActionButton(onClick = ::openCameraWithPermission) {
                         Icon(
                             imageVector = Icons.Default.PhotoCamera,
                             contentDescription = ctx.getString(R.string.fab_open_camera_cd)

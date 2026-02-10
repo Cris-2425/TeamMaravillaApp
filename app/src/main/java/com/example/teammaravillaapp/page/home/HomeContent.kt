@@ -2,11 +2,13 @@ package com.example.teammaravillaapp.page.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
@@ -127,96 +129,105 @@ fun HomeContent(
     )
 
     GeneralBackground(modifier = modifier.fillMaxSize()) {
-        Column(
-            Modifier
+        LazyColumn(
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            Text(
-                text = stringResource(R.string.home_title),
-                style = MaterialTheme.typography.headlineMedium
-            )
-
-            // Buscador + Acciones rápidas
-            SectionCard {
-                SearchField(
-                    modifier = Modifier.focusRequester(focusRequester),
-                    searchData = SearchFieldData(
-                        value = uiState.search,
-                        placeholder = stringResource(R.string.home_search_placeholder)
-                    ),
-                    onValueChange = onSearchChange
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                QuickActionsRow(
-                    actions = quickActions,
-                    onClick = { action ->
-                        when (action.label) {
-                            labelNewList -> onNavigateCreateList()
-                            labelFavorites -> onNavigateRecipes()
-                            labelHistory -> onNavigateHistory()
-                        }
-                    }
+            item {
+                Text(
+                    text = stringResource(R.string.home_title),
+                    style = MaterialTheme.typography.headlineMedium
                 )
             }
 
-            // Listas recientes
-            SectionCard {
-                Text(
-                    text = stringResource(R.string.home_recent_lists_title),
-                    style = MaterialTheme.typography.titleMedium
-                )
+            item {
 
-                Spacer(Modifier.height(10.dp))
-
-                if (uiState.rows.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.home_recent_lists_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                // Buscador y acciones rápidas
+                SectionCard {
+                    SearchField(
+                        modifier = Modifier.focusRequester(focusRequester),
+                        searchData = SearchFieldData(
+                            value = uiState.search,
+                            placeholder = stringResource(R.string.home_search_placeholder)
+                        ),
+                        onValueChange = onSearchChange
                     )
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        uiState.rows.forEach { row ->
-                            val id = row.id
-                            val list = row.list
-                            val p = row.progress
 
-                            val subtitle = if (p.totalCount == 0) {
-                                stringResource(R.string.home_list_subtitle_empty)
-                            } else {
-                                stringResource(
-                                    R.string.home_list_subtitle_progress,
-                                    p.checkedCount,
-                                    p.totalCount
-                                )
+                    Spacer(Modifier.height(12.dp))
+
+                    QuickActionsRow(
+                        actions = quickActions,
+                        onClick = { action ->
+                            when (action.label) {
+                                labelNewList -> onNavigateCreateList()
+                                labelFavorites -> onNavigateRecipes()
+                                labelHistory -> onNavigateHistory()
                             }
+                        }
+                    )
+                }
+            }
 
-                            SwipeRowActions(
-                                rowKey = id,
-                                onEdit = { renameTarget = id to list.name },
-                                onDelete = { onDelete(id) }
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    ListCard(
-                                        cardInfo = CardInfo(
-                                            imageID = R.drawable.list_supermarket,
-                                            imageDescription = list.name,
-                                            title = list.name,
-                                            subtitle = subtitle
-                                        ),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = { onOpenList(id) }
+            item {
+
+                // Listas recientes
+                SectionCard {
+                    Text(
+                        text = stringResource(R.string.home_recent_lists_title),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(Modifier.height(10.dp))
+
+                    if (uiState.rows.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.home_recent_lists_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            uiState.rows.forEach { row ->
+                                val id = row.id
+                                val list = row.list
+                                val p = row.progress
+
+                                val subtitle = if (p.totalCount == 0) {
+                                    stringResource(R.string.home_list_subtitle_empty)
+                                } else {
+                                    stringResource(
+                                        R.string.home_list_subtitle_progress,
+                                        p.checkedCount,
+                                        p.totalCount
                                     )
+                                }
 
-                                    if (p.totalCount > 0) {
-                                        LinearProgressIndicator(
-                                            progress = { p.checkedCount.toFloat() / p.totalCount.toFloat() },
-                                            modifier = Modifier.fillMaxWidth()
+                                SwipeRowActions(
+                                    rowKey = id,
+                                    onEdit = { renameTarget = id to list.name },
+                                    onDelete = { onDelete(id) }
+                                ) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        ListCard(
+                                            cardInfo = CardInfo(
+                                                imageID = R.drawable.list_supermarket,
+                                                imageDescription = list.name,
+                                                title = list.name,
+                                                subtitle = subtitle
+                                            ),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            onClick = { onOpenList(id) }
                                         )
+
+                                        if (p.totalCount > 0) {
+                                            LinearProgressIndicator(
+                                                progress = { p.checkedCount.toFloat() / p.totalCount.toFloat() },
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
                                     }
                                 }
                             }

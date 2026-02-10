@@ -31,9 +31,54 @@ import com.example.teammaravillaapp.page.session.SessionViewModel
 import com.example.teammaravillaapp.page.settings.SettingsScreen
 import com.example.teammaravillaapp.page.splash.SplashScreen
 import com.example.teammaravillaapp.page.stats.Stats
-import com.example.teammaravillaapp.ui.debug.ProductsDebugScreen
 import com.example.teammaravillaapp.ui.app.MainScaffold
 
+/**
+ * NavHost principal de TeamMaravillaApp.
+ *
+ * Responsabilidades:
+ * - Declarar el grafo de navegación (destinos y argumentos).
+ * - Conectar navegación con el estado global de sesión (mediante [SessionViewModel]).
+ * - Aplicar un “efecto de arranque” (Splash → Login/Home) con [SessionNavEffect].
+ * - Envolver el contenido en [MainScaffold] para topBar/drawer/snackbars homogéneos.
+ *
+ * Consideraciones importantes:
+ * - El estado [SessionState] NO debería mezclar “sesión actual” con “auto-login”.
+ *   La decisión de auto-login por `rememberMe` se recomienda aplicarla en [SessionNavEffect]
+ *   o en un “AppEntry/SplashViewModel”, no en el `sessionState`.
+ *
+ * @param navController Controlador de navegación usado por el grafo.
+ * Restricciones:
+ * - No nulo.
+ * - Debe ser el mismo que usa el Scaffold principal.
+ * @param sessionViewModel ViewModel que expone [SessionState] para decidir redirecciones.
+ * Restricciones:
+ * - No nulo.
+ * - Debe vivir a nivel “app” (no por-screen), para evitar resets.
+ * @param modifier Modificador externo para el scaffold/host.
+ * @param startDestination Ruta inicial del grafo. Por defecto inicia en Splash.
+ * Restricciones:
+ * - Debe existir en el grafo declarado.
+ *
+ * @throws IllegalArgumentException Si se configura un [startDestination] que no existe en el grafo.
+ * @throws IllegalStateException Puede ocurrir en runtime si se navega a un destino con argumentos inválidos
+ * (por ejemplo, ids faltantes o de tipo incorrecto) y el destino asume que existen.
+ *
+ * @see NavRoute Definición de rutas y argumentos.
+ * @see SessionNavEffect Redirección Splash → Login/Home en función de la sesión.
+ * @see MainScaffold Contenedor UI global (snackbar, topBar, etc.).
+ *
+ * Ejemplo de uso:
+ * {@code
+ * val navController = rememberNavController()
+ * val sessionVm: SessionViewModel = hiltViewModel()
+ *
+ * TeamMaravillaNavHost(
+ *   navController = navController,
+ *   sessionViewModel = sessionVm
+ * )
+ * }
+ */
 @Composable
 fun TeamMaravillaNavHost(
     navController: NavHostController,
@@ -43,6 +88,8 @@ fun TeamMaravillaNavHost(
 ) {
     val sessionState by sessionViewModel.sessionState.collectAsState()
     val isLoggedIn = sessionState is SessionState.LoggedIn
+    val username = (sessionState as? SessionState.LoggedIn)?.username
+
     val actions = rememberNavActions(navController)
 
     SessionNavEffect(
@@ -51,7 +98,10 @@ fun TeamMaravillaNavHost(
         splashDelayMs = 900L
     )
 
-    MainScaffold(navController = navController, modifier = modifier) { innerModifier, onUiEvent ->
+    MainScaffold(
+        navController = navController,
+        modifier = modifier
+    ) { innerModifier, onUiEvent ->
 
         NavHost(
             navController = navController,
@@ -170,10 +220,11 @@ fun TeamMaravillaNavHost(
                             ProfileOption.SETTINGS -> actions.toSettings()
                             ProfileOption.STATS -> actions.toStats()
                             ProfileOption.HELP -> actions.toHelp()
-                            ProfileOption.DEBUG_PRODUCTS -> actions.toProductsDebug()
-                            ProfileOption.LOGIN -> if (isLoggedIn) vm.logout() else actions.toLogin()
+                            ProfileOption.LOGIN ->
+                                if (isLoggedIn) vm.logout() else actions.toLogin()
                         }
                     },
+                    username = username,
                     isLoggedIn = isLoggedIn,
                     onUiEvent = onUiEvent
                 )
@@ -195,10 +246,6 @@ fun TeamMaravillaNavHost(
                 )
             }
 
-            composable(NavRoute.ProductsDebug.route) {
-                ProductsDebugScreen(onBack = { actions.up() })
-            }
-
             composable(
                 route = NavRoute.Camera.route,
                 arguments = listOf(
@@ -217,7 +264,9 @@ fun TeamMaravillaNavHost(
                 )
             }
 
-            composable(NavRoute.Settings.route) { SettingsScreen(onBack = { actions.up() }) }
+            composable(NavRoute.Settings.route) {
+                SettingsScreen(onBack = { actions.up() })
+            }
 
             composable(NavRoute.Stats.route) {
                 Stats(
