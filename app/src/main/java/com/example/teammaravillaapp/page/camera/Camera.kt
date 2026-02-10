@@ -185,7 +185,6 @@ fun CameraScreen(
             onCapture = {
                 val uri = createOutputUri()
                 if (uri == null) {
-                    // Validación técnica: no tenemos destino donde guardar
                     vm.onCaptureFailed()
                     return@CameraContent
                 }
@@ -265,7 +264,6 @@ private fun PreviewCameraContent_NoPermission() {
             onBack = {},
             canSaveReceipt = false,
             previewContent = {
-                // Placeholder visual para preview
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surfaceVariant) {}
             }
         )

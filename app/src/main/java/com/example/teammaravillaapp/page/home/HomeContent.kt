@@ -226,7 +226,7 @@ fun HomeContent(
             }
         }
 
-        // Diálogo de renombrado (UI local controlada)
+        // Diálogo de renombrado
         renameTarget?.let { (listId, currentName) ->
             LaunchedEffect(currentName) { renameText = currentName }
 

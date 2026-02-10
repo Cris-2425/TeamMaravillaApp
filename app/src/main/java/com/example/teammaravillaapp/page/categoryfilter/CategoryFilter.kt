@@ -54,8 +54,6 @@ fun CategoryFilter(
     )
 }
 
-/* ----------------------------- PREVIEWS ----------------------------- */
-
 @Preview(showBackground = true, name = "CategoryFilter - Cargando")
 @Composable
 private fun PreviewCategoryFilter_Loading() {

@@ -1,33 +1,47 @@
 package com.example.teammaravillaapp.page.history
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.component.ListCard
-import com.example.teammaravillaapp.component.SectionCard
-import com.example.teammaravillaapp.component.Title
-import com.example.teammaravillaapp.model.CardInfo
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.ui.events.UiEvent
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Pantalla contenedora del historial de listas abiertas recientemente.
+ *
+ * Responsabilidades:
+ * - Obtener el [HistoryViewModel] (Hilt).
+ * - Suscribirse a [HistoryViewModel.uiState] como fuente de verdad.
+ * - Consumir eventos one-shot ([HistoryViewModel.events]) y reenviarlos a la capa superior.
+ * - Delegar el render a [HistoryContent] (UI pura) para facilitar previews y test.
+ *
+ * @param onBack Callback de navegación hacia atrás.
+ * Restricciones:
+ * - No debe ser nulo.
+ * - Debe ser rápido (se ejecuta en UI thread).
+ * @param onOpenList Callback para abrir el detalle de una lista.
+ * Restricciones:
+ * - No debe ser nulo.
+ * - El [String] recibido es el id de la lista (no vacío).
+ * @param onUiEvent Consumidor de eventos de UI (snackbars, etc.).
+ * Restricciones:
+ * - No debe ser nulo.
+ *
+ * @see HistoryContent Render “presentación” de la pantalla.
+ * @see HistoryViewModel Lógica de negocio y orquestación de estado.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * History(
+ *   onBack = navController::popBackStack,
+ *   onOpenList = { id -> navController.navigate("listDetail/$id") },
+ *   onUiEvent = { event -> handleUiEvent(event) }
+ * )
+ * }
+ */
 @Composable
 fun History(
     onBack: () -> Unit,
@@ -35,75 +49,65 @@ fun History(
     onUiEvent: (UiEvent) -> Unit,
     vm: HistoryViewModel = hiltViewModel()
 ) {
-    val uiState by vm.uiState.collectAsState()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {
         vm.events.collect { onUiEvent(it) }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        GeneralBackground(overlayAlpha = 0.20f) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Title(texto = stringResource(R.string.history_title))
+    HistoryContent(
+        uiState = uiState,
+        onBack = onBack,
+        onOpenList = onOpenList,
+        onClearAll = vm::onClearAll,
+        onRemove = vm::onRemove
+    )
+}
 
-                SectionCard {
-                    when {
-                        uiState.isLoading -> {
-                            Text(
-                                text = stringResource(R.string.common_loading),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewHistory_Loading() {
+    TeamMaravillaAppTheme {
+        HistoryContent(
+            uiState = HistoryUiState(isLoading = true),
+            onBack = {},
+            onOpenList = {},
+            onClearAll = {},
+            onRemove = {}
+        )
+    }
+}
 
-                        uiState.rows.isEmpty() -> {
-                            Text(
-                                text = stringResource(R.string.history_empty),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewHistory_Empty() {
+    TeamMaravillaAppTheme {
+        HistoryContent(
+            uiState = HistoryUiState(isLoading = false, rows = emptyList()),
+            onBack = {},
+            onOpenList = {},
+            onClearAll = {},
+            onRemove = {}
+        )
+    }
+}
 
-                        else -> {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                                TextButton(onClick = vm::onClearAll) {
-                                    Text(stringResource(R.string.history_clear))
-                                }
-                            }
-
-                            Spacer(Modifier.height(8.dp))
-
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                uiState.rows.forEach { row ->
-                                    ListCard(
-                                        cardInfo = CardInfo(
-                                            imageID = R.drawable.list_supermarket,
-                                            imageDescription = row.name,
-                                            title = row.name,
-                                            subtitle = stringResource(R.string.history_open_again)
-                                        ),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = { onOpenList(row.id) }
-                                    )
-
-                                    TextButton(onClick = { vm.onRemove(row.id) }) {
-                                        Text(stringResource(R.string.history_remove))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //Box(Modifier.align(Alignment.BottomStart)) {
-        //    BackButton(onClick = onBack)
-        //}
+@Preview(showBackground = true)
+@Composable
+private fun PreviewHistory_WithRows() {
+    TeamMaravillaAppTheme {
+        HistoryContent(
+            uiState = HistoryUiState(
+                isLoading = false,
+                rows = listOf(
+                    HistoryRow(id = "l1", name = "Compra semanal"),
+                    HistoryRow(id = "l2", name = "BBQ sábado")
+                )
+            ),
+            onBack = {},
+            onOpenList = {},
+            onClearAll = {},
+            onRemove = {}
+        )
     }
 }

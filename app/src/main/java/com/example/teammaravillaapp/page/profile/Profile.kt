@@ -1,29 +1,47 @@
 package com.example.teammaravillaapp.page.profile
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.GeneralBackground
-import com.example.teammaravillaapp.component.OptionsGrid
-import com.example.teammaravillaapp.component.ProfileImage
 import com.example.teammaravillaapp.model.ProfileOption
 import com.example.teammaravillaapp.ui.events.UiEvent
-import com.yalantis.ucrop.UCrop
-import java.io.File
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
+/**
+ * Pantalla contenedora de Perfil.
+ *
+ * Responsabilidades:
+ * - Recolectar estado del [ProfileViewModel] (URI de foto de perfil).
+ * - Escuchar eventos one-shot del ViewModel y reenviarlos a [onUiEvent].
+ * - Gestionar integraciones Android (picker de imagen + recorte) mediante helpers.
+ * - Delegar el render a [ProfileContent] (presentación pura).
+ *
+ * @param onBack Navegación hacia atrás. Restricciones: no nulo.
+ * @param onNavigate Navegación a una opción del perfil. Restricciones: no nulo.
+ * @param onUiEvent Consumidor de eventos de UI (snackbars). Restricciones: no nulo.
+ * @param username Nombre visible. Si es null, se mostrará placeholder.
+ * @param isLoggedIn Indica si el usuario tiene sesión iniciada (habilita “Cerrar sesión”).
+ * @param vm ViewModel inyectado por Hilt. Se permite override para tests.
+ *
+ * @see ProfileContent Presentación pura.
+ * @see rememberProfileImagePickers Helper para pick/crop.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * Profile(
+ *   onBack = navController::popBackStack,
+ *   onNavigate = { opt -> navController.navigate(opt.route) },
+ *   onUiEvent = { event -> handleUiEvent(event) }
+ * )
+ * }
+ */
 @Composable
 fun Profile(
     onBack: () -> Unit,
@@ -33,9 +51,8 @@ fun Profile(
     isLoggedIn: Boolean = false,
     vm: ProfileViewModel = hiltViewModel()
 ) {
-    val ctx = LocalContext.current
-
-    val photoUri by vm.photoUri.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val photoUriString by vm.photoUri.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {
         vm.events.collect { onUiEvent(it) }
@@ -43,144 +60,66 @@ fun Profile(
 
     var showMenu by remember { mutableStateOf(false) }
 
-    val cropLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val data: Intent? = result.data
+    val pickers = rememberProfileImagePickers(
+        context = context,
+        onCropped = { uriString -> vm.savePhoto(uriString) },
+        onCropError = vm::onCropError
+    )
 
-        if (result.resultCode == Activity.RESULT_OK && data != null) {
-            val resultUri = UCrop.getOutput(data)
-            resultUri?.let { vm.savePhoto(it.toString()) }
-        } else if (result.resultCode == UCrop.RESULT_ERROR) {
-            vm.onCropError()
-        }
+    ProfileContent(
+        username = username,
+        isLoggedIn = isLoggedIn,
+        photoUriString = photoUriString,
+        showPhotoMenu = showMenu,
+        onShowPhotoMenuChange = { showMenu = it },
+        onPickNewPhoto = {
+            showMenu = false
+            pickers.pickImage()
+        },
+        onRemovePhoto = {
+            showMenu = false
+            vm.clearPhoto()
+        },
+        onLogout = vm::logout,
+        onNavigate = onNavigate,
+        onBack = onBack
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewProfile_LoggedOut_NoPhoto() {
+    TeamMaravillaAppTheme {
+        ProfileContent(
+            username = null,
+            isLoggedIn = false,
+            photoUriString = null,
+            showPhotoMenu = false,
+            onShowPhotoMenuChange = {},
+            onPickNewPhoto = {},
+            onRemovePhoto = {},
+            onLogout = {},
+            onNavigate = {},
+            onBack = {}
+        )
     }
+}
 
-    val pickImageLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri ->
-        if (uri != null) {
-            val destUri = android.net.Uri.fromFile(
-                File(ctx.cacheDir, "profile_${System.currentTimeMillis()}.jpg")
-            )
-
-            val intent = UCrop.of(uri, destUri)
-                .withAspectRatio(1f, 1f)
-                .withMaxResultSize(700, 700)
-                .getIntent(ctx)
-
-            cropLauncher.launch(intent)
-        }
-    }
-
-    Box(Modifier.fillMaxSize()) {
-        GeneralBackground(overlayAlpha = 0.20f) {
-
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(Modifier.height(10.dp))
-
-                // Foto + menú
-                Box {
-                    ProfileImage(
-                        imageRes = null,
-                        uriString = photoUri,
-                        modifier = Modifier.clickable { showMenu = true }
-                    )
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.profile_change_photo)) },
-                            onClick = {
-                                showMenu = false
-                                pickImageLauncher.launch("image/*")
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.profile_remove_photo)) },
-                            enabled = !photoUri.isNullOrBlank(),
-                            onClick = {
-                                showMenu = false
-                                vm.clearPhoto()
-                            }
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(14.dp))
-
-                // Tarjeta usuario
-                Surface(
-                    shape = MaterialTheme.shapes.large,
-                    tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = username ?: stringResource(R.string.profile_username_placeholder),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = if (isLoggedIn)
-                                stringResource(R.string.profile_status_logged_in)
-                            else
-                                stringResource(R.string.profile_status_logged_out),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                val options = ProfileOption.entries.toTypedArray()
-
-                Surface(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    tonalElevation = 2.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(Modifier.padding(14.dp)) {
-                        OptionsGrid(
-                            options = options.map { stringResource(it.labelRes) },
-                            onOptionClick = { index -> onNavigate(options[index]) }
-                        )
-
-                        if (isLoggedIn) {
-                            Spacer(Modifier.height(10.dp))
-                            OutlinedButton(
-                                onClick = { vm.logout() },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
-                                ),
-                                border = ButtonDefaults.outlinedButtonBorder
-                            ) {
-                                Text(stringResource(R.string.profile_logout))
-                            }
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(90.dp))
-            }
-
-            //Box(Modifier.align(Alignment.BottomStart)) {
-            //    BackButton(onClick = onBack)
-            //}
-        }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewProfile_LoggedIn_WithPhotoMenuOpen() {
+    TeamMaravillaAppTheme {
+        ProfileContent(
+            username = "Cristian",
+            isLoggedIn = true,
+            photoUriString = "content://fake/profile.jpg",
+            showPhotoMenu = true,
+            onShowPhotoMenuChange = {},
+            onPickNewPhoto = {},
+            onRemovePhoto = {},
+            onLogout = {},
+            onNavigate = {},
+            onBack = {}
+        )
     }
 }

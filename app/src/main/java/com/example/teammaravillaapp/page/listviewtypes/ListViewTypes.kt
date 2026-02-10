@@ -1,33 +1,49 @@
 package com.example.teammaravillaapp.page.listviewtypes
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.teammaravillaapp.R
-import com.example.teammaravillaapp.component.ViewTypeOption
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.model.ListViewType
 import com.example.teammaravillaapp.ui.events.UiEvent
+import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Pantalla contenedora para seleccionar el tipo de vista de una lista (burbujas / lista / compacto).
+ *
+ * Responsabilidades:
+ * - Resolver el [ListViewTypesViewModel] mediante Hilt.
+ * - Suscribirse al [ListViewTypesViewModel.uiState] como fuente de verdad.
+ * - Escuchar eventos one-shot ([ListViewTypesViewModel.events]) y reenviarlos a [onUiEvent].
+ * - Delegar el render a [ListViewTypesContent] (UI pura), facilitando tests y @Preview.
+ *
+ * @param onCancel Callback de navegación para cancelar la operación y cerrar la pantalla.
+ * Restricciones:
+ * - No nulo.
+ * - Debe ser rápido (se ejecuta en UI thread).
+ * @param onSaved Callback invocado cuando el usuario guarda correctamente la preferencia.
+ * Restricciones:
+ * - No nulo.
+ * - Debe encargarse de cerrar la pantalla o navegar (p.ej. popBackStack).
+ * @param onUiEvent Consumidor de eventos de UI (snackbars, etc.).
+ * Restricciones:
+ * - No nulo.
+ * @param vm ViewModel inyectado por Hilt. Se permite override en tests.
+ *
+ * @see ListViewTypesContent Render de presentación.
+ * @see ListViewTypesViewModel Lógica de carga/guardado de preferencias.
+ *
+ * Ejemplo de uso:
+ * {@code
+ * ListViewTypesScreen(
+ *   onCancel = navController::popBackStack,
+ *   onSaved = navController::popBackStack,
+ *   onUiEvent = { event -> handleUiEvent(event) }
+ * )
+ * }
+ */
 @Composable
 fun ListViewTypes(
     onCancel: () -> Unit,
@@ -35,71 +51,55 @@ fun ListViewTypes(
     onUiEvent: (UiEvent) -> Unit,
     vm: ListViewTypesViewModel = hiltViewModel()
 ) {
-    val uiState by vm.uiState.collectAsState()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {
         vm.events.collect { onUiEvent(it) }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.list_view_types_title)) })
-        },
-        bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = onCancel
-                ) { Text(stringResource(R.string.common_cancel)) }
+    ListViewTypesContent(
+        uiState = uiState,
+        onCancel = onCancel,
+        onSelect = vm::onSelect,
+        onSave = { vm.onSave(onSaved) }
+    )
+}
 
-                Button(
-                    modifier = Modifier.weight(1f),
-                    enabled = !uiState.isLoading,
-                    onClick = { vm.onSave(onSaved) }
-                ) { Text(stringResource(R.string.common_save)) }
-            }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+@Preview(showBackground = true)
+@Composable
+private fun PreviewListViewTypes_Loading() {
+    TeamMaravillaAppTheme {
+        ListViewTypesContent(
+            uiState = ListViewTypesUiState(isLoading = true, selected = ListViewType.BUBBLES),
+            onCancel = {},
+            onSelect = {},
+            onSave = {}
+        )
+    }
+}
 
-            Text(
-                text = stringResource(R.string.list_view_types_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+@Preview(showBackground = true)
+@Composable
+private fun PreviewListViewTypes_SelectedBubbles() {
+    TeamMaravillaAppTheme {
+        ListViewTypesContent(
+            uiState = ListViewTypesUiState(isLoading = false, selected = ListViewType.BUBBLES),
+            onCancel = {},
+            onSelect = {},
+            onSave = {}
+        )
+    }
+}
 
-            Spacer(Modifier.height(6.dp))
-
-            ViewTypeOption(
-                title = stringResource(R.string.list_view_types_bubbles),
-                desc = stringResource(R.string.list_view_types_bubbles_desc),
-                selected = uiState.selected == ListViewType.BUBBLES,
-                onClick = { vm.onSelect(ListViewType.BUBBLES) }
-            )
-
-            ViewTypeOption(
-                title = stringResource(R.string.list_view_types_list),
-                desc = stringResource(R.string.list_view_types_list_desc),
-                selected = uiState.selected == ListViewType.LIST,
-                onClick = { vm.onSelect(ListViewType.LIST) }
-            )
-
-            ViewTypeOption(
-                title = stringResource(R.string.list_view_types_compact),
-                desc = stringResource(R.string.list_view_types_compact_desc),
-                selected = uiState.selected == ListViewType.COMPACT,
-                onClick = { vm.onSelect(ListViewType.COMPACT) }
-            )
-        }
+@Preview(showBackground = true)
+@Composable
+private fun PreviewListViewTypes_SelectedCompact() {
+    TeamMaravillaAppTheme {
+        ListViewTypesContent(
+            uiState = ListViewTypesUiState(isLoading = false, selected = ListViewType.COMPACT),
+            onCancel = {},
+            onSelect = {},
+            onSave = {}
+        )
     }
 }

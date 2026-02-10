@@ -19,6 +19,8 @@
     <string name="common_remove">Remove</string>
     <string name="common_retry">Retry</string>
     <string name="common_undo">Undo</string>
+    <string name="profile_logout_success">Sesión cerrada correctamente</string>
+    <string name="help_version_format">v%1$s</string>
 
     <!-- BackButton -->
     <string name="back_button_content_description">Back</string>

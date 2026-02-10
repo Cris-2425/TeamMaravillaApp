@@ -226,7 +226,12 @@ fun TeamMaravillaNavHost(
                 )
             }
 
-            composable(NavRoute.Help.route) { Help(onBack = { actions.up() }) }
+            composable(NavRoute.Help.route) {
+                Help(
+                    onBack = { actions.up() },
+                    onUiEvent = onUiEvent
+                )
+            }
 
             composable(NavRoute.History.route) {
                 History(
