@@ -1,34 +1,59 @@
 package com.example.teammaravillaapp.data.seed
 
 import com.example.teammaravillaapp.data.remote.datasource.images.RemoteImageDataSourceImpl
-import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.data.repository.products.ProductRepository
+import com.example.teammaravillaapp.model.Product
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Orquestador de seed del catálogo cuando existe backend.
+ *
+ * Objetivo:
+ * - Publicar en el servidor un catálogo completo de [Product] partiendo de una lista de [SeedItem].
+ *
+ * Estrategia:
+ * 1) Para cada item con [SeedItem.imageRes], intenta asegurar que su imagen está subida en el servidor:
+ *    - Si `exists(id)` devuelve true, reutiliza la URL pública.
+ *    - Si no existe, intenta subirla desde drawable con `uploadFromDrawable`.
+ *    - Si falla la subida, el producto se guarda sin `imageUrl` (best-effort).
+ * 2) Finalmente, guarda la lista completa usando [ProductRepository.saveProducts].
+ *
+ * Importante:
+ * - Este seed es **destructivo** si tu API implementa “overwrite all”: sobrescribe el catálogo entero.
+ * - Está pensado como herramienta de admin/dev, no para ejecutarse siempre en cada arranque.
+ *
+ * Consideraciones:
+ * - El proceso es idempotente a nivel de imagen (si ya existe, no re-sube).
+ * - Si el backend cae, el seed puede terminar con productos sin URL.
+ *
+ * @property imageRepo DataSource remoto para comprobar/subir imágenes.
+ * @property productRepo Repositorio para persistir el catálogo remoto (y normalmente reflejarlo en local).
+ */
 @Singleton
 class CatalogSeeder @Inject constructor(
     private val imageRepo: RemoteImageDataSourceImpl,
     private val productRepo: ProductRepository
 ) {
+
     /**
-     * Seed “full”:
-     * 1) Sube imágenes (multipart) para los items que tengan imageRes (si no existen ya)
-     * 2) Guarda la lista completa en la API (saveProducts)
+     * Publica un catálogo completo en backend.
      *
-     * NOTA: si tu API guarda un único JSON "all", esto SOBRESCRIBE el fichero entero.
+     * @param items Lista de items de seed (id, name, category, imageRes opcional).
+     *
+     * @throws Exception Puede lanzar excepciones técnicas si [productRepo.saveProducts] falla
+     * (depende de tu implementación). La subida de imágenes se hace best-effort.
      */
     suspend fun seedAll(items: List<SeedItem>) {
         val seededProducts: List<Product> = items.map { item ->
 
             val url: String? = if (item.imageRes != null) {
-                // Idempotencia: si ya existe en server, no la subimos
-                val alreadyThere = runCatching { imageRepo.exists(item.id) }.getOrDefault(false)
+                val alreadyThere = runCatching { imageRepo.exists(item.id) }
+                    .getOrDefault(false)
 
                 if (alreadyThere) {
                     imageRepo.buildPublicUrl(item.id)
                 } else {
-                    // Robustez: si falla la subida, no rompemos todo el seed
                     val uploaded = runCatching {
                         imageRepo.uploadFromDrawable(
                             id = item.id,

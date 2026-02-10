@@ -70,7 +70,23 @@ class RoomProductRepository @Inject constructor(
     }
 
     suspend fun seedIfEmpty() {
-        if (dao.count() > 0) return
-        dao.upsertAll(ProductData.allProducts.map { it.toEntity() })
+        if (dao.count() == 0) {
+            dao.upsertAll(ProductData.allProducts.map { it.toEntity() })
+        } else {
+            rehydrateImagesFromSeed()
+        }
+    }
+    suspend fun rehydrateImagesFromSeed() {
+        val seedById = ProductData.allProducts.associateBy { it.id }
+        val current = dao.getAll()
+
+        val fixed = current.map { e ->
+            val seed = seedById[e.id]
+            if (e.imageRes == null && seed?.imageRes != null) {
+                e.copy(imageRes = seed.imageRes)
+            } else e
+        }
+
+        dao.upsertAll(fixed)
     }
 }

@@ -20,8 +20,16 @@ import com.example.teammaravillaapp.model.Tomate
 import com.example.teammaravillaapp.model.Yogur
 
 /**
- * SOLO usado como seed inicial de Room.
- * No usar directamente desde UI.
+ * Seed local de recetas para Room (modo offline / demo).
+ *
+ * Uso:
+ * - Se utiliza para poblar la base de datos local en el primer arranque si está vacía.
+ * - No debe consumirse directamente desde UI:
+ *   la UI debería observar repositorios (Room) para mantener un flujo reactivo.
+ *
+ * Contrato:
+ * - [Recipe.productIds] deben ser IDs válidos del catálogo (los de [ProductData.byId]).
+ * - Las imágenes se resuelven por [Recipe.imageRes] cuando no hay backend de imágenes/URLs.
  */
 object RecipeData {
 
@@ -84,6 +92,14 @@ object RecipeData {
         )
     )
 
+    /**
+     * Busca una receta por id dentro del seed.
+     *
+     * Útil para herramientas de seed o tests locales.
+     *
+     * @param id Id de receta.
+     * @return La receta si existe; null si no está en el seed.
+     */
     fun getRecipeById(id: Int): Recipe? =
         recipes.firstOrNull { it.id == id }
 }

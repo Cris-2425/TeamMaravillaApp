@@ -2,7 +2,7 @@ package com.example.teammaravillaapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ===================== LIGHT (suave, menos blanco puro) =====================
+// ===================== LIGHT =====================
 
 val primaryLight = Color(0xFFF3F1F5)
 val onPrimaryLight = Color(0xFF2C2730)
@@ -54,7 +54,7 @@ val surfaceContainerHighLight = Color(0xFFEAE6ED)
 val surfaceContainerHighestLight = Color(0xFFE3DEE6)
 
 
-// ===================== DARK (suave, menos negro puro) =====================
+// ===================== DARK =====================
 
 val primaryDark = Color(0xFF2A262E)
 val onPrimaryDark = Color(0xFFEDE7F2)

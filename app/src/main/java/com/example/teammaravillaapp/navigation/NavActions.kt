@@ -2,7 +2,17 @@ package com.example.teammaravillaapp.navigation
 
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.NavGraph.Companion.findStartDestination
 
+/**
+ * Conjunto de acciones de navegación tipadas para centralizar rutas y opciones.
+ *
+ * Objetivos:
+ * - Evitar strings sueltos por la UI.
+ * - Unificar patrones de navegación (singleTop, restoreState, popUpTo).
+ *
+ * @param navController Controlador de navegación.
+ */
 class NavActions(private val navController: NavHostController) {
 
     // -------- Helpers --------
@@ -11,26 +21,36 @@ class NavActions(private val navController: NavHostController) {
         navController.navigate(route) { builder?.invoke(this) }
     }
 
-    fun up() = navController.navigateUp()
+    fun up(): Boolean = navController.navigateUp()
 
+    /**
+     * Vuelve a la raíz del grafo (destino inicial).
+     *
+     * Útil para resetear la pila tras login/logout.
+     */
+    // No se usa, pero está curioso para otros proyectos y tener la referencia
     fun popToRoot() {
-        navController.popBackStack(route = NavRoute.Home.route, inclusive = false)
+        val startId = navController.graph.findStartDestination().id
+        navController.popBackStack(startId, inclusive = false)
     }
 
     // -------- Top level --------
 
     fun toHome() = navigate(NavRoute.Home.route) {
-        popUpTo(0)
+        val startId = navController.graph.findStartDestination().id
+        popUpTo(startId) { inclusive = false }
         launchSingleTop = true
     }
 
     fun toLogin() = navigate(NavRoute.Login.route) {
-        popUpTo(0)
+        val startId = navController.graph.findStartDestination().id
+        popUpTo(startId) { inclusive = false }
         launchSingleTop = true
     }
 
     fun toSplash() = navigate(NavRoute.Splash.route) {
-        popUpTo(0)
+        val startId = navController.graph.findStartDestination().id
+        popUpTo(startId) { inclusive = false }
         launchSingleTop = true
     }
 
@@ -50,40 +70,26 @@ class NavActions(private val navController: NavHostController) {
         navigate(NavRoute.SelectList.createRoute(recipeId))
 
     fun toProfile() = navigate(NavRoute.Profile.route)
-
     fun toSettings() = navigate(NavRoute.Settings.route)
-
     fun toStats() = navigate(NavRoute.Stats.route)
-
     fun toHelp() = navigate(NavRoute.Help.route)
-
     fun toHistory() = navigate(NavRoute.History.route)
-
-    fun toProductsDebug() = navigate(NavRoute.ProductsDebug.route)
 
     fun toCamera(listId: String? = null) =
         navigate(NavRoute.Camera.createRoute(listId))
 
     fun toListViewTypes() = navigate(NavRoute.ListViewTypes.route)
-
     fun toCategoryFilter() = navigate(NavRoute.CategoryFilter.route)
 
-    // -------- SingleTop helpers (opcional) --------
+    fun toRegister() = navigate(NavRoute.Register.route) { launchSingleTop = true }
 
-    fun toCreateListAndClearFromBackStack() = navigate(NavRoute.CreateList.route) {
-        launchSingleTop = true
-    }
+    // -------- SingleTop helpers --------
 
     fun toListDetailAndRemove(routeToPop: String, listId: String) =
         navigate(NavRoute.ListDetail.createRoute(listId)) {
             popUpTo(routeToPop) { inclusive = true }
             launchSingleTop = true
         }
-    fun toRegister() {
-        navController.navigate(NavRoute.Register.route) {
-            launchSingleTop = true
-        }
-    }
 
     // -------- Tabs: singleTop + restoreState --------
 
@@ -110,5 +116,4 @@ class NavActions(private val navController: NavHostController) {
         launchSingleTop = true
         restoreState = true
     }
-
 }

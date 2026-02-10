@@ -4,8 +4,33 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.Product
 import com.example.teammaravillaapp.model.ProductCategory
 
+/**
+ * Catálogo “seed” local (offline-first) de productos.
+ *
+ * Uso principal:
+ * - Rellenar Room en el primer arranque (seed local).
+ * - Proveer imágenes locales ([Product.imageRes]) cuando no hay backend o no hay URL.
+ * - Mantener un catálogo base consistente para toda la app.
+ *
+ * Importante:
+ * - El campo [Product.id] se deriva de un normalizador de nombre.
+ * - Ese id debe ser estable porque se usa para:
+ *   - referenciar productos desde listas (productIds),
+ *   - mapear recetas -> productos,
+ *   - rehidratar imágenes si la DB tiene datos antiguos.
+ */
 object ProductData {
 
+    /**
+     * Genera un id estable a partir del nombre:
+     * - lowercasing
+     * - normalización de acentos y ñ
+     * - reemplazo de separadores por "_"
+     *
+     * Recomendación:
+     * - Mantén este algoritmo alineado con `IdNormalizer.fromName` para evitar ids distintos
+     *   según la capa (seed / repo / remote).
+     */
     private fun idFromName(name: String): String =
         name.trim()
             .lowercase()
@@ -18,6 +43,12 @@ object ProductData {
             .replace("[^a-z0-9]+".toRegex(), "_")
             .trim('_')
 
+    /**
+     * Factory interna para crear un [Product] de seed con:
+     * - id derivado del nombre
+     * - `imageRes` obligatorio
+     * - `imageUrl` null (offline)
+     */
     private fun Product(name: String, imageRes: Int, category: ProductCategory): Product =
         Product(
             id = idFromName(name),
@@ -27,7 +58,7 @@ object ProductData {
             imageUrl = null
         )
 
-    /** Listado único de productos del catálogo. */
+    /** Listado único (single source of truth) de productos seed. */
     val allProducts: List<Product> = listOf(
         // Frutas
         Product("Manzana", R.drawable.manzana, ProductCategory.FRUITS),
@@ -138,19 +169,52 @@ object ProductData {
         Product("Huevo", R.drawable.huevo, ProductCategory.OTHER),
     )
 
-    // ✅ Mantén byName si quieres, pero mejor ya ir a byId.
+    /**
+     * Índice por id para acceso O(1).
+     *
+     * Útil cuando tienes `productIds` y necesitas obtener el [Product] completo.
+     */
     val byId: Map<String, Product> = allProducts.associateBy { it.id }
+
+    /**
+     * Índice por nombre exacto.
+     *
+     * Nota:
+     * - Es más frágil que `byId` porque depende de tildes/capitalización.
+     * - Idealmente, usa `byId` en flujos de negocio.
+     */
     val byName: Map<String, Product> = allProducts.associateBy { it.name }
 
+    /**
+     * Obtiene un [Product] por id.
+     *
+     * @throws IllegalArgumentException si el id no existe en el catálogo.
+     */
     fun productById(id: String): Product =
         requireNotNull(byId[id]) { "No existe el id: '$id' en la lista de productos." }
 
+    /**
+     * Obtiene un [Product] por nombre exacto.
+     *
+     * @throws IllegalArgumentException si el nombre no existe en el catálogo.
+     */
     fun product(name: String): Product =
         requireNotNull(byName[name]) { "No existe el nombre: '$name' en la lista de productos." }
 
+    /**
+     * Productos agrupados por categoría.
+     *
+     * Útil para pantallas de catálogo o filtros.
+     */
     val byCategory: Map<ProductCategory, List<Product>> =
-        allProducts.groupBy { it.category as ProductCategory }
+        allProducts.groupBy { it.category }
 
+    /**
+     * Lista curada de productos “recientes” para sugerencias rápidas.
+     *
+     * Nota:
+     * - No es un histórico real; es una selección fija.
+     */
     val recentUsed: List<Product> = listOf(
         product("Harina"),
         product("Yogur"),

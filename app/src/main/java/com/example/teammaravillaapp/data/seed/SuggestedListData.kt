@@ -4,12 +4,22 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.SuggestedList
 
 /**
- * Datos de ejemplo de listas sugeridas para el flujo de creación.
+ * Listas sugeridas (plantillas) para el flujo de creación de listas.
  *
- * Se usan nombres de texto directos para evitar depender de contexto
- * en inicialización estática (funciona bien en Preview).
+ * Motivo:
+ * - Ofrecer al usuario plantillas rápidas (ej. "Compra semanal", "BBQ sábado").
+ * - Evitar depender de repositorios/Room para mostrar sugerencias iniciales.
+ *
+ * Importante:
+ * - [SuggestedList.productIds] debe contener IDs válidos del catálogo (los mismos que [ProductData.byId]).
+ * - Si cambias el normalizador de IDs o el catálogo, revisa estas plantillas.
+ *
+ * Nota de implementación:
+ * - Se usan strings directos (no `stringResource`) para permitir inicialización estática y previews.
  */
 object SuggestedListData {
+
+    /** Plantillas disponibles en la app. */
     val items: List<SuggestedList> = listOf(
         SuggestedList(
             name = "Compra semanal",

@@ -15,6 +15,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel de estadísticas.
+ *
+ * Responsabilidades:
+ * - Cargar un snapshot agregado de estadísticas mediante [StatsRepository].
+ * - Exponer el estado como [StateFlow] para la UI.
+ * - Emitir eventos one-shot (snackbar) ante errores recuperables.
+ *
+ * @param repository Fuente de datos de estadísticas (DB/local).
+ * Restricciones:
+ * - No nulo.
+ *
+ * @see StatsRepository
+ * @see StatsUiState
+ *
+ * Ejemplo de uso:
+ * {@code
+ * val vm: StatsViewModel = hiltViewModel()
+ * val state by vm.uiState.collectAsStateWithLifecycle()
+ * }
+ */
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val repository: StatsRepository
@@ -30,9 +51,27 @@ class StatsViewModel @Inject constructor(
         refresh()
     }
 
+    /**
+     * Refresca las estadísticas.
+     *
+     * Motivo: permitir recarga manual (reintento tras error) y carga inicial.
+     *
+     * Comportamiento:
+     * - Mantiene los datos anteriores para evitar “pantalla vacía”.
+     * - Marca loading=true.
+     * - Si falla, conserva los últimos datos y expone el error + snackbar.
+     *
+     * @throws Exception No se propaga. Los errores del repositorio se capturan y se reflejan en [uiState].
+     *
+     * Ejemplo de uso:
+     * {@code
+     * OutlinedButton(onClick = vm::refresh) { Text("Reintentar") }
+     * }
+     */
     fun refresh() {
         viewModelScope.launch {
-            // Mantiene lo anterior, solo marca loading
+            if (_uiState.value.isLoading) return@launch
+
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
             runCatching { repository.loadStats() }

@@ -5,21 +5,24 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.ListBackground
 
 /**
- * Resolve de recursos para los fondos de lista.
+ * Resolver centralizado de fondos de listas.
  *
- * Centraliza el mapeo enum → drawable para no repetir
- * `when` por toda la app y tener un “single source of truth”.
+ * Motivo:
+ * - Evitar repetir `when(label)` por toda la app.
+ * - Mantener un único punto de verdad para mapear [ListBackground] -> drawable.
+ *
+ * Nota:
+ * - Devuelve siempre un drawable válido (fallback) para que la UI nunca quede sin fondo.
  */
 object ListBackgrounds {
 
     /**
-     * Devuelve el drawable del fondo asociado a [label].
+     * Devuelve el drawable asociado a un [ListBackground].
      *
-     * Si [label] es `null` o no coincide con ningún caso, se devuelve
-     * un fondo por defecto para que la UI nunca quede en blanco.
+     * @param label Fondo elegido por el usuario.
+     * Si es `null` o no coincide, se devuelve un fondo por defecto.
      *
-     * @param label fondo elegido por el usuario (enum) o `null`.
-     * @return id de recurso drawable siempre válido.
+     * @return id de recurso drawable (siempre válido).
      */
     @DrawableRes
     fun getBackgroundRes(label: ListBackground?): Int = when (label) {
