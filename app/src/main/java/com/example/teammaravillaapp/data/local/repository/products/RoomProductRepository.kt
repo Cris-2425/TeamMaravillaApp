@@ -11,34 +11,40 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Repositorio de productos usando Room.
+ *
+ * - Observa productos, obtiene la lista completa.
+ * - Inserta/actualiza productos preservando imágenes locales y semilla.
+ * - Normaliza IDs para consistencia.
+ */
 @Singleton
 class RoomProductRepository @Inject constructor(
     private val dao: ProductDao
 ) {
 
+    /** Flujo de todos los productos. */
     fun observeProducts(): Flow<List<Product>> =
         dao.observeAll().map { list -> list.map { it.toDomain() } }
 
+    /** Lista completa de productos (suspend). */
     suspend fun getProducts(): List<Product> =
         dao.getAll().map { it.toDomain() }
 
     /**
-     * Guarda lista remota:
-     * 1) Normaliza IDs (para que coincidan con el seed y con el resto de app)
-     * 2) Preserva imágenes locales existentes
-     * 3) Rehidrata imageRes desde ProductData si no hay imagen remota
+     * Guarda lista de productos remota.
+     *
+     * - Normaliza IDs con [IdNormalizer].
+     * - Preserva imágenes locales.
+     * - Rehidrata imágenes desde el seed si es necesario.
      */
     suspend fun saveProducts(products: List<Product>) {
-        val existingById = dao.getAll().associateBy { it.id } // ProductEntity por id
+        val existingById = dao.getAll().associateBy { it.id }
         val seedById: Map<String, Product> = ProductData.allProducts.associateBy { it.id }
 
         val normalized = products.map { incoming ->
             val normalizedId = IdNormalizer.fromName(incoming.name)
-
-            // si backend manda un id distinto, lo forzamos
-            if (incoming.id != normalizedId) {
-                incoming.copy(id = normalizedId)
-            } else incoming
+            if (incoming.id != normalizedId) incoming.copy(id = normalizedId) else incoming
         }
 
         val mergedEntities = normalized.map { incoming ->
@@ -46,10 +52,7 @@ class RoomProductRepository @Inject constructor(
             val seed = seedById[incoming.id]
 
             val merged = incoming.copy(
-                // URL: remoto > local > seed
                 imageUrl = incoming.imageUrl ?: old?.imageUrl ?: seed?.imageUrl,
-
-                // RES: remoto (si algún día llega) > local > seed
                 imageRes = incoming.imageRes ?: old?.imageRes ?: seed?.imageRes
             )
 
@@ -59,16 +62,19 @@ class RoomProductRepository @Inject constructor(
         dao.upsertAll(mergedEntities)
     }
 
+    /** Inserta o actualiza un solo producto. */
     suspend fun upsert(product: Product) {
         val normalizedId = IdNormalizer.fromName(product.name)
         val normalized = if (product.id != normalizedId) product.copy(id = normalizedId) else product
         dao.upsert(normalized.toEntity())
     }
 
+    /** Elimina un producto por ID. */
     suspend fun delete(id: String) {
         dao.deleteById(id)
     }
 
+    /** Inserta seed de productos si la DB está vacía o rehidrata imágenes. */
     suspend fun seedIfEmpty() {
         if (dao.count() == 0) {
             dao.upsertAll(ProductData.allProducts.map { it.toEntity() })
@@ -76,6 +82,8 @@ class RoomProductRepository @Inject constructor(
             rehydrateImagesFromSeed()
         }
     }
+
+    /** Rehidrata imágenes de la semilla si no existen en la DB actual. */
     suspend fun rehydrateImagesFromSeed() {
         val seedById = ProductData.allProducts.associateBy { it.id }
         val current = dao.getAll()

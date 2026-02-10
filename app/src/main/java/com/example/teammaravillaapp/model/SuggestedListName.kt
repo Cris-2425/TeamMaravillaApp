@@ -4,10 +4,18 @@ import androidx.annotation.StringRes
 import com.example.teammaravillaapp.R
 
 /**
- * Claves de nombres de listas sugeridas.
+ * Claves de nombres de listas sugeridas (**SuggestedListName**).
  *
- * Se usa solo como ENUM de constantes; el texto real se
- * resuelve en las pantallas con `stringResource(labelRes)`.
+ * Este enum se utiliza como constantes de referencia para listas sugeridas.
+ * El texto real se obtiene en la UI mediante `stringResource(labelRes)`.
+ *
+ * Ejemplo de uso:
+ * ```kotlin
+ * val weeklyShopName = SuggestedListName.SUGGESTED_WEEKLY_SHOP
+ * val labelText = stringResource(weeklyShopName.labelRes)
+ * ```
+ *
+ * @property labelRes Recurso de texto asociado a la lista sugerida (`R.string.*`).
  */
 enum class SuggestedListName(@StringRes val labelRes: Int) {
     SUGGESTED_WEEKLY_SHOP(R.string.suggested_list_weekly_shop),

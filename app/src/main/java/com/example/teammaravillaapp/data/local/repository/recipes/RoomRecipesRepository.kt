@@ -14,24 +14,41 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementación de [RecipesRepository] usando Room.
+ *
+ * - Observa recetas y sus ingredientes.
+ * - Permite obtener recetas individuales.
+ * - Inicializa la base de datos con seed si está vacía.
+ */
 @Singleton
 class RoomRecipesRepository @Inject constructor(
     private val dao: RecipesDao
 ) : RecipesRepository {
 
+    /** Flujo de todas las recetas con sus ingredientes. */
     override val recipes: Flow<List<RecipeWithIngredients>> =
         dao.observeAll().map { list -> list.map { it.toDomain() } }
 
+    /** Observa una receta por su ID. */
     override fun observeRecipe(id: Int): Flow<RecipeWithIngredients?> =
         dao.observeById(id).map { it?.toDomain() }
 
+    /** Obtiene una receta por su ID (suspend). */
     override suspend fun getRecipe(id: Int): RecipeWithIngredients? =
         dao.getById(id)?.toDomain()
 
+    /** Observa las líneas de ingredientes de una receta. */
     override fun observeIngredientLines(recipeId: Int): Flow<List<IngredientLine>> =
         dao.observeIngredientLines(recipeId)
             .map { lines -> lines.map { it.toDomain() } }
 
+    /**
+     * Inserta datos semilla si la base de datos está vacía.
+     *
+     * - Inserta las recetas.
+     * - Inserta los crossRefs entre receta y productos.
+     */
     override suspend fun seedIfEmpty() {
         if (dao.count() > 0) return
 

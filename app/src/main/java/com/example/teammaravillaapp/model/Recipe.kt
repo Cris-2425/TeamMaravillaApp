@@ -3,13 +3,29 @@ package com.example.teammaravillaapp.model
 import androidx.annotation.DrawableRes
 
 /**
- * Receta simple compuesta por un título, imagen y lista de ingredientes.
+ * Modelo de receta simple, compuesto por título, imagen y lista de productos.
  *
- * @property title nombre de la receta.
- * @property imageRes imagen opcional asociada (foto/plato).
- * @property productIds ids de productos del catálogo (API/Room).
+ * Este modelo se utiliza tanto en **capa de dominio** como en **UI** para mostrar recetas
+ * y relacionarlas con los productos disponibles en el catálogo.
+ *
+ * Ejemplo de uso:
+ * ```kotlin
+ * val receta = Recipe(
+ *     id = 1,
+ *     title = "Ensalada de frutas",
+ *     productIds = listOf("Manzana", "Plátano", "Kiwi"),
+ *     instructions = "Cortar y mezclar todos los ingredientes.",
+ *     imageRes = R.drawable.ensalada_frutas
+ * )
+ * ```
+ *
+ * @property id Identificador único de la receta.
+ * @property title Nombre de la receta.
+ * @property productIds Lista de IDs de productos del catálogo (`Product.id`) asociados a la receta.
+ * @property instructions Instrucciones paso a paso para preparar la receta.
+ * @property imageRes Recurso drawable opcional de la receta.
+ * @property imageUrl URL de imagen remota opcional.
  */
-
 data class Recipe(
     val id: Int,
     val title: String,

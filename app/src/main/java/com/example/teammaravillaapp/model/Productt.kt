@@ -5,9 +5,28 @@ import com.example.teammaravillaapp.data.seed.ProductData
 /**
  * Alias de productos para uso rápido en pantallas y datos de ejemplo.
  *
- * Importante:
- * Estos alias dependen del nombre exacto en [com.example.teammaravillaapp.data.seed.ProductData.allProducts].
- * Si cambias el `name` en el catálogo, actualiza aquí el correspondiente.
+ * Nota:
+ *  - Estos alias dependen del nombre exacto en [ProductData.allProducts].
+ *  - Si cambias el `name` en el catálogo, actualiza también aquí.
+ *
+ * Uso:
+ * ```kotlin
+ * val listaCompras = listOf(Manzana, Platano, Leche)
+ * ```
+ *
+ * Los productos se agrupan por categoría:
+ *  - Frutas
+ *  - Verduras
+ *  - Carnes
+ *  - Pescados
+ *  - Lácteos
+ *  - Pan
+ *  - Limpieza
+ *  - Bebidas
+ *  - Secos
+ *  - Otros
+ *
+ * Esto facilita la generación de listas, pruebas y datos semilla.
  */
 
 // Frutillas
