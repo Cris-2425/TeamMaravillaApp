@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -160,7 +161,7 @@ fun RecipeCard(
                 }
 
                 else -> {
-                    androidx.compose.foundation.layout.Box(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(140.dp)

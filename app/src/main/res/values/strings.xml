@@ -368,7 +368,7 @@
     <string name="suggested_list_cleaning">Cleaning</string>
 
     <!-- ListViewType -->
-    <string name="list_view_bubbles">Bubbles</string>
+    <string name="list_view_bubbles">Bubbnavhostles</string>
     <string name="list_view_list">List</string>
     <string name="list_view_compact">Compact</string>
 

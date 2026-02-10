@@ -1,6 +1,6 @@
 package com.example.teammaravillaapp.data.repository.favorites
 
-import com.example.teammaravillaapp.core.di.ApplicationScope
+import com.example.teammaravillaapp.di.ApplicationScope
 import com.example.teammaravillaapp.data.local.dao.FavoritesDao
 import com.example.teammaravillaapp.data.local.entity.FavoriteRecipeEntity
 import com.example.teammaravillaapp.data.remote.datasource.favorites.RemoteFavoritesDataSource
@@ -14,6 +14,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementación por defecto de [FavoritesRepository].
+ *
+ * Repositorio **offline-first** para favoritos, con sincronización
+ * asociada al usuario autenticado.
+ *
+ * ### Estrategia general
+ * - El estado local (Room) es la única fuente para la UI.
+ * - Las operaciones son inmediatas y no dependen de red.
+ * - La sincronización remota es best-effort.
+ *
+ * ### Comportamiento clave
+ * - Merge automático entre favoritos locales y remotos al iniciar sesión.
+ * - Persistencia consistente entre dispositivos.
+ */
 @Singleton
 class DefaultFavoritesRepository @Inject constructor(
     private val dao: FavoritesDao,
@@ -22,11 +37,22 @@ class DefaultFavoritesRepository @Inject constructor(
     @ApplicationScope private val appScope: CoroutineScope
 ) : FavoritesRepository {
 
+    /**
+     * Flujo reactivo con el conjunto de IDs favoritos.
+     *
+     * Derivado directamente desde Room.
+     */
     override val favoriteIds: Flow<Set<Int>> =
-        dao.observeIds().map { it.toSet() }
+        dao.observeIds()
+            .map { it.toSet() }
 
     init {
-        // Sync al cambiar de usuario (login)
+        /**
+         * Sincroniza favoritos al cambiar de usuario (login).
+         *
+         * Escucha cambios en el token de sesión y ejecuta un merge
+         * entre favoritos locales y remotos.
+         */
         appScope.launch {
             sessionStore.token
                 .filterNotNull()
@@ -37,28 +63,61 @@ class DefaultFavoritesRepository @Inject constructor(
         }
     }
 
+    /**
+     * Alterna el estado de favorito de una receta.
+     *
+     * ### Flujo
+     * 1. Actualiza el estado local inmediatamente.
+     * 2. Si hay usuario autenticado:
+     *    - Sube el estado completo actual al backend (best-effort).
+     *
+     * La UI nunca espera a la red.
+     */
     override suspend fun toggle(recipeId: Int) {
         val isFav = dao.isFavorite(recipeId)
-        if (isFav) dao.remove(recipeId) else dao.add(FavoriteRecipeEntity(recipeId))
+        if (isFav) {
+            dao.remove(recipeId)
+        } else {
+            dao.add(FavoriteRecipeEntity(recipeId))
+        }
 
         val userId = sessionStore.getTokenOrNull() ?: return
 
-        // Subida best-effort con el estado actual
+        // Subida best-effort con el estado actual completo
         val idsNow = dao.getAllIdsOnce().toSet()
-        runCatching { remote.saveFavorites(userId, idsNow) }
+        runCatching {
+            remote.saveFavorites(userId, idsNow)
+        }
     }
 
+    /**
+     * Sincroniza favoritos al iniciar sesión mediante merge.
+     *
+     * ### Estrategia
+     * - Descarga favoritos remotos del usuario.
+     * - Obtiene favoritos locales existentes.
+     * - Aplica unión (OR lógico).
+     * - Persiste el estado merged tanto local como remotamente.
+     *
+     * Esto garantiza:
+     * - No pérdida de favoritos.
+     * - Consistencia entre dispositivos.
+     */
     private suspend fun syncOnLoginMerge(userId: String) {
         val remoteIds = remote.getFavorites(userId)
         val localIds = dao.getAllIdsOnce().toSet()
 
-        val merged = (remoteIds + localIds)
+        val merged = remoteIds + localIds
 
-        // Persistimos merged en local
         dao.clearAll()
-        dao.addAll(merged.sorted().map { FavoriteRecipeEntity(it) })
+        dao.addAll(
+            merged
+                .sorted()
+                .map { FavoriteRecipeEntity(it) }
+        )
 
-        // Persistimos merged en remoto (para dejarlo consistente)
-        runCatching { remote.saveFavorites(userId, merged) }
+        runCatching {
+            remote.saveFavorites(userId, merged)
+        }
     }
 }

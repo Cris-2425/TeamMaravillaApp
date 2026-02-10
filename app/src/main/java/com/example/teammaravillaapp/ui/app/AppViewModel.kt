@@ -78,12 +78,14 @@ class AppViewModel @Inject constructor(
             runCatching { productRepository.seedIfEmpty() }
             runCatching { recipesRepository.seedIfEmpty() }
             runCatching { listsRepository.seedIfEmpty() }
-
-            if (isEmulator) {
-                productRepository.refreshProducts()
-                    .onFailure { showSnackbar(R.string.snackbar_action_failed) }
-            }
         }
+        /*
+                if (isEmulator) {
+                    productRepository.refreshProducts()
+                        .onFailure { showSnackbar(R.string.snackbar_action_failed) }
+                }
+
+         */
     }
 
     /**

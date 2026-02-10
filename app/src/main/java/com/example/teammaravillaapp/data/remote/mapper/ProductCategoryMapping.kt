@@ -2,6 +2,21 @@ package com.example.teammaravillaapp.data.remote.mapper
 
 import com.example.teammaravillaapp.model.ProductCategory
 
+/**
+ * Mapeo entre String de API y [ProductCategory] de dominio.
+ *
+ * - Se asegura que la conversión siempre devuelva un valor válido.
+ * - Valores desconocidos o nulos caen en [ProductCategory.OTHER].
+ * - Normaliza espacios, guiones y mayúsculas para robustez.
+ */
+
+/**
+ * Convierte un string de categoría API a [ProductCategory].
+ *
+ * - Aplica heurística de normalización:
+ *   - trim, lowercase, reemplaza espacios y guiones por "_"
+ * - Fallback: cualquier valor desconocido -> [ProductCategory.OTHER]
+ */
 fun String?.toProductCategoryOrDefault(): ProductCategory {
     val key = this.normalizeKey() ?: return ProductCategory.OTHER
     return when (key) {
@@ -20,6 +35,11 @@ fun String?.toProductCategoryOrDefault(): ProductCategory {
     }
 }
 
+/**
+ * Convierte un [ProductCategory] a su valor correspondiente en la API.
+ *
+ * - Útil para enviar datos al backend.
+ */
 fun ProductCategory.apiValue(): String = when (this) {
     ProductCategory.FRUITS -> "fruits"
     ProductCategory.VEGETABLES -> "vegetables"
@@ -34,7 +54,13 @@ fun ProductCategory.apiValue(): String = when (this) {
     ProductCategory.OTHER -> "other"
 }
 
-
+/**
+ * Normaliza la clave de categoría para comparación robusta.
+ *
+ * - Trim y lowercase.
+ * - Reemplaza espacios y guiones por "_".
+ * - Retorna null si queda vacía.
+ */
 private fun String?.normalizeKey(): String? =
     this?.trim()
         ?.lowercase()

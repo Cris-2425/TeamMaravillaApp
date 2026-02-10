@@ -42,6 +42,7 @@ fun ListDetail(
     onUiEvent: (UiEvent) -> Unit
 ) {
     val vm: ListDetailViewModel = hiltViewModel()
+
     val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {

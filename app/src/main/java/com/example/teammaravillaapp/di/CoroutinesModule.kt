@@ -1,4 +1,4 @@
-package com.example.teammaravillaapp.core.di
+package com.example.teammaravillaapp.di
 
 import dagger.Module
 import dagger.Provides

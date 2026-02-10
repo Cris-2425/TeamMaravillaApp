@@ -9,6 +9,22 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementación de [RemoteProductDataSource] usando Retrofit ([ProductApi]).
+ *
+ * Se encarga de:
+ * - Obtener todos los productos del backend.
+ * - Sobrescribir completamente los productos en el backend.
+ * - Insertar o actualizar productos individuales.
+ * - Eliminar productos por ID.
+ *
+ * Usa un [Mutex] para serializar las operaciones que modifican el estado remoto
+ * y evitar condiciones de carrera.
+ *
+ * Anotado con [Singleton] para que Hilt provea una sola instancia.
+ *
+ * @property api Interfaz de Retrofit para llamadas de productos.
+ */
 @Singleton
 class RemoteProductDataSourceImpl @Inject constructor(
     private val api: ProductApi

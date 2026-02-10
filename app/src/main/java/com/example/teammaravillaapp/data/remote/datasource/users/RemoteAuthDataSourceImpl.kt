@@ -7,6 +7,19 @@ import com.example.teammaravillaapp.data.remote.dto.RegisterRequestDto
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementación concreta de [RemoteAuthDataSource] usando Retrofit ([AuthApi]).
+ *
+ * Se encarga de:
+ * - Construir los DTOs de request.
+ * - Llamar a la API.
+ * - Devolver el DTO de respuesta.
+ *
+ * Anotado con [Singleton] para garantizar una única instancia
+ * en toda la aplicación mediante Hilt.
+ *
+ * @property api Interfaz de Retrofit para llamadas de autenticación.
+ */
 @Singleton
 class RemoteAuthDataSourceImpl @Inject constructor(
     private val api: AuthApi
