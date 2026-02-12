@@ -1,180 +1,248 @@
-# 🛒 Team Maravilla App
+# 🧺✨ TeamMaravillaApp
 
-Aplicación Android desarrollada en **Kotlin** con **Jetpack Compose**.  
-Su objetivo es ofrecer una experiencia moderna y visual para gestionar listas de compra, recetas y productos, con posibilidad de personalización del estilo y fondo de cada lista.
+## Offline-First Grocery Lists & Recipes Platform
 
----
-
-## 📱 Descripción General
-
-**Team Maravilla App** permite al usuario:
-
-- Crear y personalizar listas de compra.  
-- Añadir o eliminar productos fácilmente.  
-- Filtrar categorías visibles.  
-- Visualizar recetas con sus ingredientes.  
-- Guardar recetas como favoritas.  
-- Cambiar el estilo o vista de las listas.  
-- Acceder a secciones de perfil, login y configuración.
-
-> En esta versión, las pantallas son funcionales de forma independiente, sin navegación integrada.  
-> Se han incluido todas las **vistas principales**, con componentes reutilizables y repositorios de datos simulados en memoria.
+**Android · Jetpack Compose · Room · Retrofit · Hilt · MVVM**
 
 ---
 
-## 🧩 Estructura del Proyecto
+## 📱 Overview
 
-```plaintext
+TeamMaravillaApp is a modern Android application designed to manage shopping lists, recipes and favorites, built with a strong focus on:
+
+- Offline-first architecture  
+- Clean separation of layers  
+- Reactive UI (StateFlow + Jetpack Compose)  
+- Resilient synchronization  
+- Production-ready modular structure  
+
+This project demonstrates **advanced Android development practices** aligned with real-world mobile architecture patterns.
+
+---
+
+## 🎯 Purpose of the Project
+
+This application was built to demonstrate:
+
+- Clean Architecture principles applied pragmatically  
+- Local-first data modeling with **Room as Single Source of Truth**  
+- Structured repository orchestration between local and remote layers  
+- Real authentication flow with session persistence  
+- Scalable project organization suitable for mid-size production apps  
+
+---
+
+## 📸 Screenshots
+`docs/images/`
+
+### 🏠 Home Screen
+`docs/images/home.png`
+
+### 📝 List Detail
+`docs/images/list_detail.png`
+
+### 🍳 Recipes
+`docs/images/recipes.png`
+
+### 👤 Profile & Settings
+`docs/images/profile.png`
+
+### 📊 Stats Screen
+`docs/images/stats.png`
+
+---
+
+## 🏗 Architecture
+
+TeamMaravillaApp follows a **Local-First Clean Architecture** approach.
+
+### High-Level Flow
+
+Compose UI
+↓
+ViewModel (StateFlow)
+↓
+Repository (Local-first orchestration)
+↓ ↘
+Room (Single Source of Truth) Retrofit (Remote sync)
+
+
+### Core Principles
+
+- UI observes **only Room**, never the network directly  
+- Remote refresh runs in background  
+- Synchronization is throttled and guarded by `Mutex`  
+- DTO ↔ Domain ↔ Entity mapping is fully isolated  
+- DataStore handles session and user preferences  
+
+---
+
+## 🧠 Architecture Layers
+
+### UI Layer
+- Jetpack Compose  
+- Material 3  
+- Navigation Compose  
+- Lifecycle-aware StateFlow collection  
+
+### Domain Layer
+- Pure Kotlin models  
+- No Android dependencies  
+- Feature-based organization  
+
+### Data Layer
+
+#### Local
+- Room database  
+- DAO pattern  
+- Explicit migrations  
+- Flow-based reactive queries  
+
+#### Remote
+- Retrofit  
+- DTO mapping  
+- Best-effort synchronization  
+- Mutex-based write protection  
+
+### Session
+- DataStore Preferences  
+- Reactive session state  
+- Token and rememberMe handling  
+
+---
+
+## 🗂 Project Structure
+
+> Package-oriented, scalable and production-ready.
+
 com.example.teammaravillaapp
 │
-├── data/ → Repositorios en memoria ("Fake DB")
-│   ├── FakeUserLists.kt
-│   ├── FakeUserRecipes.kt
-│   └── FakeUserPrefs.kt
+├── component/              # Reusable Compose UI components
+│   └── legacy/             # Deprecated or transitional components
 │
-├── model/ → Modelos de datos y enums
-│   ├── Product.kt, ProductCategory.kt, ProductData.kt
-│   ├── Recipe.kt, RecipeData.kt
-│   ├── UserList.kt, ListBackgrounds.kt
-│   ├── QuickActionData.kt, CardInfo.kt, SearchFieldData.kt
+├── data/
+│   ├── local/              # Room database layer
+│   │   ├── dao/            # Database access objects
+│   │   ├── db/             # Database config & migrations
+│   │   ├── entity/         # Room entities & relations
+│   │   ├── mapper/         # Entity ↔ Domain mappers
+│   │   ├── prefs/          # DataStore preferences
+│   │   └── repository/     # Local repositories
+│   │
+│   ├── remote/             # Networking layer (Retrofit)
+│   │   ├── api/            # Retrofit API interfaces
+│   │   ├── datasource/     # Remote data sources
+│   │   ├── dto/            # Network DTO models
+│   │   └── mapper/         # DTO ↔ Domain mappers
+│   │
+│   ├── repository/         # Default repositories (Local + Remote)
+│   ├── seed/               # Initial catalog & demo seed data
+│   ├── session/            # Session persistence (DataStore)
+│   └── sync/               # Synchronization logic & mappers
 │
-├── component/ → Componentes reutilizables de Compose
-│   ├── ListCard, ProductBubble, RecipeCard
-│   ├── QuickActionButton, BackButton, BottomBar, etc.
-│
-├── page/ → Pantallas principales de la app
-│   ├── Home.kt
-│   ├── CreateListt.kt
-│   ├── ListDetail.kt
-│   ├── Recipes.kt, RecipesDetail.kt
-│   ├── Profile.kt, Login.kt
-│   ├── CategoryFilter.kt, ListViewTypes.kt
-│
-├── ui/theme/ → Colores, tipografías y estilos (Compose Theme)
-│
-├── util/ → Constantes globales y utilidades
-│   └── TAG_GLOBAL.kt
-│
-└── MainActivity.kt → Punto de entrada principal
-```
----
-
-## 🎨 Tecnologías Utilizadas
-
-- **Kotlin**
-- **Jetpack Compose (Material 3)**
-- **Android Studio / Gradle KTS**
-- **State management:** `remember`, `mutableStateOf`, `mutableStateListOf`
-- **Diseño adaptable:** `LazyColumn`, `FlowRow`, `Surface`, `Scaffold`
+├── di/                     # Hilt dependency injection modules
+├── docs/                   # Documentation & assets
+├── model/                  # Pure domain models (no Android deps)
+├── navigation/             # Navigation graph & route definitions
+├── page/                   # Feature-based UI modules
+├── ui/                     # App-level UI & theme
+└── util/                   # Shared utilities & helpers
 
 ---
 
-## 🧠 Arquitectura Interna
+## 🚀 Features
 
-El proyecto sigue una estructura **modular y organizada por capas**, inspirada en MVVM (sin ViewModel todavía):
+### 🛒 Shopping Lists
+- Create / Rename / Delete lists  
+- Add products with quantity controls  
+- Mark products as purchased  
+- Clear purchased items  
+- Category filters  
+- Multiple view types (List / Compact / Bubbles)  
 
-- **Model** → Entidades puras con datos (inmutables).  
-- **Data** → Repositorios en memoria (simulan base de datos).  
-- **Component** → UI reutilizable y desacoplada.  
-- **Page** → Pantallas completas que combinan componentes.  
-- **Util** → Constantes y helpers globales.
+### 🍳 Recipes
+- Recipe detail with ingredients relation  
+- Many-to-many product relationship  
+- Add ingredients to shopping list  
+- Favorites support  
 
----
+### ⭐ Favorites
+- Local persistence (Room)  
+- Remote file-based sync  
+- Auto-merge on login  
 
-## 🧾 Estado Actual
+### 📷 Receipts
+- CameraX integration  
+- Image cropping with uCrop  
+- Local persistence  
 
-| Área | Estado | Descripción |
-|------|--------|-------------|
-| 🎨 Interfaz visual | ✅ Completa | Todas las pantallas diseñadas y funcionales. |
-| 🗂️ Repositorios | ✅ Implementados | Datos en memoria para listas y recetas. |
-| ⚙️ Lógica básica | ✅ Operativa | Añadir/eliminar productos, favoritos, filtros. |
-| 🔄 Navegación | ⏳ Pendiente | A implementar con `NavHost` y rutas. |
-| 💾 Persistencia real | ⏳ Pendiente | Reemplazar `FakeUser*` por Room o DataStore. |
+### 📊 Statistics
+- Totals overview  
+- Last 7 days activity  
+- Top products  
+- Reactive database-driven analytics  
 
----
-
-## 🧑‍💻 Autores
-
-**Desarrolladores:** Cristian R, Rolando O.
-**Asignatura:** Programación Multimedia y Dispositivos Móviles  
-
----
-
-## 📸 Capturas de Pantallas
-
-### 🏠 Pantalla de Inicio (Home)
-Permite acceder a las listas recientes, crear nuevas listas y consultar favoritos o historial.
-![Home](home.png)
-
----
-
-### 🛍️ Crear Lista (CreateListt)
-Pantalla para crear una nueva lista de compra, elegir su fondo y usar plantillas sugeridas.
-![CreateListt](create_list.png)
+### 👤 Authentication
+- Login & Register  
+- Session persistence  
+- rememberMe support  
+- Clean logout handling  
 
 ---
 
-### 📋 Detalle de Lista (ListDetail)
-Visualiza y gestiona los productos de una lista concreta.  
-Permite añadir o quitar elementos fácilmente.
-![ListDetail](list_detail.png)
+## 🛠 Tech Stack
+
+| Category | Technology |
+|--------|------------|
+| UI | Jetpack Compose |
+| Architecture | MVVM |
+| Dependency Injection | Hilt |
+| Database | Room |
+| Networking | Retrofit + OkHttp |
+| Image Loading | Coil |
+| Preferences | DataStore |
+| Camera | CameraX |
+| Image Crop | uCrop |
 
 ---
 
-### 🧮 Filtrar Categorías (CategoryFilter)
-Permite activar o desactivar categorías de productos visibles dentro de la app.
-![CategoryFilter](category_filter.png)
+## 🔄 Sync Strategy
+
+TeamMaravillaApp uses a **local-first synchronization strategy**.
+
+### Key Concepts
+
+- UI is always driven by Room  
+- Remote refresh runs inside repositories  
+- Refresh is throttled to avoid spamming  
+- Mutex prevents concurrent overwrites  
+- Network failures never crash the UI  
+
+This guarantees:
+
+- Offline resilience  
+- Predictable UI state  
+- Reduced network overhead  
 
 ---
 
-### 🎨 Estilo de Vista (ListViewTypes)
-Selecciona entre diferentes estilos de presentación: lista, mosaico u otros.
-![ListViewTypes](list_view_types.png)
+## 🔐 Build Configuration
 
----
+The backend base URL is configured via `BuildConfig`.
 
-### 🍳 Recetas (Recipes)
-Explora recetas disponibles y marca tus favoritas.  
-Muestra imagen e ingredientes de cada una.
-![Recipes](recipes.png)
+--- 
 
----
+📜 License
+Proprietary License
+Copyright © 2026 Cristian R.
+All rights reserved.
 
-### 🍽️ Detalle de Receta (RecipesDetail)
-Visualiza una receta concreta con todos sus ingredientes listados de forma visual.
-![RecipesDetail](recipes_detail.png)
+This software is provided for portfolio and evaluation purposes only.
 
----
+No permission is granted to copy, modify, distribute, sublicense, or sell any part of this software without explicit written authorization from the author.
 
-### 👤 Perfil (Profile)
-Pantalla de usuario con opciones de configuración o accesos rápidos personales.
-![Profile](profile.png)
+👤 Author
+Cristian R. & Rolando O.
+Android Developer
 
----
-
-### 🔐 Login / Registro (Login)
-Formulario para introducir usuario y contraseña.  
-Interfaz simple y coherente con el resto del diseño.
-![Login](login.png)
-
----
-
-## 🚀 Futuras Mejoras
-
-- Integrar **sistema de navegación Compose** (`NavHost`).  
-- Añadir **persistencia local** (Room o DataStore).  
-- Implementar **login funcional** y perfil con datos reales.  
-- Sincronización opcional con backend remoto.
-
----
-
-## 🧩 Licencia
-
-Este proyecto se distribuye para fines educativos.  
-Uso libre y modificación permitida bajo reconocimiento de autoría.
-
----
-
-🟢 **Estado final:**  
-> Proyecto estable, compilable y totalmente presentable para evaluación.  
-> Cumple todos los criterios de diseño modular, documentación y funcionalidad básica.
+Jetpack Compose · Clean Architecture · Offline-First Systems
