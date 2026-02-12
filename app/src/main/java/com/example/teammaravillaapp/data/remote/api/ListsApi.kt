@@ -1,35 +1,48 @@
 package com.example.teammaravillaapp.data.remote.api
 
 import com.example.teammaravillaapp.data.remote.dto.UserListDto
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import java.io.IOException
 
 /**
- * API para gestionar listas de usuario (User Lists) en el backend.
+ * Contrato Retrofit para **listas de usuario** en el backend.
  *
- * Permite obtener y sobrescribir la colección completa de listas.
+ * Este API expone endpoints de colección completa (bulk):
+ * - Lectura de todas las listas.
+ * - Escritura sobrescribiendo el conjunto completo.
+ *
+ * ### Por qué endpoints “bulk”
+ * Simplifica sincronización tipo “fuente de verdad”, reduciendo operaciones por item
+ * y evitando merges complejos a costa de enviar colecciones completas.
+ *
+ * ## Concurrencia
+ * Métodos `suspend`: deben invocarse desde coroutines. Retrofit gestiona el IO internamente.
+ *
+ * @see UserListDto
  */
 interface ListsApi {
 
     /**
-     * Obtiene todas las listas de usuario.
+     * Recupera todas las listas persistidas en backend.
      *
-     * Endpoint: GET /json/lists/all
+     * @return [Response] con una lista de [UserListDto]. Permite inspeccionar `isSuccessful` y códigos HTTP.
      *
-     * @return Lista de [UserListDto] representando todas las listas.
+     * @throws IOException Si falla la comunicación de red.
      */
     @GET("json/lists/all")
-    suspend fun getAll(): List<UserListDto>
+    suspend fun getAll(): Response<List<UserListDto>>
 
     /**
-     * Sobrescribe todas las listas de usuario en el backend.
+     * Sobrescribe el conjunto completo de listas en backend.
      *
-     * Endpoint: POST /json/lists/all
+     * @param body Colección completa que reemplaza la existente.
+     * @return [Response] vacío (`Unit`) para inspección de estado HTTP.
      *
-     * @param body Lista completa de [UserListDto] que reemplazará a la existente.
-     * @return Mapa con información adicional devuelta por el backend, generalmente un mensaje de confirmación.
+     * @throws IOException Si falla la comunicación de red.
      */
     @POST("json/lists/all")
-    suspend fun saveAll(@Body body: List<UserListDto>): Map<String, String>
+    suspend fun saveAll(@Body body: List<UserListDto>): Response<Unit>
 }

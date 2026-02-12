@@ -2,40 +2,24 @@ package com.example.teammaravillaapp.data.remote.mapper
 
 import com.example.teammaravillaapp.data.remote.dto.ListItemDto
 import com.example.teammaravillaapp.data.remote.dto.UserListDto
-import com.example.teammaravillaapp.data.remote.dto.RecipeIngredientLineDto
-import com.example.teammaravillaapp.model.*
+import com.example.teammaravillaapp.model.ListBackground
+import com.example.teammaravillaapp.model.ListItemSnapshot
+import com.example.teammaravillaapp.model.UserListSnapshot
 
 /**
- * Mapeo entre DTOs de API y modelos de dominio para:
- * - Listas de usuario ([UserList], [UserListSnapshot], [ListItemSnapshot])
- * - Líneas de ingredientes ([IngredientLine])
+ * Extensiones de mapeo entre DTOs remotos y modelos de dominio para **listas**.
  *
- * Estrategia:
- * - Centralizar conversiones entre capas para mantener la lógica consistente.
- * - Proveer fallbacks seguros en caso de datos incompletos o inválidos.
- * - Ordenar elementos por `position` para mantener consistencia en UI y sincronización.
- */
-
-/**
- * Convierte un [UserListDto] en un [UserList] simplificado para UI.
+ * Centraliza conversiones para mantener:
+ * - un único punto de verdad sobre el contrato API ↔ dominio
+ * - orden determinista (por `position`) en sincronización y UI
+ * - *fallbacks* seguros ante valores desconocidos (p. ej. `background`)
  *
- * - `productIds` se extraen de los items y se ordenan por `position`.
- * - `background` se convierte mediante [toListBackgroundOrDefault].
- * - Útil para mostrar listas sin necesidad de detalles de items.
- */
-fun UserListDto.toDomainSimple(): UserList =
-    UserList(
-        id = id,
-        name = name,
-        background = background.toListBackgroundOrDefault(),
-        productIds = items.sortedBy { it.position }.map { it.productId }
-    )
-
-/**
- * Convierte un [UserListDto] en [UserListSnapshot] completo.
+ * Estas funciones son **puras** (sin efectos secundarios) y seguras para uso en cualquier hilo.
  *
- * - Incluye todos los items con estado, posición, cantidad, etc.
- * - Se usa para sincronización con backend o persistencia local completa.
+ * @see UserListDto
+ * @see UserListSnapshot
+ * @see ListItemDto
+ * @see ListItemSnapshot
  */
 fun UserListDto.toSnapshot(): UserListSnapshot =
     UserListSnapshot(
@@ -49,10 +33,13 @@ fun UserListDto.toSnapshot(): UserListSnapshot =
     )
 
 /**
- * Convierte un [UserListSnapshot] en [UserListDto] listo para API.
+ * Convierte un *snapshot* de dominio en DTO listo para envío a API.
  *
- * - Convierte `background` a string.
- * - Mantiene orden de items según `position`.
+ * Mantiene el orden por `position` para evitar escrituras no deterministas cuando el backend
+ * persiste la colección tal cual.
+ *
+ * @receiver Snapshot de dominio.
+ * @return DTO equivalente para transporte.
  */
 fun UserListSnapshot.toDto(): UserListDto =
     UserListDto(
@@ -66,10 +53,10 @@ fun UserListSnapshot.toDto(): UserListDto =
     )
 
 /**
- * Convierte un [ListItemDto] en [ListItemSnapshot] para dominio.
+ * Convierte un DTO de item en su representación de dominio para sincronización.
  *
- * - Se preservan `productId`, `addedAt`, `position`, `checked` y `quantity`.
- * - Se usa principalmente en sincronización de listas y UI.
+ * @receiver DTO remoto.
+ * @return Snapshot de item en dominio.
  */
 fun ListItemDto.toSnapshot(): ListItemSnapshot =
     ListItemSnapshot(
@@ -81,7 +68,10 @@ fun ListItemDto.toSnapshot(): ListItemSnapshot =
     )
 
 /**
- * Convierte un [ListItemSnapshot] en [ListItemDto] listo para API.
+ * Convierte un snapshot de item a DTO remoto.
+ *
+ * @receiver Snapshot de dominio.
+ * @return DTO listo para API.
  */
 fun ListItemSnapshot.toDto(): ListItemDto =
     ListItemDto(
@@ -93,9 +83,18 @@ fun ListItemSnapshot.toDto(): ListItemDto =
     )
 
 /**
- * Convierte un string en [ListBackground], usando un fallback seguro.
+ * Convierte un `String` en [ListBackground] con *fallback* seguro.
  *
- * - Si la cadena no coincide con ningún valor de [ListBackground], retorna [ListBackground.FONDO1].
+ * ### Por qué existe
+ * El backend persiste `background` como texto. Para mantener robustez ante:
+ * - valores legacy
+ * - datos corruptos
+ * - cambios de enumeración
+ *
+ * se degrada a un valor por defecto en lugar de fallar.
+ *
+ * @receiver Valor textual recibido/persistido.
+ * @return [ListBackground] si existe; en caso contrario [ListBackground.FONDO1].
  */
 private fun String.toListBackgroundOrDefault(): ListBackground =
     runCatching { ListBackground.valueOf(this) }

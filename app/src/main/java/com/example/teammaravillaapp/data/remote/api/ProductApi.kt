@@ -1,48 +1,43 @@
 package com.example.teammaravillaapp.data.remote.api
 
 import com.example.teammaravillaapp.data.remote.dto.ProductDto
-import com.google.gson.JsonElement
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import java.io.IOException
 
 /**
- * API para gestionar productos en el backend.
+ * Contrato Retrofit para **productos** en el backend.
  *
- * Permite obtener y sobrescribir la lista completa de productos.
+ * La sincronización se realiza en modo “bulk”: se descarga o se sobrescribe la colección completa.
+ * Esto permite tratar el backend como fuente de verdad con un pipeline de sincronización simple.
+ *
+ * ## Concurrencia
+ * Métodos `suspend`: deben invocarse desde coroutines. Retrofit gestiona el IO internamente.
+ *
+ * @see ProductDto
  */
 interface ProductApi {
 
     /**
-     * Obtiene todos los productos como DTO.
+     * Recupera todos los productos persistidos en backend.
      *
-     * Endpoint: GET /json/products/all
+     * @return [Response] con la lista de [ProductDto].
      *
-     * @return Lista de [ProductDto] representando todos los productos.
+     * @throws IOException Si falla la comunicación de red.
      */
     @GET("json/products/all")
-    suspend fun getAll(): List<ProductDto>
+    suspend fun getAll(): Response<List<ProductDto>>
 
     /**
-     * Obtiene todos los productos en formato crudo [JsonElement].
+     * Sobrescribe la colección completa de productos en backend.
      *
-     * Útil para inspección directa del JSON sin mapeo a DTO.
+     * @param body Colección completa que reemplaza la existente.
+     * @return [Response] vacío (`Unit`) para inspección de estado HTTP.
      *
-     * Endpoint: GET /json/products/all
-     *
-     * @return JSON completo de productos como [JsonElement].
-     */
-    @GET("json/products/all")
-    suspend fun getAllRaw(): JsonElement
-
-    /**
-     * Sobrescribe la lista completa de productos en el backend.
-     *
-     * Endpoint: POST /json/products/all
-     *
-     * @param body Lista completa de [ProductDto] que reemplazará a la existente.
-     * @return Mapa con mensaje de confirmación devuelto por el backend.
+     * @throws IOException Si falla la comunicación de red.
      */
     @POST("json/products/all")
-    suspend fun saveAll(@Body body: List<ProductDto>): Map<String, String>
+    suspend fun saveAll(@Body body: List<ProductDto>): Response<Unit>
 }

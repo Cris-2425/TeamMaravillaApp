@@ -17,13 +17,26 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repositorio que gestiona la persistencia de listas de usuario y sus ítems utilizando Room.
+ * Implementación Room de la persistencia de **listas de usuario**.
  *
- * Esta clase implementa la capa de datos del patrón Clean Architecture.
- * Proporciona operaciones CRUD sobre listas y sus ítems, observables mediante [Flow].
- * También contiene métodos auxiliares para sincronización con fuentes remotas y manejo de snapshots.
+ * Actúa como adaptador entre:
+ * - **Dominio** (`UserList`, `UserListSnapshot`)
+ * - **Persistencia** (Room: entidades y DAO)
  *
- * @property dao Instancia de [ListsDao] proporcionada por Hilt para acceso a la base de datos local.
+ * ### Alcance
+ * - CRUD de listas e items
+ * - Operaciones atómicas sobre items (toggle, cantidades, reordenado)
+ * - Construcción de *snapshots* para sincronización
+ * - Rehidratación desde remoto reemplazando el estado local
+ *
+ * ## Concurrencia
+ * - Seguro para uso concurrente: Room serializa escrituras y gestiona el dispatcher.
+ * - Los métodos que reordenan o reconstruyen items se basan en queries SQL atómicas (vía DAO)
+ *   para minimizar condiciones de carrera.
+ *
+ * @property dao DAO de listas, inyectado por Hilt.
+ *
+ * @see ListsDao
  */
 @Singleton
 class RoomListsRepository @Inject constructor(
@@ -31,47 +44,52 @@ class RoomListsRepository @Inject constructor(
 ) {
 
     /**
-     * Observa todas las listas del usuario como un flujo reactivo.
+     * Observa todas las listas del usuario en forma de dominio.
      *
-     * Convierte las entidades de Room ([ListEntity]) a objetos de dominio ([UserList]).
+     * Esta transformación es **pura** y mantiene la UI desacoplada de Room.
      *
-     * @return [Flow] que emite la lista actualizada de [UserList] cada vez que cambia la base de datos.
+     * @return `Flow` que emite listas de dominio cada vez que cambia la BD.
      */
     fun observeLists(): Flow<List<UserList>> =
         dao.observeAll().map { roomLists -> roomLists.map { it.toDomain() } }
 
     /**
-     * Observa los ítems de una lista específica.
+     * Observa los items de una lista específica.
      *
-     * @param listId ID de la lista cuyos ítems se desean observar.
-     * @return [Flow] que emite los [ListItemEntity] de la lista cada vez que cambian.
+     * Se expone como entidades porque suelen consumirse tal cual para acciones inmediatas
+     * (toggle/cantidad) y ya contienen lo necesario para persistencia.
+     *
+     * @param listId ID de la lista.
+     * @return `Flow` con los items, ordenados por `position`.
      */
     fun observeItems(listId: String): Flow<List<ListItemEntity>> =
         dao.observeItems(listId)
 
     /**
-     * Obtiene un ítem específico de una lista.
+     * Recupera un item concreto por `productId` dentro de una lista.
      *
      * @param listId ID de la lista.
      * @param productId ID del producto.
-     * @return [ListItemEntity] si existe, null si no se encuentra.
+     * @return El item si existe, o `null` si no está presente.
      */
     suspend fun getItem(listId: String, productId: String): ListItemEntity? =
         dao.getItem(listId, productId)
 
     /**
-     * Obtiene una lista por su ID.
+     * Recupera una lista por ID en modelo de dominio.
      *
      * @param id ID de la lista.
-     * @return [UserList] si existe, null si no se encuentra.
+     * @return `UserList` o `null` si no existe.
      */
     suspend fun get(id: String): UserList? =
         dao.getById(id)?.toDomain()
 
     /**
-     * Inserta una lista de demostración si la base de datos está vacía.
+     * Inserta datos de demostración si la BD está vacía.
      *
-     * Este método es útil para inicializar la app con datos de ejemplo.
+     * ### Por qué aquí
+     * Mantiene la lógica de inicialización encapsulada en la capa de datos y evita
+     * dependencias de UI para poblar la app en primera ejecución.
      */
     suspend fun seedIfEmpty() {
         if (dao.count() > 0) return
@@ -90,10 +108,13 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Agrega una nueva lista.
+     * Crea una lista nueva asignándole un ID único.
      *
-     * @param list [UserList] a agregar.
-     * @return ID generado de la nueva lista.
+     * Se persiste la cabecera y se materializan los items a partir de `productIds`,
+     * preservando metadatos cuando aplique (en este caso, lista nueva → defaults).
+     *
+     * @param list Lista de dominio (el `id` de entrada no se reutiliza).
+     * @return ID generado para la nueva lista.
      */
     suspend fun add(list: UserList): String {
         val id = UUID.randomUUID().toString()
@@ -107,10 +128,13 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Actualiza los IDs de productos de una lista existente.
+     * Sustituye los productos de una lista preservando `checked` y `quantity` cuando sea posible.
+     *
+     * Se utiliza `createdAt` como referencia estable para `baseTime` de items nuevos, evitando que
+     * un simple cambio de composición “recree” tiempos artificiales.
      *
      * @param id ID de la lista.
-     * @param newProductIds Nueva lista de IDs de productos.
+     * @param newProductIds IDs de productos que deben quedar en la lista.
      */
     suspend fun updateProductIds(id: String, newProductIds: List<String>) {
         val current = dao.getById(id) ?: return
@@ -120,7 +144,7 @@ class RoomListsRepository @Inject constructor(
     /**
      * Elimina una lista y todos sus ítems asociados.
      *
-     * @param id ID de la lista a eliminar.
+     * @param id ID de la lista.
      */
     suspend fun deleteById(id: String) {
         dao.deleteItemsForList(id)
@@ -128,10 +152,10 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Renombra una lista existente.
+     * Renombra una lista manteniendo el resto de metadatos.
      *
      * @param id ID de la lista.
-     * @param newName Nuevo nombre para la lista.
+     * @param newName Nuevo nombre.
      */
     suspend fun rename(id: String, newName: String) {
         val current = dao.getById(id) ?: return
@@ -139,10 +163,14 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Agrega un ítem a una lista si no existe previamente.
+     * Añade un producto a una lista si todavía no existe como item.
+     *
+     * ### Por qué se evita duplicado aquí
+     * Se mantiene una UX consistente (una línea por producto) sin depender de restricciones
+     * de BD; además permite definir `position` como `existing.size` de forma determinista.
      *
      * @param listId ID de la lista.
-     * @param productId ID del producto a agregar.
+     * @param productId ID del producto a añadir.
      */
     suspend fun addItem(listId: String, productId: String) {
         val existing = dao.getItems(listId)
@@ -163,7 +191,10 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Elimina un ítem de una lista y ajusta las posiciones de los restantes.
+     * Elimina un item y recompone el orden (`position`) del resto.
+     *
+     * Esta operación mantiene un orden sin huecos, lo que simplifica renderizado
+     * y futuras inserciones/reordenados.
      *
      * @param listId ID de la lista.
      * @param productId ID del producto a eliminar.
@@ -175,7 +206,7 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Cambia el estado de completado de un ítem.
+     * Alterna el estado `checked` de un item.
      *
      * @param listId ID de la lista.
      * @param productId ID del producto.
@@ -184,30 +215,36 @@ class RoomListsRepository @Inject constructor(
         dao.toggleChecked(listId, productId)
 
     /**
-     * Establece la cantidad de un ítem, garantizando un mínimo de 1.
+     * Establece la cantidad de un item, aplicando un mínimo de `1`.
      *
      * @param listId ID de la lista.
      * @param productId ID del producto.
-     * @param quantity Cantidad deseada (mínimo 1).
+     * @param quantity Cantidad deseada (se normaliza a `>= 1`).
      */
     suspend fun setQuantity(listId: String, productId: String, quantity: Int) =
         dao.setQuantity(listId, productId, quantity.coerceAtLeast(1))
 
     /**
-     * Marca o desmarca todos los ítems de una lista.
+     * Marca o desmarca todos los items de una lista.
      *
      * @param listId ID de la lista.
-     * @param checked Estado deseado.
+     * @param checked Estado objetivo.
      */
-    suspend fun setAllChecked(listId: String, checked: Boolean) = dao.setAllChecked(listId, checked)
+    suspend fun setAllChecked(listId: String, checked: Boolean) =
+        dao.setAllChecked(listId, checked)
 
     /**
-     * Elimina todos los ítems marcados como completados y reorganiza posiciones.
+     * Elimina items `checked` y renormaliza posiciones.
+     *
+     * ### Por qué renormaliza
+     * `DELETE` puede dejar huecos en `position`. Esta rutina reconstruye el orden en memoria
+     * y lo persiste como estado final determinista.
      *
      * @param listId ID de la lista.
      */
     suspend fun clearChecked(listId: String) {
         dao.deleteChecked(listId)
+
         val remaining = dao.getItems(listId)
             .sortedBy { it.position }
             .mapIndexed { idx, it -> it.copy(position = idx) }
@@ -217,51 +254,63 @@ class RoomListsRepository @Inject constructor(
     }
 
     /**
-     * Observa el progreso de todas las listas (ítems completados / total).
+     * Observa el progreso por lista como `Map<listId, ListProgress>`.
      *
-     * @return [Flow] que emite un [Map] de ID de lista a [ListProgress].
+     * @return `Flow` que emite el mapa de progreso cada vez que cambian los items.
+     *
+     * @see ListProgress
      */
     fun observeProgress(): Flow<Map<String, ListProgress>> =
         dao.observeProgress().map { rows ->
             rows.associate { r -> r.listId to ListProgress(r.checkedCount, r.totalCount) }
         }
 
-    /** Incrementa la cantidad de un ítem. */
-    suspend fun incQuantity(listId: String, productId: String) = dao.incQuantity(listId, productId)
+    /**
+     * Incrementa la cantidad de un item.
+     *
+     * @param listId ID de la lista.
+     * @param productId ID del producto.
+     */
+    suspend fun incQuantity(listId: String, productId: String) =
+        dao.incQuantity(listId, productId)
 
-    /** Decrementa la cantidad de un ítem, mínimo 1. */
+    /**
+     * Decrementa la cantidad de un item con mínimo `1`.
+     *
+     * @param listId ID de la lista.
+     * @param productId ID del producto.
+     */
     suspend fun decQuantityMin1(listId: String, productId: String) =
         dao.decQuantityMin1(listId, productId)
 
     // ----------------- Sincronización remota -----------------
 
     /**
-     * Obtiene snapshots completos de todas las listas y sus ítems para sincronización.
+     * Construye *snapshots* completos (lista + items) para sincronización.
      *
-     * @return Lista de [UserListSnapshot] representando el estado actual.
+     * @return Estado actual como lista de [UserListSnapshot].
      */
     suspend fun snapshotWithItems(): List<UserListSnapshot> =
         dao.getAllSnapshot().map { it.toSnapshot() }
 
     /**
-     * Guarda masivamente listas y ítems provenientes de un origen remoto.
+     * Persiste masivamente listas e items provenientes de remoto, reemplazando el estado local.
      *
-     * Este método reemplaza completamente los datos locales.
+     * ### Por qué reemplazo total
+     * En sincronización “fuente de verdad” se necesita eliminar también lo que ya no existe en remoto.
+     * Este método evita merges complejos a costa de sobrescribir el caché local.
      *
-     * @param remote Lista de [UserListSnapshot] obtenida de remoto.
+     * @param remote Snapshots remotos con `createdAt`, `items` y metadatos.
+     *
+     * @see ListsDao.replaceAllFromRemote
      */
     suspend fun saveAllFromRemote(remote: List<UserListSnapshot>) {
-        dao.clearItems()
-        dao.clearLists()
-
-        remote.forEach { snap ->
-            dao.upsert(
-                ListEntity(
-                    id = snap.id,
-                    name = snap.name,
-                    background = snap.background.name,
-                    createdAt = snap.createdAt
-                )
+        val lists = remote.map { snap ->
+            ListEntity(
+                id = snap.id,
+                name = snap.name,
+                background = snap.background.name,
+                createdAt = snap.createdAt
             )
         }
 
@@ -278,6 +327,6 @@ class RoomListsRepository @Inject constructor(
             }
         }
 
-        if (items.isNotEmpty()) dao.upsertItems(items)
+        dao.replaceAllFromRemote(lists, items)
     }
 }

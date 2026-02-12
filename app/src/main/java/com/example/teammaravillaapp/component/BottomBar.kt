@@ -1,5 +1,6 @@
 package com.example.teammaravillaapp.component
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.History
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.model.OptionButton
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
@@ -61,7 +63,8 @@ fun BottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Home,
-                    contentDescription = stringResource(R.string.bottom_bar_home_cd)
+                    contentDescription = stringResource(R.string.bottom_bar_home_cd),
+                    modifier = Modifier.size(26.dp)
                 )
             },
             label = { Text(stringResource(R.string.bottom_bar_home_label)) }
@@ -73,7 +76,8 @@ fun BottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Restaurant,
-                    contentDescription = stringResource(R.string.bottom_bar_recipes_cd)
+                    contentDescription = stringResource(R.string.bottom_bar_recipes_cd),
+                    modifier = Modifier.size(26.dp)
                 )
             },
             label = { Text(stringResource(R.string.bottom_bar_recipes_label)) }
@@ -85,7 +89,8 @@ fun BottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.History,
-                    contentDescription = stringResource(R.string.bottom_bar_history_cd)
+                    contentDescription = stringResource(R.string.bottom_bar_history_cd),
+                    modifier = Modifier.size(26.dp)
                 )
             },
             label = { Text(stringResource(R.string.bottom_bar_history_label)) }
@@ -97,7 +102,8 @@ fun BottomBar(
             icon = {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
-                    contentDescription = stringResource(R.string.bottom_bar_profile_cd)
+                    contentDescription = stringResource(R.string.bottom_bar_profile_cd),
+                    modifier = Modifier.size(26.dp)
                 )
             },
             label = { Text(stringResource(R.string.bottom_bar_profile_label)) }

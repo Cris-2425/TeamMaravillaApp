@@ -57,9 +57,9 @@ fun ListCard(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(24.dp),
         color = cs.surfaceContainerLow,
-        tonalElevation = 4.dp
+        tonalElevation = 6.dp
     ) {
         Row(
             modifier = Modifier
