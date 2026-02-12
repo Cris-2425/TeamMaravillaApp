@@ -8,57 +8,54 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel responsable de exponer el estado de sesión global para la UI.
+ * ViewModel que materializa el estado de sesión global en un único [SessionState] observable.
  *
- * Responsabilidades:
- * - Escuchar los flujos de [SessionStore] (loggedIn / rememberMe / username).
- * - Transformarlos en un único [SessionState] estable para el árbol de UI.
- * - Proveer un estado inicial [SessionState.Loading] para evitar valores indeterminados.
+ * La UI consume un `StateFlow` estable en lugar de combinar manualmente múltiples `Flow` de [SessionStore].
+ * Esto reduce complejidad en Compose y evita inconsistencias entre campos (p. ej. `loggedIn` y `username`).
  *
- * Motivo:
- * - Centralizar la lógica de sesión en un único punto.
- * - Simplificar composables: consumen 1 flow en vez de 3.
+ * ### Regla de seguridad en arranque
+ * Si existe una sesión marcada como activa pero `rememberMe == false`, se limpia la sesión al iniciar.
+ * Esto previene “auto-login” indeseado tras reinicios cuando el usuario optó por no recordar sesión.
  *
- * @param sessionStore Fuente de verdad de la sesión (persistencia y flujos).
- * Restricciones:
- * - No nulo.
+ * ## Concurrencia
+ * - Construye [sessionState] con `combine` y lo convierte a `StateFlow` mediante `stateIn`.
+ * - `SharingStarted.WhileSubscribed(5_000)` evita trabajo continuo cuando no hay observadores.
  *
- * @property sessionState Estado observable listo para consumir en Compose.
+ * @property sessionState Estado de sesión listo para consumir en UI (Compose).
+ * @constructor Inyecta [SessionStore] como fuente de verdad de sesión.
  *
- * @throws Exception No se lanza explícitamente desde este ViewModel.
- * Posibles fallos técnicos (no propagados directamente):
- * - Errores de lectura de DataStore/IO dentro de [SessionStore] podrían reflejarse como
- *   valores por defecto o emisiones inesperadas según la implementación del Store.
- *
- * @see SessionState Modelo de estado.
- * @see SessionStore Persistencia/observación de sesión.
- *
- * Ejemplo de uso:
- * {@code
- * val vm: SessionViewModel = hiltViewModel()
- * val st by vm.sessionState.collectAsStateWithLifecycle()
- * if (st is SessionState.LoggedOut) { ... }
- * }
+ * @see SessionStore
+ * @see SessionState
  */
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val sessionStore: SessionStore
 ) : ViewModel() {
 
+    init {
+        viewModelScope.launch {
+            val loggedIn = sessionStore.isLoggedIn.first()
+            val remember = sessionStore.rememberMe.first()
+
+            if (loggedIn && !remember) {
+                sessionStore.clearSession()
+            }
+        }
+    }
+
     /**
-     * Estado global de sesión derivado de [SessionStore].
+     * Estado de sesión derivado de [SessionStore].
      *
-     * Regla actual:
-     * - Si `loggedIn == true` Y `rememberMe == true` ⇒ [SessionState.LoggedIn]
-     * - En cualquier otro caso ⇒ [SessionState.LoggedOut]
+     * - `Loading` como valor inicial para evitar estados transitorios durante el primer collect.
+     * - `distinctUntilChanged()` para minimizar recomposiciones en UI.
      *
-     * Nota de negocio:
-     * - Si “remember me” solo decide persistencia (no si estás logueado ahora),
-     *   podrías querer considerar LoggedIn cuando `loggedIn == true` aunque rememberMe sea false.
+     * @return `StateFlow` con el estado actual de sesión.
      */
     val sessionState: StateFlow<SessionState> =
         combine(

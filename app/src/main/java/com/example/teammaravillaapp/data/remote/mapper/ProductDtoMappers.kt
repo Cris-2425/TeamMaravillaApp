@@ -2,24 +2,19 @@ package com.example.teammaravillaapp.data.remote.mapper
 
 import com.example.teammaravillaapp.data.remote.dto.ProductDto
 import com.example.teammaravillaapp.model.Product
+import com.example.teammaravillaapp.model.ProductCategory
 
 /**
- * Extensiones de mapeo entre DTO de API y modelo de dominio.
+ * Extensiones de mapeo entre el contrato remoto de **productos** ([ProductDto]) y el modelo de dominio ([Product]).
  *
- * Único lugar donde ocurre la conversión entre capas:
- * - `ProductDto` <-> `Product` (domain)
+ * Mantener este mapeo en un único lugar reduce duplicación y evita que la capa de presentación
+ * tenga que conocer detalles del contrato API.
  *
- * ### Estrategia
- * - Mantener la lógica de negocio separada de la capa de datos.
- * - Evitar transformaciones repetidas en ViewModel o Repository.
- * - Permitir fallback seguro para categorías desconocidas.
- */
-
-/**
- * Convierte un [ProductDto] (API) a [Product] (domain).
+ * Estas funciones son **puras** y seguras para uso en cualquier hilo.
  *
- * - Mapea `category` a [ProductCategory] usando [toProductCategoryOrDefault].
- * - `imageRes` se inicializa como null; se usa solo en local si aplica.
+ * @see ProductDto
+ * @see Product
+ * @see ProductCategory
  */
 fun ProductDto.toDomain(): Product =
     Product(
@@ -31,10 +26,14 @@ fun ProductDto.toDomain(): Product =
     )
 
 /**
- * Convierte un [Product] (domain) a [ProductDto] (API).
+ * Convierte un producto de dominio a DTO para API.
  *
- * - Convierte la categoría a su valor API mediante [apiValue].
- * - Se excluye `imageRes` ya que es solo local.
+ * ### Decisión de diseño
+ * `imageRes` se excluye porque es un detalle **local** (recurso Android) no representable en remoto.
+ * La categoría se serializa mediante el valor API expuesto por [ProductCategory.apiValue].
+ *
+ * @receiver Producto de dominio.
+ * @return DTO listo para transporte.
  */
 fun Product.toDto(): ProductDto =
     ProductDto(

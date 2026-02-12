@@ -1,10 +1,7 @@
 package com.example.teammaravillaapp.ui.app
 
-import android.os.Build
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.data.repository.lists.ListsRepository
 import com.example.teammaravillaapp.data.repository.products.ProductRepository
 import com.example.teammaravillaapp.data.repository.recipes.RecipesRepository
@@ -17,19 +14,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel de arranque global de la app.
+ * ViewModel de *bootstrap* de la aplicación.
  *
- * Responsabilidades:
- * - Ejecutar seeds iniciales (Room/local) al iniciar la app.
- * - Intentar refrescar datos remotos cuando procede (ej. emulador con backend disponible).
- * - Exponer eventos one-shot (snackbars) consumibles desde UI.
+ * Centraliza la inicialización de datos para evitar que cada pantalla replique lógica de arranque:
+ * - inserta seeds locales si el caché está vacío
+ * - dispara intentos de refresh/sincronización según la implementación de cada repositorio
  *
- * Motivo:
- * - Centralizar el “bootstrap” de datos para evitar duplicaciones en pantallas.
+ * ## Concurrencia
+ * Ejecuta tareas en `viewModelScope` para vincular su ciclo de vida al proceso de UI, y expone
+ * eventos one-shot por [SharedFlow] para integrarse con Compose.
  *
- * @param recipesRepository Repositorio de recetas (seed local).
- * @param productRepository Repositorio de productos (seed local + refresh remoto).
- * @param listsRepository Repositorio de listas (seed local).
+ * @property events Flujo de eventos one-shot consumible desde UI (snackbars, etc.).
+ * @constructor Inyecta repositorios de dominio necesarios para bootstrap.
+ *
+ * @see UiEvent
+ * @see RecipesRepository
+ * @see ProductRepository
+ * @see ListsRepository
  */
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -39,24 +40,21 @@ class AppViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * Heurística para detectar emulador.
+     * Buffer de eventos one-shot.
      *
-     * Nota:
-     * - No es un “contrato” oficial, solo una aproximación.
-     * - Útil para habilitar refresh remoto cuando el backend solo es accesible desde emulador.
+     * - `replay = 0`: evita re-entregar eventos antiguos tras rotaciones.
+     * - `extraBufferCapacity = 1`: tolera picos de emisión sin suspender al emisor.
      */
-    private val isEmulator: Boolean = isProbablyEmulator()
-
     private val _events = MutableSharedFlow<UiEvent>(
         replay = 0,
         extraBufferCapacity = 1
     )
 
     /**
-     * Flujo de eventos one-shot para UI (snackbars).
+     * Flujo público de eventos one-shot.
      *
-     * Recomendación:
-     * - Consumirlo con `collectLatest` en un `LaunchedEffect`.
+     * Recomendación de consumo en Compose:
+     * - `collectLatest` dentro de `LaunchedEffect`.
      */
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -65,13 +63,10 @@ class AppViewModel @Inject constructor(
     }
 
     /**
-     * Ejecuta la inicialización de datos al arrancar la app.
+     * Dispara la inicialización de datos al arrancar.
      *
-     * Reglas:
-     * - Seeds: siempre (best-effort).
-     * - Refresh remoto: solo en emulador (según heurística).
-     *
-     * @throws Exception No se propaga: se maneja mediante `runCatching`.
+     * Se ejecuta como *best-effort*: un fallo en un repositorio no debe impedir inicializar otros.
+     * La propagación de errores se evita usando `runCatching`.
      */
     private fun seedOnAppStart() {
         viewModelScope.launch {
@@ -79,49 +74,5 @@ class AppViewModel @Inject constructor(
             runCatching { recipesRepository.seedIfEmpty() }
             runCatching { listsRepository.seedIfEmpty() }
         }
-        /*
-                if (isEmulator) {
-                    productRepository.refreshProducts()
-                        .onFailure { showSnackbar(R.string.snackbar_action_failed) }
-                }
-
-         */
     }
-
-    /**
-     * Emite un snackbar simple sin parámetros de formato.
-     *
-     * @param messageResId String resource del mensaje.
-     */
-    fun showSnackbar(@StringRes messageResId: Int) {
-        emitSnackbar(messageResId, emptyArray())
-    }
-
-    /**
-     * Emite un snackbar con argumentos de formato (`%s`, `%d`, etc.).
-     *
-     * @param messageResId String resource del mensaje.
-     * @param args Argumentos para `getString(messageResId, *args)`.
-     */
-    fun showSnackbar(@StringRes messageResId: Int, vararg args: Any) {
-        emitSnackbar(messageResId, args.toList().toTypedArray())
-    }
-
-    /**
-     * Emite el evento real de snackbar.
-     *
-     * @param messageResId String resource del mensaje.
-     * @param formatArgs Argumentos de formateo. Debe ser `Array<Any>` para poder splattear.
-     */
-    private fun emitSnackbar(
-        @StringRes messageResId: Int,
-        formatArgs: Array<Any>
-    ) {
-        _events.tryEmit(UiEvent.ShowSnackbar(messageResId, formatArgs))
-    }
-
-    private fun isProbablyEmulator(): Boolean =
-        Build.FINGERPRINT.contains("generic", ignoreCase = true) ||
-                Build.MODEL.contains("Emulator", ignoreCase = true) ||
-                Build.MODEL.contains("Android SDK built for x86", ignoreCase = true)
 }

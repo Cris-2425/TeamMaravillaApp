@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.data.repository.lists
 import com.example.teammaravillaapp.di.ApplicationScope
 import com.example.teammaravillaapp.data.local.entity.ListItemEntity
 import com.example.teammaravillaapp.data.local.repository.lists.RoomListsRepository
-import com.example.teammaravillaapp.data.remote.datasource.lists.RemoteListsDataSourceImpl
+import com.example.teammaravillaapp.data.remote.datasource.lists.RemoteListsDataSource
 import com.example.teammaravillaapp.model.UserList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -13,63 +13,69 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
+import retrofit2.HttpException
+import java.io.IOException
 
 /**
- * Implementación por defecto de [ListsRepository].
+ * Implementación por defecto de [ListsRepository] con estrategia **offline-first**.
  *
- * Repositorio **offline-first** que utiliza Room como source of truth
- * y sincroniza listas de usuario con el backend de forma best-effort.
+ * Room actúa como **source of truth**: la UI observa únicamente estado local. Las mutaciones se aplican
+ * primero en local y después se sincronizan con el backend en segundo plano (*best-effort*).
  *
- * ### Estrategia general
- * - La UI observa exclusivamente datos locales.
- * - Todas las mutaciones ocurren primero en Room.
- * - La sincronización remota se realiza en background y nunca bloquea la UI.
+ * ## Estrategia de sincronización
+ * - **Pull**: `forceRefresh()` descarga el estado remoto y reemplaza el local.
+ * - **Push**: `pushAllToRemote()` sube el *snapshot* completo local y sobrescribe el remoto.
  *
- * ### Características clave
- * - Sincronización bidireccional (pull + push).
- * - Protección de concurrencia mediante `Mutex`.
- * - Throttling de refresh para evitar llamadas excesivas.
- * - Uso exclusivo de interfaces en la capa remota (sin acoplamiento a impl).
+ * ## Control de concurrencia
+ * - [refreshMutex] evita refrescos simultáneos.
+ * - `lastRefreshMs` + [refreshMinIntervalMs] implementan **throttling** para reducir llamadas repetidas
+ *   (p. ej. por recomposiciones o múltiples observadores).
+ *
+ * @property remote DataSource remoto (contrato, sin acoplarse a implementación).
+ * @property local Repositorio Room que materializa y mantiene snapshots.
+ * @property appScope Scope de aplicación para disparar refresh en background.
+ *
+ * @see RemoteListsDataSource
+ * @see RoomListsRepository
  */
 @Singleton
 class DefaultListsRepository @Inject constructor(
-    private val remote: RemoteListsDataSourceImpl,
+    private val remote: RemoteListsDataSource,
     private val local: RoomListsRepository,
     @ApplicationScope private val appScope: CoroutineScope
 ) : ListsRepository {
 
     /**
-     * Mutex que garantiza un único refresh remoto activo.
+     * Mutex para serializar refresh y evitar duplicación de trabajo.
      */
     private val refreshMutex = Mutex()
 
     /**
-     * Marca temporal del último refresh remoto.
+     * Marca de tiempo del último refresh exitoso (o del último push).
+     *
+     * `@Volatile` permite lecturas coherentes entre hilos sin sincronización pesada.
      */
     @Volatile
     private var lastRefreshMs: Long = 0L
 
     /**
-     * Intervalo mínimo entre refreshes remotos.
+     * Intervalo mínimo entre refresh automáticos para evitar exceso de IO.
      */
     private val refreshMinIntervalMs: Long = 30_000L
 
     /**
-     * Flujo reactivo de listas observado por la UI.
+     * Observa listas desde local y dispara un refresh en background al primer collect.
      *
-     * - Emite inmediatamente desde Room.
-     * - Dispara un refresh remoto perezoso al iniciar la observación.
+     * @return `Flow` de listas en dominio.
      */
     override fun observeLists(): Flow<List<UserList>> =
         local.observeLists()
-            .onStart {
-                appScope.launch { refreshIfStale() }
-            }
+            .onStart { appScope.launch { refreshIfStale() } }
 
     /**
-     * Inicializa la base local con datos seed si está vacía.
+     * Inserta seed local si está vacío y, si procede, refresca desde remoto.
      *
-     * Posteriormente intenta sincronizar con el backend.
+     * La llamada de red es *best-effort* para no bloquear la inicialización offline.
      */
     override suspend fun seedIfEmpty() {
         local.seedIfEmpty()
@@ -77,9 +83,10 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Crea una nueva lista localmente y devuelve su ID.
+     * Crea una lista en local y sincroniza a remoto en background (*best-effort*).
      *
-     * La sincronización remota se ejecuta en segundo plano (best-effort).
+     * @param list Lista de dominio a crear.
+     * @return ID generado localmente.
      */
     override suspend fun add(list: UserList): String {
         val id = local.add(list)
@@ -88,42 +95,49 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Obtiene una lista puntual sin reactividad.
+     * Recupera una lista por ID desde local.
+     *
+     * @param id ID de la lista.
+     * @return Lista de dominio o `null` si no existe.
      */
     override suspend fun get(id: String): UserList? =
         local.get(id)
 
     /**
-     * Reemplaza los productos de una lista preservando estado local.
+     * Sustituye los `productIds` de una lista en local y sincroniza.
      *
-     * Pensado para merges masivos desde backend o seed.
+     * Actualiza [lastRefreshMs] para evitar un pull inmediato que sobrescriba el cambio reciente.
+     *
+     * @param id ID de la lista.
+     * @param newProductIds IDs finales de productos.
      */
-    override suspend fun updateProductIds(
-        id: String,
-        newProductIds: List<String>
-    ) {
+    override suspend fun updateProductIds(id: String, newProductIds: List<String>) {
         local.updateProductIds(id, newProductIds)
         lastRefreshMs = System.currentTimeMillis()
         runCatching { pushAllToRemote() }
     }
 
     /**
-     * Observa los ítems de una lista específica.
+     * Observa items de una lista desde local.
+     *
+     * @param listId ID de la lista.
+     * @return `Flow` con items de la lista.
      */
     override fun observeItems(listId: String): Flow<List<ListItemEntity>> =
         local.observeItems(listId)
 
     /**
-     * Obtiene un ítem puntual de una lista.
+     * Recupera un item puntual desde local.
+     *
+     * @param listId ID de la lista.
+     * @param productId ID del producto.
+     * @return Item o `null` si no existe.
      */
-    override suspend fun getItem(
-        listId: String,
-        productId: String
-    ): ListItemEntity? =
+    override suspend fun getItem(listId: String, productId: String): ListItemEntity? =
         local.getItem(listId, productId)
 
     /**
-     * Añade un producto a una lista.
+     * Añade un item en local y sincroniza (*best-effort*).
      */
     override suspend fun addItem(listId: String, productId: String) {
         local.addItem(listId, productId)
@@ -131,7 +145,7 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Elimina un producto de una lista.
+     * Elimina un item en local y sincroniza (*best-effort*).
      */
     override suspend fun removeItem(listId: String, productId: String) {
         local.removeItem(listId, productId)
@@ -139,7 +153,7 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Alterna el estado checked de un ítem.
+     * Alterna `checked` en local y sincroniza (*best-effort*).
      */
     override suspend fun toggleChecked(listId: String, productId: String) {
         local.toggleChecked(listId, productId)
@@ -147,19 +161,15 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Establece la cantidad de un ítem.
+     * Establece `quantity` en local y sincroniza (*best-effort*).
      */
-    override suspend fun setQuantity(
-        listId: String,
-        productId: String,
-        quantity: Int
-    ) {
+    override suspend fun setQuantity(listId: String, productId: String, quantity: Int) {
         local.setQuantity(listId, productId, quantity)
         runCatching { pushAllToRemote() }
     }
 
     /**
-     * Marca o desmarca todos los ítems de una lista.
+     * Marca/desmarca todos los items en local y sincroniza (*best-effort*).
      */
     override suspend fun setAllChecked(listId: String, checked: Boolean) {
         local.setAllChecked(listId, checked)
@@ -167,7 +177,7 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Elimina todos los ítems marcados como checked.
+     * Limpia items marcados en local y sincroniza (*best-effort*).
      */
     override suspend fun clearChecked(listId: String) {
         local.clearChecked(listId)
@@ -175,15 +185,15 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Observa el progreso de todas las listas.
+     * Observa progreso desde local.
      *
-     * Usado principalmente en pantallas de Home o Dashboard.
+     * @return `Flow` con progreso por lista.
      */
     override fun observeProgress(): Flow<Map<String, ListProgress>> =
         local.observeProgress()
 
     /**
-     * Elimina una lista completa.
+     * Elimina una lista en local y sincroniza (*best-effort*).
      */
     override suspend fun deleteById(id: String) {
         local.deleteById(id)
@@ -192,7 +202,7 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Renombra una lista existente.
+     * Renombra una lista en local y sincroniza (*best-effort*).
      */
     override suspend fun rename(id: String, newName: String) {
         local.rename(id, newName)
@@ -201,7 +211,7 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Incrementa la cantidad de un ítem.
+     * Incrementa la cantidad en local y sincroniza (*best-effort*).
      */
     override suspend fun incQuantity(listId: String, productId: String) {
         local.incQuantity(listId, productId)
@@ -209,7 +219,7 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Decrementa la cantidad de un ítem con mínimo 1.
+     * Decrementa la cantidad (mínimo 1) en local y sincroniza (*best-effort*).
      */
     override suspend fun decQuantityMin1(listId: String, productId: String) {
         local.decQuantityMin1(listId, productId)
@@ -217,15 +227,17 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Fuerza un refresh remoto hacia la base local.
+     * Fuerza un refresh desde remoto, devolviendo un [Result] para que la capa superior decida UI.
+     *
+     * @return `Result.success(Unit)` si completa; `Result.failure` en caso de error de red/HTTP.
      */
     override suspend fun refreshLists(): Result<Unit> =
         runCatching { forceRefresh() }
 
     /**
-     * Fuerza la carga de datos seed sobrescribiendo el estado local.
+     * Fuerza inserción de seed local (si aplica) sin tocar red.
      *
-     * Útil para debug o QA.
+     * @return `Result` con el resultado de la operación.
      */
     override suspend fun forceSeed(): Result<Unit> =
         runCatching {
@@ -234,9 +246,10 @@ class DefaultListsRepository @Inject constructor(
         }
 
     /**
-     * Ejecuta un refresh remoto solo si el último se considera obsoleto.
+     * Ejecuta un refresh si ha pasado [refreshMinIntervalMs] desde el último refresh/push.
      *
-     * Protegido por mutex para evitar condiciones de carrera.
+     * Implementa doble comprobación (antes y dentro del mutex) para minimizar contención
+     * cuando múltiples colecciones disparan `onStart` simultáneamente.
      */
     private suspend fun refreshIfStale() {
         val now = System.currentTimeMillis()
@@ -250,22 +263,26 @@ class DefaultListsRepository @Inject constructor(
     }
 
     /**
-     * Descarga el estado completo de listas desde el backend
-     * y lo persiste localmente.
+     * Descarga desde remoto y reemplaza el estado local.
+     *
+     * Actualiza [lastRefreshMs] para reflejar el último pull exitoso.
      */
     private suspend fun forceRefresh() {
-        val remoteLists = remote.fetchAll()       // List<UserListSnapshot>
+        val remoteLists = remote.fetchAll()
         local.saveAllFromRemote(remoteLists)
         lastRefreshMs = System.currentTimeMillis()
     }
 
     /**
-     * Empuja el estado completo local al backend.
+     * Sube el estado local completo (snapshot) y sobrescribe el remoto.
      *
-     * Usado tras cualquier mutación local.
+     * Actualiza [lastRefreshMs] para evitar un pull inmediato que pueda sobrescribir cambios recientes.
+     *
+     * @throws HttpException Si el backend responde con error.
+     * @throws IOException Si falla la comunicación de red.
      */
     private suspend fun pushAllToRemote() {
-        val snapshot = local.snapshotWithItems()  // List<UserListSnapshot>
+        val snapshot = local.snapshotWithItems()
         remote.overwriteAll(snapshot)
         lastRefreshMs = System.currentTimeMillis()
     }

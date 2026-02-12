@@ -1,163 +1,119 @@
 package com.example.teammaravillaapp.data.repository.recipes
 
 import com.example.teammaravillaapp.di.ApplicationScope
-import com.example.teammaravillaapp.data.local.dao.RecipesDao
-import com.example.teammaravillaapp.data.local.entity.RecipeEntity
-import com.example.teammaravillaapp.data.local.entity.RecipeIngredientsCrossRef
-import com.example.teammaravillaapp.data.local.mapper.toDomain
+import com.example.teammaravillaapp.data.local.repository.recipes.RoomRecipesRepository
 import com.example.teammaravillaapp.data.remote.datasource.recipes.RemoteRecipesDataSource
-import com.example.teammaravillaapp.data.remote.mapper.toDomain
-import com.example.teammaravillaapp.data.seed.RecipeData
 import com.example.teammaravillaapp.model.IngredientLine
-import com.example.teammaravillaapp.data.sync.mapper.toDto
-import com.example.teammaravillaapp.data.sync.mapper.toEntity
 import com.example.teammaravillaapp.model.RecipeWithIngredients
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.example.teammaravillaapp.data.sync.mapper.toEntity
 
 /**
- * Implementación por defecto de [RecipesRepository].
+ * Implementación por defecto de [RecipesRepository] como **Single Source of Truth** (Room-first).
  *
- * Actúa como **Single Source of Truth** para las recetas,
- * combinando almacenamiento local (Room) con sincronización remota.
+ * La UI consume exclusivamente el estado local. El backend se usa para hidratar/actualizar el caché,
+ * pero fallos de red no deben degradar el funcionamiento base.
  *
- * ### Estrategia general
- * - **Room-first**: la UI siempre observa datos locales.
- * - **Sync lazy**: el refresco remoto ocurre en background y solo si es necesario.
- * - **Protección de concurrencia**: evita múltiples refresh simultáneos.
+ * ## Estrategia de refresco
+ * - `recipes` y `observeRecipe(id)` disparan refresh perezoso (`onStart`).
+ * - Se aplica **throttling** con [refreshMinIntervalMs] y serialización con [refreshMutex].
  *
- * ### Características clave
- * - Observación reactiva con `Flow`.
- * - Seed inicial si la base está vacía.
- * - Sincronización remota bidireccional (pull + push).
- * - Throttling de refresh para proteger red y batería.
+ * ## Tolerancia a backend inestable
+ * - `IOException` se interpreta como ausencia de conectividad → no se propaga.
+ * - `404` se interpreta como “sin datos remotos” → no se propaga.
+ * - Otros errores HTTP se propagan para que la capa superior pueda reportar/telemetría.
+ *
+ * @property remote DataSource remoto de recetas (DTOs).
+ * @property local Repositorio Room (agregado de dominio).
+ * @property appScope Scope de aplicación para tareas de refresh no bloqueantes.
+ *
+ * @see RemoteRecipesDataSource
+ * @see RoomRecipesRepository
  */
 @Singleton
 class DefaultRecipesRepository @Inject constructor(
-    private val dao: RecipesDao,
     private val remote: RemoteRecipesDataSource,
+    private val local: RoomRecipesRepository,
     @ApplicationScope private val appScope: CoroutineScope
 ) : RecipesRepository {
 
     /**
-     * Mutex para garantizar que solo haya un refresh remoto activo a la vez.
+     * Mutex para evitar refresh simultáneos.
      */
     private val refreshMutex = Mutex()
 
     /**
-     * Marca temporal del último refresh remoto exitoso.
+     * Marca temporal del último refresh exitoso (ms).
      */
     @Volatile
     private var lastRefreshMs: Long = 0L
 
     /**
-     * Intervalo mínimo entre refreshes remotos.
-     *
-     * Evita sincronizaciones excesivas cuando múltiples observers
-     * se suscriben casi simultáneamente.
+     * Intervalo mínimo entre refreshes automáticos.
      */
     private val refreshMinIntervalMs: Long = 30_000L
 
     /**
-     * Flujo reactivo con todas las recetas y sus ingredientes.
+     * Flujo principal de recetas (agregado) observado por la UI.
      *
-     * - Emite datos locales inmediatamente.
-     * - Dispara un refresh remoto en background al comenzar la observación.
+     * Dispara un refresh perezoso en background al inicio de la observación.
      */
     override val recipes: Flow<List<RecipeWithIngredients>> =
-        dao.observeAll()
-            .map { list -> list.map { it.toDomain() } }
-            .onStart {
-                appScope.launch { refreshIfStale() }
-            }
+        local.observeAll()
+            .onStart { appScope.launch { refreshIfStale() } }
 
     /**
-     * Observa una receta específica por ID.
+     * Observa una receta por ID desde local, con refresh perezoso.
      *
-     * El refresco remoto se ejecuta de forma lazy al iniciar la observación.
+     * @param id ID de la receta.
+     * @return `Flow` con la receta o `null`.
      */
     override fun observeRecipe(id: Int): Flow<RecipeWithIngredients?> =
-        dao.observeById(id)
-            .map { it?.toDomain() }
-            .onStart {
-                appScope.launch { refreshIfStale() }
-            }
+        local.observeById(id)
+            .onStart { appScope.launch { refreshIfStale() } }
 
     /**
-     * Obtiene una receta puntual sin observación reactiva.
+     * Recupera una receta puntual desde local (*snapshot*).
      *
-     * No dispara sincronización remota.
+     * @param id ID de la receta.
+     * @return Receta o `null`.
      */
     override suspend fun getRecipe(id: Int): RecipeWithIngredients? =
-        dao.getById(id)?.toDomain()
+        local.getById(id)
 
     /**
-     * Observa únicamente las líneas de ingredientes de una receta.
+     * Observa líneas de ingredientes (proyección) desde local.
      *
-     * Ideal para pantallas centradas en ingredientes o cantidades.
+     * @param recipeId ID de la receta.
+     * @return `Flow` con líneas de ingredientes.
      */
     override fun observeIngredientLines(recipeId: Int): Flow<List<IngredientLine>> =
-        dao.observeIngredientLines(recipeId)
-            .map { lines -> lines.map { it.toDomain() } }
+        local.observeIngredientLines(recipeId)
 
     /**
-     * Inicializa la base de datos con datos seed si está vacía.
+     * Inserta seed local si está vacío y luego intenta refrescar desde remoto.
      *
-     * ### Flujo
-     * 1. Si hay datos → intenta refresh remoto y termina.
-     * 2. Si está vacía:
-     *    - Inserta recetas seed localmente.
-     *    - Inserta relaciones receta–ingrediente.
-     *    - Empuja los datos al backend (best-effort).
-     *
-     * No sobrescribe datos existentes.
+     * La red se trata como opcional para no penalizar el arranque offline.
      */
     override suspend fun seedIfEmpty() {
-        if (dao.count() > 0) {
-            runCatching { refreshIfStale() }
-            return
-        }
-
-        // Local
-        val entities = RecipeData.recipes.map { r ->
-            RecipeEntity(
-                id = r.id,
-                title = r.title,
-                imageRes = r.imageRes,
-                instructions = r.instructions
-            )
-        }
-
-        val refs = RecipeData.recipes.flatMap { r ->
-            r.productIds.distinct().mapIndexed { index, pid ->
-                RecipeIngredientsCrossRef(
-                    recipeId = r.id,
-                    productId = pid,
-                    quantity = null,
-                    unit = null,
-                    position = index
-                )
-            }
-        }
-
-        dao.replaceAll(entities, refs)
-
-        // Push a remoto
-        runCatching { pushAllToRemote() }
-        lastRefreshMs = System.currentTimeMillis()
+        local.seedIfEmpty()
+        runCatching { refreshIfStale() }.getOrNull()
     }
 
     /**
-     * Ejecuta un refresh remoto solo si el último es considerado obsoleto.
+     * Ejecuta un refresh remoto si el último estado se considera obsoleto.
      *
-     * Protegido por mutex para evitar condiciones de carrera.
+     * Implementa doble comprobación para minimizar contención cuando múltiples triggers
+     * (varios `onStart`) ocurren casi simultáneamente.
      */
     private suspend fun refreshIfStale() {
         val now = System.currentTimeMillis()
@@ -166,49 +122,37 @@ class DefaultRecipesRepository @Inject constructor(
         refreshMutex.withLock {
             val nowLocked = System.currentTimeMillis()
             if (nowLocked - lastRefreshMs < refreshMinIntervalMs) return
+
             runCatching { forceRefresh() }
+                .onFailure { }
         }
     }
 
     /**
-     * Fuerza un refresh remoto sin validar intervalo.
+     * Descarga recetas desde remoto y reemplaza el caché local.
      *
-     * - Descarga todas las recetas del backend.
-     * - Reemplaza completamente el estado local.
+     * Solo actúa si hay datos remotos no vacíos para evitar sobrescribir el estado local con “nada”
+     * en escenarios donde el backend aún no tiene colección inicial.
+     *
+     * @throws HttpException Si ocurre un error HTTP distinto de 404.
+     * @throws IOException Si falla la comunicación (se intercepta y se ignora en el llamador).
      */
     private suspend fun forceRefresh() {
-        val remoteDtos = remote.fetchAll()
+        val remoteDtos = try {
+            remote.fetchAll()
+        } catch (e: IOException) {
+            return
+        } catch (e: HttpException) {
+            if (e.code() == 404) return
+            throw e
+        }
+
+        if (remoteDtos.isEmpty()) return
 
         val recipes = remoteDtos.map { it.toEntity() }
-        val refs = remoteDtos.flatMap { dto ->
-            dto.ingredients.map { it.toEntity(dto.id) }
-        }
+        val refs = remoteDtos.flatMap { dto -> dto.ingredients.map { it.toEntity(dto.id) } }
 
-        dao.replaceAll(recipes, refs)
-        lastRefreshMs = System.currentTimeMillis()
-    }
-
-    /**
-     * Empuja todo el estado local al backend.
-     *
-     * Usado principalmente tras un seed inicial.
-     */
-    private suspend fun pushAllToRemote() {
-        val recipeEntities = dao.getAllRecipeEntities()
-        val crossRefs = dao.getAllCrossRefs()
-
-        val refsByRecipe = crossRefs.groupBy { it.recipeId }
-
-        val dtos = recipeEntities.map { re ->
-            val ingredientDtos =
-                (refsByRecipe[re.id] ?: emptyList())
-                    .sortedBy { it.position }
-                    .map { it.toDto() }
-
-            re.toDto(ingredientDtos)
-        }
-
-        remote.overwriteAll(dtos)
+        local.replaceAll(recipes, refs)
         lastRefreshMs = System.currentTimeMillis()
     }
 }

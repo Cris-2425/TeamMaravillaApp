@@ -4,52 +4,43 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.example.teammaravillaapp.page.session.SessionViewModel
 
 /**
- * DataStore de sesión (Preferences) para persistir y observar el estado de autenticación.
+ * Almacén de sesión basado en **DataStore Preferences**.
  *
- * Motivo:
- * - Centralizar el “source of truth” de la sesión (loggedIn, username, token, rememberMe).
- * - Exponer flows para que la UI/ViewModels reaccionen automáticamente a cambios.
- * - Separar persistencia (DataStore) de la lógica de negocio (repositorios/VM).
+ * Centraliza el estado de autenticación como **source of truth** observable:
+ * - `logged_in` (sesión activa)
+ * - `username`
+ * - `token`
+ * - `remember_me`
  *
- * Decisiones de diseño:
- * - `rememberMe` por defecto es `true` (comportamiento cómodo por defecto).
- * - `logged_in` por defecto es `false` (sesión no iniciada).
- * - `username` y `token` pueden ser null si no existen en preferencias.
+ * ### Por qué DataStore
+ * Este estado es **configuración de sesión** (clave → valor), no un modelo relacional.
+ * DataStore ofrece persistencia asíncrona y `Flow` nativo para reaccionar a cambios.
  *
- * @param appContext Contexto de aplicación (no Activity) requerido por DataStore.
- * Restricciones:
- * - Debe ser el contexto con ciclo de vida de aplicación.
- * - No nulo.
+ * ### Tolerancia a fallos
+ * Los `Flow` de lectura degradan a [emptyPreferences] ante [IOException] para evitar crasheos por
+ * corrupción/transitorios de IO, manteniendo valores por defecto consistentes.
  *
- * @throws Exception No se lanza explícitamente desde la API pública.
- * Fallos técnicos posibles (no tipados):
- * - IOException / corrupción de DataStore durante lectura/escritura puede producir excepciones.
- * Recomendación: envolver `dataStore.data` con `catch { emit(emptyPreferences()) }` si quieres
- * evitar crashes y degradar a valores por defecto.
+ * ## Concurrencia
+ * - `DataStore` es **thread-safe**.
+ * - Todas las escrituras son `suspend` y deben ejecutarse desde coroutines.
  *
- * @see com.example.teammaravillaapp.page.session.SessionViewModel Consumidor típico de estos flows.
+ * @property appContext Contexto de aplicación (no Activity), requerido por DataStore.
  *
- * Ejemplo de uso:
- * {@code
- * // Login OK
- * sessionStore.saveSession(username = "cris", token = "abc", rememberMe = true)
- *
- * // UI: observar estado
- * sessionStore.isLoggedIn.map { logged -> ... }
- *
- * // Logout
- * sessionStore.clearSession()
- * }
+ * @see SessionViewModel Consumidor típico de estos flows.
  */
 @Singleton
 class SessionStore @Inject constructor(
@@ -59,7 +50,7 @@ class SessionStore @Inject constructor(
     /**
      * Claves internas de DataStore.
      *
-     * Se mantienen encapsuladas para:
+     * Se encapsulan para:
      * - evitar colisiones de nombres
      * - permitir refactors sin afectar consumidores
      */
@@ -80,73 +71,83 @@ class SessionStore @Inject constructor(
     /**
      * Preferencia “recordarme”.
      *
-     * Semántica recomendada:
-     * - Controla persistencia entre reinicios, no necesariamente si estás logueado “ahora”.
+     * Semántica: controla si la sesión debe restaurarse tras reiniciar la app, no si la sesión está
+     * activa *en este instante*.
      *
-     * Valor por defecto: `true` si no existe la clave.
+     * Valor por defecto: `true`.
      *
-     * @return Flow<Boolean> que emite el valor actual de “remember me”.
+     * @return `Flow` que emite el valor actual de “remember me”.
      *
-     * @throws Exception No se lanza explícitamente.
-     * DataStore podría lanzar IOException en lectura si no se gestiona con `catch`.
+     * @throws IOException Si falla la lectura y no se intercepta (las lecturas aquí lo interceptan).
      */
     val rememberMe: Flow<Boolean> =
-        appContext.dataStore.data.map { it[Keys.REMEMBER_ME] ?: true }
+        appContext.dataStore.data
+            .catch { exception ->
+                if (exception is IOException) emit(emptyPreferences())
+                else throw exception
+            }
+            .map { it[Keys.REMEMBER_ME] ?: true }
 
     /**
      * Indica si hay una sesión marcada como activa.
      *
-     * Valor por defecto: `false` si no existe la clave.
+     * Valor por defecto: `false`.
      *
-     * @return Flow<Boolean> que emite el estado de `logged_in`.
+     * @return `Flow` que emite el estado de `logged_in`.
      *
-     * @throws Exception No se lanza explícitamente.
-     * DataStore podría lanzar IOException en lectura si no se gestiona con `catch`.
+     * @throws IOException Si falla la lectura y no se intercepta (las lecturas aquí lo interceptan).
      */
     val isLoggedIn: Flow<Boolean> =
-        appContext.dataStore.data.map { prefs -> prefs[Keys.LOGGED_IN] ?: false }
+        appContext.dataStore.data
+            .catch { exception ->
+                if (exception is IOException) emit(emptyPreferences())
+                else throw exception
+            }
+            .map { prefs -> prefs[Keys.LOGGED_IN] ?: false }
 
     /**
-     * Username persistido.
+     * Username persistido, si existe.
      *
-     * @return Flow<String?> que emite el username o null si no existe.
-     *
-     * @throws Exception No se lanza explícitamente.
-     * DataStore podría lanzar IOException en lectura si no se gestiona con `catch`.
+     * @return `Flow` que emite el username o `null` si no está persistido.
      */
     val username: Flow<String?> =
-        appContext.dataStore.data.map { prefs -> prefs[Keys.USERNAME] }
+        appContext.dataStore.data
+            .catch { exception ->
+                if (exception is IOException) emit(emptyPreferences())
+                else throw exception
+            }
+            .map { prefs -> prefs[Keys.USERNAME] }
 
     /**
-     * Token persistido.
+     * Token persistido, si existe.
      *
-     * @return Flow<String?> que emite el token o null si no existe.
+     * Se modela como `String?` para permitir limpiar el token sin afectar el resto de preferencias.
      *
-     * @throws Exception No se lanza explícitamente.
-     * DataStore podría lanzar IOException en lectura si no se gestiona con `catch`.
+     * @return `Flow` que emite el token o `null` si no está persistido.
      */
     val token: Flow<String?> =
-        appContext.dataStore.data.map { prefs -> prefs[Keys.TOKEN] }
+        appContext.dataStore.data
+            .catch { exception ->
+                if (exception is IOException) emit(emptyPreferences())
+                else throw exception
+            }
+            .map { prefs -> prefs[Keys.TOKEN] }
 
     /**
-     * Guarda o actualiza la sesión tras un login exitoso.
+     * Persiste el resultado de un login exitoso.
      *
      * Responsabilidad:
-     * - Marcar la sesión como activa (`logged_in = true`).
-     * - Persistir username.
-     * - Persistir rememberMe (para decidir auto-login en arranque).
-     * - Persistir/eliminar token según corresponda.
+     * - Marcar `logged_in = true`
+     * - Persistir `username`
+     * - Persistir `remember_me`
+     * - Persistir o eliminar `token` (según se provea)
      *
-     * Nota:
-     * - `rememberMe` NO decide si el usuario está logueado ahora.
-     *   Solo decide si la sesión debe restaurarse automáticamente
-     *   tras reiniciar la aplicación.
+     * @param username Nombre de usuario a persistir.
+     * @param token Token opcional (si el backend lo usa).
+     * @param rememberMe Si `true`, habilita restauración de sesión tras reinicio.
      *
-     * @param username Nombre de usuario persistido.
-     * @param token Token opcional (si tu backend lo usa).
-     * @param rememberMe Indica si se permite auto-login en reinicios.
-     *
-     * @throws IOException / IllegalStateException si DataStore falla al escribir.
+     * @throws IOException Si falla la escritura en DataStore.
+     * @throws IllegalStateException Si DataStore no está en un estado válido.
      */
     suspend fun saveSession(username: String, token: String? = null, rememberMe: Boolean) {
         appContext.dataStore.edit { prefs ->
@@ -158,18 +159,14 @@ class SessionStore @Inject constructor(
     }
 
     /**
-     * Limpia completamente la sesión (logout).
+     * Limpia la sesión activa (logout) sin alterar la preferencia de “recordarme”.
      *
-     * Responsabilidades:
-     * - Marcar `logged_in = false`.
-     * - Eliminar username.
-     * - Eliminar token.
+     * ### Por qué no toca `remember_me`
+     * `remember_me` representa una preferencia del usuario y puede mantenerse aunque la sesión
+     * actual se cierre (p. ej. el usuario decide “recordarme” para el siguiente login).
      *
-     * Importante:
-     * - NO modifica el valor de `remember_me`.
-     *   Se respeta la última elección del usuario.
-     *
-     * @throws IOException / IllegalStateException si DataStore falla.
+     * @throws IOException Si falla la escritura en DataStore.
+     * @throws IllegalStateException Si DataStore no está en un estado válido.
      */
     suspend fun clearSession() {
         appContext.dataStore.edit { prefs ->
@@ -180,27 +177,23 @@ class SessionStore @Inject constructor(
     }
 
     /**
-     * Devuelve el token actual (si existe) como lectura inmediata.
+     * Lectura inmediata del token persistido, si existe.
      *
-     * Motivo:
-     * - Facilitar consumo desde interceptores/clients (Retrofit/OkHttp) o repositorios.
+     * Útil en componentes que requieren acceso puntual (p. ej. repositorios o interceptores),
+     * evitando colecciones reactivas cuando no aportan valor.
      *
-     * @return token persistido o null si no existe.
+     * @return Token persistido o `null`.
      *
-     * @throws Exception Técnicas:
-     * - Excepciones de lectura DataStore al usar `first()`.
-     *
-     * Ejemplo de uso:
-     * {@code
-     * val token = sessionStore.getTokenOrNull()
-     * if (token != null) { ... }
-     * }
+     * @throws Exception Si ocurre un fallo de lectura en `first()` (p. ej. IO no recuperable).
      */
     suspend fun getTokenOrNull(): String? = token.first()
 }
 
 /**
- * Extensión interna de DataStore.
+ * `DataStore<Preferences>` asociado al contexto de aplicación para persistir sesión.
+ *
+ * Se mantiene a nivel de fichero para limitar su visibilidad al módulo y evitar uso accidental
+ * desde capas no previstas.
  *
  * @see SessionStore Consumidor principal.
  */

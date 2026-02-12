@@ -4,8 +4,6 @@ import com.example.teammaravillaapp.data.local.dao.RecipesDao
 import com.example.teammaravillaapp.data.local.entity.RecipeEntity
 import com.example.teammaravillaapp.data.local.entity.RecipeIngredientsCrossRef
 import com.example.teammaravillaapp.data.local.mapper.toDomain
-import com.example.teammaravillaapp.data.remote.mapper.toDomain
-import com.example.teammaravillaapp.data.repository.recipes.RecipesRepository
 import com.example.teammaravillaapp.data.seed.RecipeData
 import com.example.teammaravillaapp.model.IngredientLine
 import com.example.teammaravillaapp.model.RecipeWithIngredients
@@ -15,41 +13,93 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Implementación de [RecipesRepository] usando Room.
+ * Implementación Room del repositorio de **recetas**.
  *
- * - Observa recetas y sus ingredientes.
- * - Permite obtener recetas individuales.
- * - Inicializa la base de datos con seed si está vacía.
+ * Expone modelos de dominio y mantiene la lógica de persistencia encapsulada:
+ * - Observación reactiva de recetas completas
+ * - Lecturas puntuales (*snapshots*)
+ * - Reemplazo completo (ideal para sincronización/seed)
+ *
+ * ## Concurrencia
+ * - Seguro para uso concurrente: Room gestiona el dispatcher y serializa escrituras.
+ * - Transformaciones `map { ... }` son **puras** y se ejecutan en el contexto del colector del `Flow`.
+ *
+ * @property dao DAO de recetas, inyectado por Hilt.
+ *
+ * @see RecipesDao
  */
 @Singleton
 class RoomRecipesRepository @Inject constructor(
     private val dao: RecipesDao
-) : RecipesRepository {
-
-    /** Flujo de todas las recetas con sus ingredientes. */
-    override val recipes: Flow<List<RecipeWithIngredients>> =
-        dao.observeAll().map { list -> list.map { it.toDomain() } }
-
-    /** Observa una receta por su ID. */
-    override fun observeRecipe(id: Int): Flow<RecipeWithIngredients?> =
-        dao.observeById(id).map { it?.toDomain() }
-
-    /** Obtiene una receta por su ID (suspend). */
-    override suspend fun getRecipe(id: Int): RecipeWithIngredients? =
-        dao.getById(id)?.toDomain()
-
-    /** Observa las líneas de ingredientes de una receta. */
-    override fun observeIngredientLines(recipeId: Int): Flow<List<IngredientLine>> =
-        dao.observeIngredientLines(recipeId)
-            .map { lines -> lines.map { it.toDomain() } }
+) {
 
     /**
-     * Inserta datos semilla si la base de datos está vacía.
+     * Observa todas las recetas como agregado de dominio (receta + ingredientes).
      *
-     * - Inserta las recetas.
-     * - Inserta los crossRefs entre receta y productos.
+     * @return `Flow` que emite la lista de recetas cada vez que cambian `recipes` o sus relaciones.
      */
-    override suspend fun seedIfEmpty() {
+    fun observeAll(): Flow<List<RecipeWithIngredients>> =
+        dao.observeAll().map { list -> list.map { it.toDomain() } }
+
+    /**
+     * Observa una receta por ID en forma de dominio.
+     *
+     * @param id ID de la receta.
+     * @return `Flow` que emite la receta o `null` si no existe.
+     */
+    fun observeById(id: Int): Flow<RecipeWithIngredients?> =
+        dao.observeById(id).map { it?.toDomain() }
+
+    /**
+     * Recupera una receta por ID (*snapshot*).
+     *
+     * @param id ID de la receta.
+     * @return La receta o `null` si no existe.
+     */
+    suspend fun getById(id: Int): RecipeWithIngredients? =
+        dao.getById(id)?.toDomain()
+
+    /**
+     * Observa las líneas de ingredientes (proyección) de una receta.
+     *
+     * Esta vía evita cargar el agregado completo cuando solo se necesita la lista para UI.
+     *
+     * @param recipeId ID de la receta.
+     * @return `Flow` con la lista de [IngredientLine] ordenada por `position`.
+     */
+    fun observeIngredientLines(recipeId: Int): Flow<List<IngredientLine>> =
+        dao.observeIngredientLines(recipeId).map { lines -> lines.map { it.toDomain() } }
+
+    /**
+     * Cuenta cuántas recetas existen en local.
+     *
+     * @return Total de recetas persistidas.
+     */
+    suspend fun count(): Int = dao.count()
+
+    /**
+     * Reemplaza el estado local de recetas y relaciones de ingredientes.
+     *
+     * @param recipes Entidades de receta.
+     * @param refs Relaciones receta-producto.
+     *
+     * @see RecipesDao.replaceAll
+     */
+    suspend fun replaceAll(recipes: List<RecipeEntity>, refs: List<RecipeIngredientsCrossRef>) =
+        dao.replaceAll(recipes, refs)
+
+    /**
+     * Inserta datos seed si no existe ninguna receta en local.
+     *
+     * ### Por qué `seedIfEmpty`
+     * - Evita sobreescribir datos del usuario si ya hay contenido.
+     * - Mantiene una primera experiencia usable en modo offline/demo.
+     *
+     * Genera:
+     * - [RecipeEntity] desde [RecipeData]
+     * - [RecipeIngredientsCrossRef] con `position` determinista y `distinct()` en `productIds`
+     */
+    suspend fun seedIfEmpty() {
         if (dao.count() > 0) return
 
         val entities = RecipeData.recipes.map { r ->
@@ -61,7 +111,7 @@ class RoomRecipesRepository @Inject constructor(
             )
         }
 
-        val ingredientRows = RecipeData.recipes.flatMap { r ->
+        val refs = RecipeData.recipes.flatMap { r ->
             r.productIds.distinct().mapIndexed { index, pid ->
                 RecipeIngredientsCrossRef(
                     recipeId = r.id,
@@ -73,7 +123,6 @@ class RoomRecipesRepository @Inject constructor(
             }
         }
 
-        dao.upsertRecipes(entities)
-        dao.upsertCrossRefs(ingredientRows)
+        dao.replaceAll(entities, refs)
     }
 }

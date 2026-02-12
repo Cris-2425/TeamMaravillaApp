@@ -4,16 +4,16 @@ import androidx.compose.ui.graphics.Color
 
 // ===================== LIGHT =====================
 
-val primaryLight = Color(0xFFF3F1F5)
-val onPrimaryLight = Color(0xFF2C2730)
+val primaryLight = Color(0xFF805382)
+val onPrimaryLight = Color(0xFFFFFFFF)
 
-val primaryContainerLight = Color(0xFFE8DFEF)
-val onPrimaryContainerLight = Color(0xFF3A2B42)
+val primaryContainerLight = Color(0xFFEBDFE6)
+val onPrimaryContainerLight = Color(0xFF2C2730)
 
 val secondaryLight = Color(0xFF6A6470)
 val onSecondaryLight = Color(0xFFFFFFFF)
 
-val secondaryContainerLight = Color(0xFFE7E2EA)
+val secondaryContainerLight = Color(0xFFF0E6EE)
 val onSecondaryContainerLight = Color(0xFF3A353F)
 
 val tertiaryLight = Color(0xFF476B78)
@@ -27,40 +27,41 @@ val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFF1D8D6)
 val onErrorContainerLight = Color(0xFF410E0B)
 
-val backgroundLight = Color(0xFFF4F2F6)
+
+val backgroundLight = Color(0xFFFFF7FA)
 val onBackgroundLight = Color(0xFF26232A)
 
-val surfaceLight = Color(0xFFF6F4F8)
+val surfaceLight = Color(0xFFFFF7FA)
 val onSurfaceLight = Color(0xFF26232A)
 
-val surfaceVariantLight = Color(0xFFE6E2E8)
+val surfaceVariantLight = Color(0xFFEBDFE6)
 val onSurfaceVariantLight = Color(0xFF504C56)
 
 val outlineLight = Color(0xFF8A8591)
-val outlineVariantLight = Color(0xFFD3CDD8)
+val outlineVariantLight = Color(0xFFD8CED7)
 
 val scrimLight = Color(0xFF000000)
 val inverseSurfaceLight = Color(0xFF343037)
-val inverseOnSurfaceLight = Color(0xFFF2EEF6)
+val inverseOnSurfaceLight = Color(0xFFFFF7FA)
+
 val inversePrimaryLight = Color(0xFFD8C3E6)
 
-// containers / surfaces extra
-val surfaceDimLight = Color(0xFFE3DFE6)
-val surfaceBrightLight = Color(0xFFF7F5F9)
-val surfaceContainerLowestLight = Color(0xFFFAF8FC)
-val surfaceContainerLowLight = Color(0xFFF4F1F7)
-val surfaceContainerLight = Color(0xFFF0ECF3)
-val surfaceContainerHighLight = Color(0xFFEAE6ED)
-val surfaceContainerHighestLight = Color(0xFFE3DEE6)
+// containers
+val surfaceDimLight = Color(0xFFF0E6EE)
+val surfaceBrightLight = Color(0xFFFFFBFF)
+val surfaceContainerLowestLight = Color(0xFFFFFBFF)
+val surfaceContainerLowLight = Color(0xFFFFF7FA)
+val surfaceContainerLight = Color(0xFFF6EBF2)
+val surfaceContainerHighLight = Color(0xFFF0E6EE)
+val surfaceContainerHighestLight = Color(0xFFEBDFE6)
 
 
 // ===================== DARK =====================
-
-val primaryDark = Color(0xFF2A262E)
-val onPrimaryDark = Color(0xFFEDE7F2)
+val primaryDark = Color(0xFFD8C3E6)
+val onPrimaryDark = Color(0xFF2A262E)
 
 val primaryContainerDark = Color(0xFF40304A)
-val onPrimaryContainerDark = Color(0xFFE8DFEF)
+val onPrimaryContainerDark = Color(0xFFEDE7F2)
 
 val secondaryDark = Color(0xFFCFC8D4)
 val onSecondaryDark = Color(0xFF322D36)
@@ -96,7 +97,7 @@ val inverseSurfaceDark = Color(0xFFE3DEE6)
 val inverseOnSurfaceDark = Color(0xFF343037)
 val inversePrimaryDark = Color(0xFF40304A)
 
-// containers / surfaces extra
+// containers
 val surfaceDimDark = Color(0xFF151318)
 val surfaceBrightDark = Color(0xFF3C3740)
 val surfaceContainerLowestDark = Color(0xFF121016)

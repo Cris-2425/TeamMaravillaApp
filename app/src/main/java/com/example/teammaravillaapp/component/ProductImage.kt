@@ -12,41 +12,41 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 import java.util.Locale
 
 /**
- * Imagen de producto con soporte para:
- * - URL remota (Coil)
- * - Recurso local drawable
- * - Fallback textual (abreviatura) si no hay imagen
+ * Renderiza la imagen de un producto con soporte **offline-friendly**:
+ * - **Remoto** vía URL (Coil)
+ * - **Local** vía `@DrawableRes` (seed / fallback)
+ * - **Fallback textual** (abreviatura) cuando no hay imagen usable
  *
- * Prioridad de renderizado:
- * 1) Si [imageUrl] no es nula ni vacía, se muestra imagen remota.
- * 2) Si no, si [imageRes] es un drawable válido, se muestra imagen local.
- * 3) Si no, si [showAbbrFallback] es `true`, se muestra abreviatura del nombre.
- * 4) En caso contrario, se muestra [errorRes] como último recurso.
+ * ### Prioridad de renderizado
+ * 1) Si `imageUrl` no es nula ni vacía → carga remota con Coil.
+ * 2) Si no, si `imageRes` es válido → muestra drawable local.
+ * 3) Si no, si `showAbbrFallback` es `true` → muestra abreviatura derivada de `name`.
+ * 4) Si no → muestra `errorRes` como último recurso.
  *
- * @param name Nombre del producto. Se usa como `contentDescription` y para la abreviatura.
- * @param imageUrl URL remota opcional (por ejemplo, de tu API).
- * @param imageRes Drawable local opcional (por ejemplo, productos seed).
- * @param modifier Modificador de Compose para tamaño, recorte, etc.
+ * ### Por qué `SubcomposeAsyncImage`
+ * Permite **componer UI distinta** según el estado del painter (Loading/Error/Success) sin duplicar el
+ * contenedor, manteniendo una experiencia consistente incluso con recursos locales.
+ *
+ * ## Concurrencia
+ * Función **pura de UI**: no bloquea hilos. La carga de imagen ocurre en background gestionada por Coil.
+ *
+ * @param name Nombre del producto. Se usa como `contentDescription` y para construir la abreviatura.
+ * @param imageUrl URL remota opcional (p. ej. la devuelta por tu API).
+ * @param imageRes Drawable local opcional (p. ej. productos seed).
+ * @param modifier Modificador de Compose (tamaño, clip, padding, etc.).
  * @param contentScale Escalado de la imagen dentro del contenedor.
- * @param showAbbrFallback Indica si debe mostrarse abreviatura cuando no hay imagen disponible.
- * @param placeholderRes Drawable usado como placeholder durante la carga remota.
- * @param errorRes Drawable usado cuando falla la carga o como fallback final.
- *
- * Ejemplo de uso:
- * {@code
- * ProductImage(
- *   name = product.name,
- *   imageUrl = product.imageUrl,
- *   imageRes = product.imageRes
- * )
- * }
+ * @param showAbbrFallback Si `true`, muestra abreviatura cuando no hay imagen disponible.
+ * @param placeholderRes Drawable usado mientras carga la imagen remota (o si no hay `imageRes` local).
+ * @param errorRes Drawable usado como último recurso si falla la carga y no se muestra abreviatura.
  */
 @Composable
 fun ProductImage(
@@ -60,25 +60,68 @@ fun ProductImage(
     @DrawableRes errorRes: Int = R.drawable.logo
 ) {
     val context = LocalContext.current
-    val abbr = name
-        .trim()
-        .take(3)
-        .uppercase(Locale.getDefault())
-        .ifEmpty { "?" }
+    val abbr = name.trim().take(3).uppercase(Locale.getDefault()).ifEmpty { "?" }
 
     when {
         !imageUrl.isNullOrBlank() -> {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(imageUrl)
                     .crossfade(true)
                     .build(),
                 contentDescription = name,
-                contentScale = contentScale,
                 modifier = modifier,
-                placeholder = painterResource(placeholderRes),
-                error = painterResource(errorRes)
-            )
+                contentScale = contentScale
+            ) {
+                when (painter.state) {
+                    is AsyncImagePainter.State.Loading -> {
+                        if (imageRes != null && imageRes != 0) {
+                            Image(
+                                painter = painterResource(imageRes),
+                                contentDescription = name,
+                                modifier = modifier,
+                                contentScale = contentScale
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(placeholderRes),
+                                contentDescription = null,
+                                modifier = modifier,
+                                contentScale = contentScale
+                            )
+                        }
+                    }
+
+                    is AsyncImagePainter.State.Error -> {
+                        when {
+                            imageRes != null && imageRes != 0 -> Image(
+                                painter = painterResource(imageRes),
+                                contentDescription = name,
+                                modifier = modifier,
+                                contentScale = contentScale
+                            )
+
+                            showAbbrFallback -> Box(
+                                modifier = modifier,
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = abbr, style = MaterialTheme.typography.labelMedium)
+                            }
+
+                            else -> Image(
+                                painter = painterResource(errorRes),
+                                contentDescription = name,
+                                modifier = modifier,
+                                contentScale = contentScale
+                            )
+                        }
+                    }
+
+                    else -> {
+                        SubcomposeAsyncImageContent()
+                    }
+                }
+            }
         }
 
         imageRes != null && imageRes != 0 -> {
@@ -92,10 +135,7 @@ fun ProductImage(
 
         showAbbrFallback -> {
             Box(modifier = modifier, contentAlignment = Alignment.Center) {
-                Text(
-                    text = abbr,
-                    style = MaterialTheme.typography.labelMedium
-                )
+                Text(text = abbr, style = MaterialTheme.typography.labelMedium)
             }
         }
 
@@ -107,6 +147,21 @@ fun ProductImage(
                 modifier = modifier
             )
         }
+    }
+}
+
+/**
+ * Muestras de uso para KDoc.
+ */
+@Suppress("unused")
+private object ProductImageSamples {
+    @Composable
+    fun basic() {
+        ProductImage(
+            name = "Manzana",
+            imageUrl = "https://example.com/images/apple.png",
+            imageRes = null
+        )
     }
 }
 
