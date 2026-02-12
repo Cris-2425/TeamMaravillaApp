@@ -115,6 +115,7 @@ Room (Single Source of Truth) Retrofit (Remote sync)
 
 > Package-oriented, scalable and production-ready.
 
+```
 com.example.teammaravillaapp
 │
 ├── component/              # Reusable Compose UI components
@@ -147,6 +148,7 @@ com.example.teammaravillaapp
 ├── page/                   # Feature-based UI modules
 ├── ui/                     # App-level UI & theme
 └── util/                   # Shared utilities & helpers
+```
 
 ---
 
