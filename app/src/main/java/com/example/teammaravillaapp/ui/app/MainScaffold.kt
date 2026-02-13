@@ -54,11 +54,10 @@ fun MainScaffold(
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
 
-    // ----- Ruta actual -----
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
-    // ----- Rutas sin barras/drawer -----
+    // Pantallas sin barra arriba y abajo
     val authRoutes = remember {
         setOf(
             NavRoute.Splash.route,
@@ -67,13 +66,18 @@ fun MainScaffold(
         )
     }
 
-    // Tabs con bottom bar
+    // Pantallitas con barra abajo
     val bottomTabs = remember {
         setOf(
             NavRoute.Home.route,
             NavRoute.Recipes.route,
+            NavRoute.RecipesDetail.route,
             NavRoute.History.route,
-            NavRoute.Profile.route
+            NavRoute.Profile.route,
+            NavRoute.ListDetail.route,
+            NavRoute.Settings.route,
+            NavRoute.Stats.route,
+            NavRoute.Help.route
         )
     }
 
@@ -93,19 +97,23 @@ fun MainScaffold(
         else -> OptionButton.HOME
     }
 
+    // Título de las pantallas
     val titleRes = when (currentRoute) {
-        NavRoute.Home.route -> R.string.nav_title_lists
+        NavRoute.Home.route -> R.string.home_title
         NavRoute.Recipes.route -> R.string.nav_title_recipes
+        NavRoute.RecipesDetail.route -> R.string.recipes_preparation
         NavRoute.History.route -> R.string.nav_title_history
         NavRoute.Profile.route -> R.string.nav_title_profile
+        NavRoute.ListDetail.route -> R.string.list_detail_details
+        NavRoute.Settings.route -> R.string.settings_title
+        NavRoute.Stats.route -> R.string.stats_title
+        NavRoute.Help.route -> R.string.help_title
         else -> R.string.app_title
     }
 
-    // ----- Drawer global -----
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val enableDrawer = showBars
 
-    // ----- Permiso cámara runtime -----
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -121,7 +129,6 @@ fun MainScaffold(
         else permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    // ----- Snackbars globales -----
     LaunchedEffect(Unit) {
         uiEvents.collect { event ->
             when (event) {

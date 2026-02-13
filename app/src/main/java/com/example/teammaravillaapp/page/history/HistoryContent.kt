@@ -76,7 +76,7 @@ fun HistoryContent(
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Title(texto = stringResource(R.string.history_title))
+                Spacer(Modifier.height(12.dp))
 
                 SectionCard {
                     when {

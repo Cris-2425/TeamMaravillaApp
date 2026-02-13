@@ -39,6 +39,7 @@ import com.example.teammaravillaapp.component.SwipeRowActions
 import com.example.teammaravillaapp.model.CardInfo
 import com.example.teammaravillaapp.model.QuickActionData
 import com.example.teammaravillaapp.model.SearchFieldData
+import com.example.teammaravillaapp.page.recipes.RecipesUiState
 import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
@@ -137,15 +138,8 @@ fun HomeContent(
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
             item {
-                Text(
-                    text = stringResource(R.string.home_title),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+                Spacer(Modifier.height(12.dp))
 
-            item {
-
-                // Buscador y acciones rápidas
                 SectionCard {
                     SearchField(
                         modifier = Modifier.focusRequester(focusRequester),
@@ -172,8 +166,6 @@ fun HomeContent(
             }
 
             item {
-
-                // Listas recientes
                 SectionCard {
                     Text(
                         text = stringResource(R.string.home_recent_lists_title),
@@ -184,12 +176,17 @@ fun HomeContent(
 
                     if (uiState.rows.isEmpty()) {
                         Text(
-                            text = stringResource(R.string.home_recent_lists_empty),
+                            text = stringResource(R.string.nav_title_lists),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                text = stringResource(R.string.home_list_order),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             uiState.rows.forEach { row ->
                                 val id = row.id
                                 val list = row.list
@@ -236,8 +233,6 @@ fun HomeContent(
                 }
             }
         }
-
-        // Diálogo de renombrado
         renameTarget?.let { (listId, currentName) ->
             LaunchedEffect(currentName) { renameText = currentName }
 

@@ -88,8 +88,7 @@ fun StatsContent(
                 contentPadding = PaddingValues(bottom = 120.dp)
             ) {
                 item {
-                    Title(texto = stringResource(R.string.stats_title))
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(12.dp))
                     Text(
                         text = stringResource(R.string.stats_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
@@ -97,7 +96,6 @@ fun StatsContent(
                     )
                 }
 
-                // Banner de loading / error (solo si aplica)
                 item {
                     when {
                         state.isLoading -> {
@@ -136,7 +134,6 @@ fun StatsContent(
                     }
                 }
 
-                // Totales (siempre visibles aunque haya error → así la UI no “salta” tanto)
                 item {
                     SectionCard {
                         Text(
@@ -199,7 +196,6 @@ fun StatsContent(
                     }
                 }
 
-                // Últimos 7 días
                 item {
                     SectionCard {
                         Text(
@@ -226,7 +222,6 @@ fun StatsContent(
                     }
                 }
 
-                // Top productos
                 item {
                     SectionCard {
                         Text(

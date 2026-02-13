@@ -4,7 +4,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
@@ -53,14 +54,19 @@ fun Title(
             )
         }
 
-        Text(
-            text = texto,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            fontWeight = MaterialTheme.typography.titleLarge.fontWeight ?: FontWeight.SemiBold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        ) {
+            Text(
+                text = texto,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

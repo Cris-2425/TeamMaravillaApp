@@ -19,8 +19,6 @@
     <string name="common_remove">Remove</string>
     <string name="common_retry">Retry</string>
     <string name="common_undo">Undo</string>
-    <string name="profile_logout_success">Sesión cerrada correctamente</string>
-    <string name="help_version_format">v%1$s</string>
 
     <!-- BackButton -->
     <string name="back_button_content_description">Back</string>
@@ -40,6 +38,7 @@
     <string name="recipes_filter_mine">My recipes</string>
     <string name="recipes_empty_all">No recipes available</string>
     <string name="recipes_empty_mine">You don’t have favorite recipes yet</string>
+    <string name="recipes_preparation">Recipe preparation</string>
 
     <!-- Profile -->
     <string name="profile_username_placeholder">Username</string>
@@ -54,11 +53,12 @@
     <string name="profile_status_logged_out">Guest</string>
     <string name="profile_change_photo">Change photo</string>
     <string name="profile_remove_photo">Remove photo</string>
+    <string name="profile_logout_success">Sesión cerrada correctamente</string>
+    <string name="profile_logout_ok">Session closed</string>
+    <string name="profile_crop_error">The image could not be cropped</string>
 
     <!-- Login -->
     <string name="login_error_empty_fields">Please, fill user and password</string>
-    <string name="profile_logout_ok">Session closed</string>
-    <string name="profile_crop_error">The image could not be cropped</string>
     <string name="login_title">Sign in</string>
     <string name="login_subtitle">Access your account to sync your content</string>
     <string name="login_username_label">Username</string>
@@ -133,6 +133,7 @@
     <string name="list_detail_filter_prefix">Filter: </string>
     <string name="list_detail_filter_chip">Filter: %1$s</string>
     <string name="list_detail_filter_chip_more">Filter: %1$s +%2$d</string>
+    <string name="list_detail_details">List details</string>
 
     <!-- Createlistt -->
     <string name="create_list_default_name">New list</string>
@@ -168,6 +169,8 @@
     <string name="home_list_subtitle_empty">0 products</string>
     <string name="home_list_subtitle_progress">%1$d/%2$d purchased</string>
     <string name="home_snackbar_list_deleted">List deleted</string>
+    <string name="home_list_order">Sorted by most recent</string>
+    <string name="search_placeholder_products_lists">Search product or list</string>
 
     <!-- Camera -->
     <string name="camera_title">Camera</string>
@@ -187,6 +190,16 @@
     <string name="camera_saved_ok">Receipt saved ✅</string>
     <string name="camera_permission_denied">Camera permission denied.</string>
     <string name="fab_open_camera_cd">Open camera</string>
+    <string name="camera_permission_missing">Camera permission is missing.</string>
+    <string name="camera_permission_grant">Grant permission</string>
+    <string name="camera_cd_toggle_lens">Switch camera</string>
+    <string name="camera_cd_capture">Capture</string>
+    <string name="camera_cd_flash">Flash</string>
+    <string name="camera_captured_image_cd">Captured photo</string>
+    <string name="camera_preview_placeholder">Camera preview (design only)</string>
+    <string name="camera_cd_torch">Linterna</string>
+    <string name="camera_zoom_label">Zoom</string>
+    <string name="camera_zoom_value">x%.1f</string>
 
     <!-- Optional CameraX UI -->
     <string name="camera_back">Back</string>
@@ -224,6 +237,7 @@
     <string name="stats_top_products">Top products</string>
     <string name="stats_top_products_empty">You haven\'t added any products to any list yet</string>
     <string name="stats_error_generic">Could not load stats</string>
+    <string name="stats_times_format">×%1$d</string>
 
     <!-- Help -->
     <string name="help_title">Help</string>
@@ -245,6 +259,7 @@
     <string name="help_send_feedback_chooser">Send feedback</string>
     <string name="help_feedback_subject">Feedback TeamMaravillaApp (%1$s)</string>
     <string name="help_feedback_body">Hello!\n\nI want to share this feedback:\n\n\n---\nVersion: %1$s (%2$d)\n</string>
+    <string name="help_version_format">v%1$s</string>
 
     <!-- History -->
     <string name="history_title">Browsing history</string>
@@ -328,22 +343,6 @@
     <string name="topbar_menu_stats">Stats</string>
     <string name="topbar_menu_help">Help</string>
 
-
-    <string name="camera_permission_missing">Camera permission is missing.</string>
-    <string name="camera_permission_grant">Grant permission</string>
-
-
-    <string name="camera_cd_toggle_lens">Switch camera</string>
-    <string name="camera_cd_capture">Capture</string>
-    <string name="camera_cd_flash">Flash</string>
-
-    <string name="camera_captured_image_cd">Captured photo</string>
-    <string name="camera_preview_placeholder">Camera preview (design only)</string>
-
-    <string name="camera_cd_torch">Linterna</string>
-    <string name="camera_zoom_label">Zoom</string>
-    <string name="camera_zoom_value">x%.1f</string>
-
     <!-- ******************************************************************************* -->
     <!-- Package model -->
     <!-- ******************************************************************************* -->
@@ -372,16 +371,9 @@
     <string name="list_view_list">List</string>
     <string name="list_view_compact">Compact</string>
 
-
+    <!-- RenameDialog -->
     <string name="rename_list_title">Rename list</string>
     <string name="rename_list_placeholder">List name</string>
-
-    <string name="search_placeholder_products_lists">Search product or list</string>
-
     <string name="swipe_action_rename">Rename</string>
     <string name="swipe_action_delete">Delete</string>
-
-    <string name="stats_times_format">×%1$d</string>
-
-
 </resources>
