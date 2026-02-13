@@ -326,6 +326,11 @@
     <string name="drawer_share_title">Share</string>
     <string name="drawer_share_text">See my list on TeamMaravillaApp 🧺✨</string>
     <string name="search_hint">Use the search bar above to filter your lists</string>
+    <string name="drawer_hello_username">Hello, %1$s 😊</string>
+    <string name="drawer_username_fallback">username</string>
+    <string name="drawer_my_recipes">My recipes</string>
+    <string name="drawer_settings">Settings</string>
+    <string name="drawer_logout">Logout</string>
 
     <!-- ProfileImage -->
     <string name="profile_image_description">Profile picture</string>

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,44 +19,49 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 /**
  * Contenido del menú lateral (drawer).
  *
- * Muestra un conjunto de opciones (notificaciones, compartir, opciones y salir) y delega
- * la interacción al exterior mediante callbacks. Este componente no contiene lógica de negocio.
+ * Muestra un saludo al usuario y accesos directos a secciones frecuentes.
+ * Este componente no contiene lógica de negocio: delega la interacción al exterior mediante callbacks.
  *
+ * @param username Nombre a mostrar en el saludo. Si está vacío, se usa un fallback.
  * @param modifier Modificador de Compose para controlar layout, tamaño o padding del contenedor.
- * @param onNotifications Acción al pulsar “Notificaciones”.
+ * @param onMyRecipes Acción al pulsar “Mis recetas”.
  * @param onShare Acción al pulsar “Compartir lista”.
- * @param onOptions Acción al pulsar “Opciones”.
- * @param onExit Acción al pulsar “Salir”.
- *
- * Ejemplo de uso:
- * {@code
- * DrawerContent(
- *   onNotifications = { viewModel.onNotificationsClick() },
- *   onShare = { viewModel.onShareClick() },
- *   onOptions = { navController.navigate(Screen.Options.route) },
- *   onExit = { viewModel.onExitClick() }
- * )
- * }
+ * @param onSettings Acción al pulsar “Ajustes”.
+ * @param onLogout Acción al pulsar “Cerrar sesión”.
  */
 @Composable
 fun DrawerContent(
+    username: String?,
     modifier: Modifier = Modifier,
-    onNotifications: () -> Unit,
+    onMyRecipes: () -> Unit,
     onShare: () -> Unit,
-    onOptions: () -> Unit,
-    onExit: () -> Unit
+    onSettings: () -> Unit,
+    onLogout: () -> Unit
 ) {
+    val safeName = username
+        ?.takeIf(String::isNotBlank)
+        ?: stringResource(R.string.drawer_username_fallback)
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(vertical = 8.dp)
     ) {
         Spacer(Modifier.height(12.dp))
 
+        Text(
+            text = stringResource(R.string.drawer_hello_username, safeName),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+        )
+
+        Spacer(Modifier.height(8.dp))
+
         DrawerItem(
-            text = stringResource(R.string.drawer_notifications),
-            onClick = onNotifications
+            text = stringResource(R.string.drawer_my_recipes),
+            onClick = onMyRecipes,
         )
 
         DrawerItem(
@@ -64,13 +70,13 @@ fun DrawerContent(
         )
 
         DrawerItem(
-            text = stringResource(R.string.drawer_options),
-            onClick = onOptions
+            text = stringResource(R.string.drawer_settings),
+            onClick = onSettings
         )
 
         DrawerItem(
-            text = stringResource(R.string.drawer_exit),
-            onClick = onExit
+            text = stringResource(R.string.drawer_logout),
+            onClick = onLogout
         )
     }
 }
@@ -80,10 +86,11 @@ fun DrawerContent(
 private fun DrawerContentPreview() {
     TeamMaravillaAppTheme {
         DrawerContent(
-            onNotifications = {},
+            username = "Cristian",
+            onMyRecipes = {},
             onShare = {},
-            onOptions = {},
-            onExit = {}
+            onSettings = {},
+            onLogout = {}
         )
     }
 }
