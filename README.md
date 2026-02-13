@@ -120,7 +120,7 @@ This application was built to demonstrate:
 ---
 
 ### 📷 Camera / Receipt
-![Camera](docs/images/camera.png)
+![Camera](docs/images/camera2.png)
 
 ---
 
