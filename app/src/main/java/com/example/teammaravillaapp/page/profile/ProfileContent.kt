@@ -20,14 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.OptionsGrid
 import com.example.teammaravillaapp.component.ProfileImage
 import com.example.teammaravillaapp.model.ProfileOption
-import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 
 /**
  * UI pura de la pantalla de Perfil.
@@ -96,7 +94,6 @@ fun ProfileContent(
             ) {
                 Spacer(Modifier.height(10.dp))
 
-                // Foto + menú
                 Box {
                     ProfileImage(
                         imageRes = null,
@@ -128,7 +125,6 @@ fun ProfileContent(
 
                 Spacer(Modifier.height(14.dp))
 
-                // Tarjeta usuario
                 Surface(
                     shape = MaterialTheme.shapes.large,
                     tonalElevation = 2.dp,
@@ -158,7 +154,6 @@ fun ProfileContent(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Grid + logout
                 Surface(
                     shape = MaterialTheme.shapes.extraLarge,
                     tonalElevation = 2.dp,

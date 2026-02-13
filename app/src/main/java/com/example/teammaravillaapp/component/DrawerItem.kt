@@ -44,7 +44,7 @@ fun DrawerItem(
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(16.dp),
-        color = MaterialTheme.colorScheme.onSecondary
+        color = MaterialTheme.colorScheme.onTertiaryContainer
     )
 }
 

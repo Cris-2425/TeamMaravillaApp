@@ -13,6 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.teammaravillaapp.R
@@ -22,6 +24,9 @@ import com.example.teammaravillaapp.component.TopBar
 import com.example.teammaravillaapp.model.OptionButton
 import com.example.teammaravillaapp.navigation.NavRoute
 import com.example.teammaravillaapp.navigation.rememberNavActions
+import com.example.teammaravillaapp.page.profile.ProfileViewModel
+import com.example.teammaravillaapp.page.session.SessionState
+import com.example.teammaravillaapp.page.session.SessionViewModel
 import com.example.teammaravillaapp.ui.events.UiEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -53,7 +58,6 @@ fun MainScaffold(
     val uiEvents = remember { MutableSharedFlow<UiEvent>(extraBufferCapacity = 64) }
     val scope = rememberCoroutineScope()
     val ctx = LocalContext.current
-
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
@@ -153,6 +157,10 @@ fun MainScaffold(
             }
         }
     }
+    val sessionVm: SessionViewModel = hiltViewModel()
+    val sessionState by sessionVm.sessionState.collectAsStateWithLifecycle()
+    val username = (sessionState as? SessionState.LoggedIn)?.username
+    val profileVm: ProfileViewModel = hiltViewModel()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -161,31 +169,28 @@ fun MainScaffold(
             if (enableDrawer) {
                 ModalDrawerSheet {
                     DrawerContent(
-                        onNotifications = {
+                        username = username,
+                        onMyRecipes = {
                             scope.launch { drawerState.close() }
-                            uiEvents.tryEmit(UiEvent.ShowSnackbar(R.string.drawer_not_implemented))
+                            actions.toRecipes()
                         },
                         onShare = {
                             scope.launch { drawerState.close() }
-
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
                                 putExtra(Intent.EXTRA_TEXT, ctx.getString(R.string.drawer_share_text))
                             }
                             ctx.startActivity(
-                                Intent.createChooser(
-                                    intent,
-                                    ctx.getString(R.string.drawer_share_title)
-                                )
+                                Intent.createChooser(intent, ctx.getString(R.string.drawer_share_title))
                             )
                         },
-                        onOptions = {
+                        onSettings = {
                             scope.launch { drawerState.close() }
                             actions.toSettings()
                         },
-                        onExit = {
+                        onLogout = {
                             scope.launch { drawerState.close() }
-                            uiEvents.tryEmit(UiEvent.ShowSnackbar(R.string.drawer_exit_hint))
+                            profileVm.logout()
                         }
                     )
                 }
