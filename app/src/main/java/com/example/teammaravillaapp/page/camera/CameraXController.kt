@@ -257,4 +257,27 @@ class CameraXController(
         cameraProvider?.unbindAll()
         camera = null
     }
+
+    fun takePictureSafe(
+        outputOptions: ImageCapture.OutputFileOptions,
+        onSuccess: (ImageCapture.OutputFileResults) -> Unit,
+        onError: (ImageCaptureException) -> Unit
+    ): Boolean {
+        val cap = imageCapture ?: return false
+
+        cap.takePicture(
+            outputOptions,
+            mainExecutor,
+            object : ImageCapture.OnImageSavedCallback {
+                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                    onSuccess(outputFileResults)
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    onError(exception)
+                }
+            }
+        )
+        return true
+    }
 }

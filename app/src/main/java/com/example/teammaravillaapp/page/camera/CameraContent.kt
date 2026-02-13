@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
@@ -31,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.GeneralBackground
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 
 /**
  * Pantalla de cámara (UI pura / capa de **presentación**).
@@ -84,6 +85,7 @@ import com.example.teammaravillaapp.component.GeneralBackground
  * )
  * }
  */
+
 @Composable
 fun CameraContent(
     uiState: CameraUiState,
@@ -119,14 +121,13 @@ fun CameraContent(
 
     GeneralBackground(overlayAlpha = 0.18f) {
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(text = title, style = MaterialTheme.typography.titleLarge)
 
-            // Sin permiso
             if (!uiState.hasPermission) {
                 Surface(
                     shape = MaterialTheme.shapes.medium,
@@ -134,7 +135,7 @@ fun CameraContent(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        Modifier.padding(12.dp),
+                        modifier = Modifier.padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(permissionMissing)
@@ -146,7 +147,6 @@ fun CameraContent(
                 return@GeneralBackground
             }
 
-            // Foto capturada
             if (uiState.capturedUri != null) {
                 Surface(
                     shape = MaterialTheme.shapes.large,
@@ -158,12 +158,12 @@ fun CameraContent(
                         contentDescription = stringResource(R.string.camera_captured_image_cd),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 240.dp)
+                            .weight(1f, fill = false)
                     )
                 }
 
                 Row(
-                    Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     OutlinedButton(
@@ -175,7 +175,7 @@ fun CameraContent(
                     Button(
                         onClick = onSaveReceipt,
                         modifier = Modifier.weight(1f),
-                        enabled = !uiState.isSaving && canSaveReceipt
+                        enabled = !uiState.isSaving
                     ) { Text(if (uiState.isSaving) saving else saveReceipt) }
                 }
 
@@ -183,64 +183,77 @@ fun CameraContent(
                 return@GeneralBackground
             }
 
-            // Hueco visual donde el contenedor superpone PreviewView (runtime) o placeholder (preview)
-            Surface(
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = 1.dp,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 320.dp)
+                    .weight(1f)
             ) {
-                if (previewContent != null) previewContent()
-            }
-
-            // Controles (fila 1): lens / capture / flash / torch
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onToggleLens) {
-                    Icon(Icons.Default.Cached, contentDescription = cdToggleLens)
-                }
-
-                FilledIconButton(onClick = onCapture, enabled = !uiState.isCapturing) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = cdCapture)
-                }
-
-                IconButton(onClick = onToggleFlash) {
-                    Icon(
-                        if (uiState.flashEnabled) Icons.Default.FlashOn else Icons.Default.FlashOff,
-                        contentDescription = cdFlash
-                    )
-                }
-
-                IconButton(onClick = onToggleTorch) {
-                    Icon(
-                        if (uiState.torchEnabled) Icons.Default.FlashlightOn else Icons.Default.FlashlightOff,
-                        contentDescription = cdTorch
-                    )
-                }
-            }
-
-            // Zoom (fila 2)
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    tonalElevation = 1.dp,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(zoomLabel, style = MaterialTheme.typography.titleSmall)
-                    Text(zoomText, style = MaterialTheme.typography.bodyMedium)
+                    previewContent?.invoke()
                 }
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = onToggleLens) {
+                            Icon(Icons.Default.Cached, contentDescription = cdToggleLens)
+                        }
 
-                Slider(
-                    value = uiState.zoomRatio.coerceIn(1f, uiState.maxZoomRatio),
-                    onValueChange = onZoomChange,
-                    valueRange = 1f..uiState.maxZoomRatio.coerceAtLeast(1f),
-                    enabled = uiState.maxZoomRatio > 1f
-                )
+                        FilledIconButton(
+                            onClick = onCapture,
+                            enabled = !uiState.isCapturing
+                        ) {
+                            Icon(Icons.Default.PhotoCamera, contentDescription = cdCapture)
+                        }
+
+                        IconButton(onClick = onToggleFlash) {
+                            Icon(
+                                if (uiState.flashEnabled) Icons.Default.FlashOn else Icons.Default.FlashOff,
+                                contentDescription = cdFlash
+                            )
+                        }
+
+                        IconButton(onClick = onToggleTorch) {
+                            Icon(
+                                if (uiState.torchEnabled) Icons.Default.FlashlightOn else Icons.Default.FlashlightOff,
+                                contentDescription = cdTorch
+                            )
+                        }
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(zoomLabel, style = MaterialTheme.typography.titleSmall)
+                            Text(zoomText, style = MaterialTheme.typography.bodyMedium)
+                        }
+
+                        Slider(
+                            value = uiState.zoomRatio.coerceIn(1f, uiState.maxZoomRatio),
+                            onValueChange = onZoomChange,
+                            valueRange = 1f..uiState.maxZoomRatio.coerceAtLeast(1f),
+                            enabled = uiState.maxZoomRatio > 1f
+                        )
+                    }
+                }
             }
+
+            Spacer(Modifier.padding(top = 4.dp))
 
             OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(back) }
         }
