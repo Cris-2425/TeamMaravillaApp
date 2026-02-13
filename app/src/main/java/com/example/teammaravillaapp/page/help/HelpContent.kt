@@ -64,7 +64,7 @@ fun HelpContent(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Title(texto = stringResource(R.string.help_title))
+            Spacer(Modifier.height(12.dp))
 
             Text(
                 text = stringResource(R.string.help_subtitle),

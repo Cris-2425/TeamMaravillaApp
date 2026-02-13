@@ -3,7 +3,7 @@ package com.example.teammaravillaapp.page.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.teammaravillaapp.model.ThemeMode
 import com.example.teammaravillaapp.ui.app.ThemeViewModel

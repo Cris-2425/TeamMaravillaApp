@@ -72,12 +72,13 @@ fun SettingsContent(
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Title(texto = stringResource(R.string.settings_title))
 
                 Surface(
                     shape = MaterialTheme.shapes.extraLarge,
                     tonalElevation = 2.dp
                 ) {
+                    Spacer(Modifier.height(12.dp))
+
                     Column(
                         Modifier
                             .fillMaxWidth()

@@ -86,15 +86,6 @@ fun RecipesContent(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
             ) {
-                Spacer(Modifier.height(18.dp))
-
-                Title(
-                    texto = if (uiState.showMine)
-                        stringResource(R.string.recipes_title_mine)
-                    else
-                        stringResource(R.string.recipes_title_all)
-                )
-
                 Spacer(Modifier.height(12.dp))
 
                 Surface(

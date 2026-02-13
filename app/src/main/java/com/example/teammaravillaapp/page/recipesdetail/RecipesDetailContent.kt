@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -38,7 +39,7 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.component.GeneralBackground
 import com.example.teammaravillaapp.component.ProductBubble
 import com.example.teammaravillaapp.model.Recipe
-
+import androidx.compose.foundation.layout.Row
 
 /**
  * UI pura del detalle de receta.
@@ -63,6 +64,7 @@ import com.example.teammaravillaapp.model.Recipe
  * )
  * }
  */
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipesDetailContent(
@@ -99,163 +101,163 @@ fun RecipesDetailContent(
                 else -> {
                     val recipe: Recipe = uiState.recipe ?: return@GeneralBackground
 
-                    Column(
-                        Modifier
+                    LazyColumn(
+                        modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp),
+                        contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
-                        Spacer(Modifier.height(10.dp))
 
-                        // HEADER
-                        Surface(
-                            shape = RoundedCornerShape(28.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            tonalElevation = 2.dp,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                        item { Spacer(Modifier.height(10.dp)) }
+
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(28.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tonalElevation = 2.dp,
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                // title row
-                                androidx.compose.foundation.layout.Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                Column(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 14.dp, vertical = 10.dp)
                                 ) {
-                                    Text(
-                                        text = recipe.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        modifier = Modifier.weight(1f),
-                                        maxLines = 1
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Text(
+                                            text = recipe.title,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            modifier = Modifier.weight(1f),
+                                            maxLines = 1
+                                        )
 
-                                    IconButton(onClick = onToggleFavorite) {
-                                        Icon(
-                                            imageVector = if (uiState.isFavorite)
-                                                Icons.Filled.Favorite
-                                            else
-                                                Icons.Outlined.FavoriteBorder,
-                                            contentDescription = null,
-                                            tint = if (uiState.isFavorite)
-                                                MaterialTheme.colorScheme.primary
-                                            else
-                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                        IconButton(onClick = onToggleFavorite) {
+                                            Icon(
+                                                imageVector = if (uiState.isFavorite)
+                                                    Icons.Filled.Favorite
+                                                else
+                                                    Icons.Outlined.FavoriteBorder,
+                                                contentDescription = null,
+                                                tint = if (uiState.isFavorite)
+                                                    MaterialTheme.colorScheme.primary
+                                                else
+                                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
+                            Surface(
+                                shape = MaterialTheme.shapes.extraLarge,
+                                tonalElevation = 2.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                val img = recipe.imageRes
+                                if (img != null && img != 0) {
+                                    Image(
+                                        painter = painterResource(img),
+                                        contentDescription = stringResource(R.string.recipe_image_content_description),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(190.dp)
+                                            .clip(MaterialTheme.shapes.extraLarge)
+                                            .clickable { },
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(190.dp)
+                                            .clip(MaterialTheme.shapes.extraLarge)
+                                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.recipe_image_placeholder),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
                                     }
                                 }
                             }
                         }
 
-                        Spacer(Modifier.height(16.dp))
+                        item {
+                            Text(
+                                text = stringResource(R.string.recipe_ingredients_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start
+                            )
+                        }
 
-                        // IMAGEN
-                        Surface(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            tonalElevation = 2.dp,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            val img = recipe.imageRes
-                            if (img != null && img != 0) {
-                                Image(
-                                    painter = painterResource(img),
-                                    contentDescription = stringResource(R.string.recipe_image_content_description),
+                        item {
+                            Surface(
+                                shape = MaterialTheme.shapes.extraLarge,
+                                tonalElevation = 1.dp,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                FlowRow(
+                                    maxItemsInEachRow = 3,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(190.dp)
-                                        .clip(MaterialTheme.shapes.extraLarge)
-                                        .clickable { /* opcional */ },
-                                    contentScale = ContentScale.Crop
+                                        .padding(12.dp)
+                                ) {
+                                    uiState.ingredients.forEach { product ->
+                                        ProductBubble(product)
+                                    }
+                                }
+                            }
+                        }
+
+                        if (recipe.instructions.isNotBlank()) {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.recipe_instructions_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(190.dp)
-                                        .clip(MaterialTheme.shapes.extraLarge)
-                                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                                    contentAlignment = Alignment.Center
+                            }
+
+                            item {
+                                Surface(
+                                    shape = MaterialTheme.shapes.extraLarge,
+                                    tonalElevation = 1.dp,
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.recipe_image_placeholder),
+                                        text = recipe.instructions,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                        modifier = Modifier.padding(14.dp)
                                     )
                                 }
                             }
                         }
 
-                        Spacer(Modifier.height(18.dp))
-
-                        // INGREDIENTES
-                        Text(
-                            text = stringResource(R.string.recipe_ingredients_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Start
-                        )
-
-                        Spacer(Modifier.height(10.dp))
-
-                        Surface(
-                            shape = MaterialTheme.shapes.extraLarge,
-                            tonalElevation = 1.dp,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            FlowRow(
-                                maxItemsInEachRow = 3,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp)
+                        item {
+                            Button(
+                                onClick = { onAddToShoppingList(recipe.id) },
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(vertical = 14.dp)
                             ) {
-                                uiState.ingredients.forEach { product ->
-                                    ProductBubble(product)
-                                }
+                                Text(text = stringResource(R.string.recipe_add_ingredients_button))
                             }
                         }
 
-                        Spacer(Modifier.height(18.dp))
-
-                        // PREPARACIÓN
-                        if (recipe.instructions.isNotBlank()) {
-                            Text(
-                                text = stringResource(R.string.recipe_instructions_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(Modifier.height(8.dp))
-
-                            Surface(
-                                shape = MaterialTheme.shapes.extraLarge,
-                                tonalElevation = 1.dp,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = recipe.instructions,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(14.dp)
-                                )
-                            }
-
-                            Spacer(Modifier.height(18.dp))
-                        }
-
-                        Button(
-                            onClick = { onAddToShoppingList(recipe.id) },
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(vertical = 14.dp)
-                        ) {
-                            Text(text = stringResource(R.string.recipe_add_ingredients_button))
-                        }
-
-                        Spacer(Modifier.height(100.dp))
+                        item { Spacer(Modifier.height(30.dp)) }
                     }
                 }
             }

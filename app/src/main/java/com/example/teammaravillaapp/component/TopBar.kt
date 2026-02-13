@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,13 +78,6 @@ fun TopBar(
             }
         },
         actions = {
-            IconButton(onClick = onSearchClick) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.topbar_search_cd)
-                )
-            }
-
             IconButton(onClick = { moreExpanded = true }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
@@ -123,7 +117,7 @@ fun TopBar(
                 )
             }
         },
-        colors = androidx.compose.material3.TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
     )
