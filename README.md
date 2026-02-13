@@ -1,8 +1,16 @@
-# 🧺✨ TeamMaravillaApp
+<p align="center">
+  <img src="docs/images/hero_banner.png" width="100%" />
+</p>
 
-## Offline-First Grocery Lists & Recipes Platform
+<h1 align="center">TeamMaravillaApp 🧺✨</h1>
+<p align="center">
+  Offline-First Grocery Lists & Recipes Platform
+</p>
 
-**Android · Jetpack Compose · Room · Retrofit · Hilt · MVVM**
+<p align="center">
+  <b>Android · Jetpack Compose · Room · Retrofit · Hilt · MVVM</b>
+</p>
+
 
 ---
 
@@ -32,23 +40,98 @@ This application was built to demonstrate:
 
 ---
 
-## 📸 Screenshots
-`docs/images/`
+## 📸 Application Screens
 
-### 🏠 Home Screen
-`docs/images/home.png`
+---
+
+### 🏠 Home
+![Home](docs/images/home.png)
+
+---
 
 ### 📝 List Detail
-`docs/images/list_detail.png`
+![List Detail](docs/images/list_detail.png)
+
+---
+
+### ➕ Create List
+![Create List](docs/images/create_list.png)
+
+---
+
+### 🔍 Category Filter
+![Category Filter](docs/images/category_filter.png)
+
+---
+
+### 🗂 List View Types
+![List View Types](docs/images/list_view_types.png)
+
+---
+
+### 🛒 Select List
+![Select List](docs/images/select_list.png)
+
+---
 
 ### 🍳 Recipes
-`docs/images/recipes.png`
+![Recipes](docs/images/recipes.png)
 
-### 👤 Profile & Settings
-`docs/images/profile.png`
+---
 
-### 📊 Stats Screen
-`docs/images/stats.png`
+### 📖 Recipe Detail
+![Recipe Detail](docs/images/recipe_detail.png)
+
+---
+
+### ⭐ Favorites (within Recipes)
+![Favorites](docs/images/favorites.png)
+
+---
+
+### 📊 Stats
+![Stats](docs/images/stats.png)
+
+---
+
+### 🕘 History
+![History](docs/images/history.png)
+
+---
+
+### 👤 Profile
+![Profile](docs/images/profile.png)
+
+---
+
+### ⚙ Settings
+![Settings](docs/images/settings.png)
+
+---
+
+### 🔐 Login
+![Login](docs/images/login.png)
+
+---
+
+### 📝 Register
+![Register](docs/images/register.png)
+
+---
+
+### 📷 Camera / Receipt
+![Camera](docs/images/camera.png)
+
+---
+
+### 💡 Help
+![Help](docs/images/help.png)
+
+---
+
+### 🚀 Splash
+![Splash](docs/images/splash.png)
+
 
 ---
 
