@@ -9,11 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ImageCapture
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,15 +19,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -101,6 +95,13 @@ fun CameraScreen(
 
     val controller = remember { CameraXController(context) }
 
+    val previewView = remember {
+        PreviewView(context).apply {
+            scaleType = PreviewView.ScaleType.FILL_CENTER
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted -> vm.onPermissionResult(granted) }
@@ -109,54 +110,28 @@ fun CameraScreen(
         permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    var previewViewRef by remember { mutableStateOf<PreviewView?>(null) }
-
-    // Re-bindea cuando cambie lente/permisos y solo si no hay foto capturada
-    LaunchedEffect(uiState.hasPermission, uiState.lensFacing, uiState.capturedUri) {
+    LaunchedEffect(uiState.hasPermission, uiState.lensFacing, uiState.flashEnabled, uiState.capturedUri) {
         if (uiState.hasPermission && uiState.capturedUri == null) {
-            previewViewRef?.let { pv ->
-                controller.bind(
-                    previewView = pv,
-                    lifecycleOwner = lifecycleOwner,
-                    lensFacing = uiState.lensFacing,
-                    flashEnabled = uiState.flashEnabled,
-                    onBound = { maxZoom ->
-                        vm.onMaxZoomKnown(maxZoom)
-                        // Ajuste defensivo del zoom actual al rango
-                        vm.setZoomRatio(uiState.zoomRatio.coerceIn(1f, maxZoom.coerceAtLeast(1f)))
-                    }
-                )
-            }
+            controller.bind(
+                previewView = previewView,
+                lifecycleOwner = lifecycleOwner,
+                lensFacing = uiState.lensFacing,
+                flashEnabled = uiState.flashEnabled,
+                onBound = { maxZoom ->
+                    vm.onMaxZoomKnown(maxZoom)
+                    vm.setZoomRatio(uiState.zoomRatio.coerceIn(1f, maxZoom.coerceAtLeast(1f)))
+                }
+            )
         }
     }
 
-    LaunchedEffect(uiState.flashEnabled) {
-        controller.updateFlash(uiState.flashEnabled)
-    }
-
-    // Torch (linterna continua)
-    LaunchedEffect(uiState.torchEnabled) {
-        controller.setTorch(uiState.torchEnabled)
-    }
-
-    // Zoom ratio
-    LaunchedEffect(uiState.zoomRatio) {
-        controller.setZoomRatio(uiState.zoomRatio)
-    }
+    LaunchedEffect(uiState.torchEnabled) { controller.setTorch(uiState.torchEnabled) }
+    LaunchedEffect(uiState.zoomRatio) { controller.setZoomRatio(uiState.zoomRatio) }
 
     DisposableEffect(Unit) {
         onDispose { controller.unbind() }
     }
 
-    /**
-     * Crea una URI de salida en MediaStore para almacenar la foto capturada.
-     *
-     * Motivo: evitar escribir directamente en rutas de archivo y delegar en el sistema
-     * (compatibilidad con scoped storage).
-     *
-     * @return [Uri] válida si MediaStore puede crear el registro; `null` si la inserción falla.
-     * @throws SecurityException si el sistema deniega acceso a MediaStore (raro, pero posible).
-     */
     fun createOutputUri(): Uri? {
         val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val name = "TM_receipt_$time"
@@ -173,73 +148,50 @@ fun CameraScreen(
         )
     }
 
-    Box(Modifier.fillMaxSize()) {
+    CameraContent(
+        uiState = uiState,
+        onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+        onToggleLens = vm::toggleLens,
+        onToggleFlash = vm::toggleFlash,
+        onToggleTorch = vm::toggleTorch,
+        onZoomChange = vm::setZoomRatio,
+        onCapture = {
+            vm.onCaptureStarted()
 
-        CameraContent(
-            uiState = uiState,
-            onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-            onToggleLens = vm::toggleLens,
-            onToggleFlash = vm::toggleFlash,
-            onToggleTorch = vm::toggleTorch,
-            onZoomChange = vm::setZoomRatio,
-            onCapture = {
-                val uri = createOutputUri()
-                if (uri == null) {
-                    vm.onCaptureFailed()
-                    return@CameraContent
-                }
+            val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val name = "TM_receipt_$time"
 
-                vm.onCaptureStarted()
-
-                val output = ImageCapture.OutputFileOptions
-                    .Builder(context.contentResolver, uri, ContentValues())
-                    .build()
-
-                controller.takePicture(
-                    outputOptions = output,
-                    onSuccess = { vm.onCaptured(uri) },
-                    onError = { vm.onCaptureFailed() }
-                )
-            },
-            onRetake = vm::retake,
-            onSaveReceipt = { vm.saveReceipt(listId) },
-            onBack = onBack,
-            canSaveReceipt = !listId.isNullOrBlank()
-        )
-
-        // Capa real de PreviewView (solo runtime)
-        if (uiState.hasPermission && uiState.capturedUri == null) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 64.dp)
-                    .heightIn(min = 320.dp),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = 1.dp
-            ) {
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { ctx ->
-                        PreviewView(ctx).also { pv ->
-                            pv.scaleType = PreviewView.ScaleType.FILL_CENTER
-                            previewViewRef = pv
-
-                            controller.bind(
-                                previewView = pv,
-                                lifecycleOwner = lifecycleOwner,
-                                lensFacing = uiState.lensFacing,
-                                flashEnabled = uiState.flashEnabled,
-                                onBound = { maxZoom ->
-                                    vm.onMaxZoomKnown(maxZoom)
-                                    vm.setZoomRatio(uiState.zoomRatio.coerceIn(1f, maxZoom.coerceAtLeast(1f)))
-                                }
-                            )
-                        }
-                    }
-                )
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, "$name.jpg")
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/TeamMaravilla")
             }
+
+            val output = ImageCapture.OutputFileOptions
+                .Builder(context.contentResolver, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                .build()
+
+            controller.takePicture(
+                outputOptions = output,
+                onSuccess = { results ->
+                    val saved = results.savedUri
+                    if (saved != null) vm.onCaptured(saved)
+                    else vm.onCaptureFailed()
+                },
+                onError = { vm.onCaptureFailed() }
+            )
+        },
+        onRetake = vm::retake,
+        onSaveReceipt = { vm.saveReceipt(listId) },
+        onBack = onBack,
+        canSaveReceipt = !listId.isNullOrBlank(),
+        previewContent = {
+            AndroidView(
+                factory = { previewView },
+                modifier = Modifier.fillMaxSize()
+            )
         }
-    }
+    )
 }
 
 /**
