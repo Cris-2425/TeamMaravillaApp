@@ -6,6 +6,7 @@ import com.example.teammaravillaapp.R
 import com.example.teammaravillaapp.data.local.repository.stats.StatsRepository
 import com.example.teammaravillaapp.ui.events.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -41,7 +42,7 @@ class StatsViewModel @Inject constructor(
     private val repository: StatsRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(StatsUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(StatsUiState(isLoading = false))
     val uiState: StateFlow<StatsUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 1)
@@ -68,35 +69,36 @@ class StatsViewModel @Inject constructor(
      * OutlinedButton(onClick = vm::refresh) { Text("Reintentar") }
      * }
      */
+
+    private var refreshJob: Job? = null
+
     fun refresh() {
         viewModelScope.launch {
-            if (_uiState.value.isLoading) return@launch
+            if (refreshJob?.isActive == true) return@launch
+            refreshJob = viewModelScope.launch {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
-            runCatching { repository.loadStats() }
-                .onSuccess { snap ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = null,
-                        lists = snap.lists,
-                        products = snap.products,
-                        recipes = snap.recipes,
-                        favorites = snap.favorites,
-                        totalItems = snap.totalItems,
-                        checkedItems = snap.checkedItems,
-                        listsLast7Days = snap.listsLast7Days,
-                        itemsLast7Days = snap.itemsLast7Days,
-                        topProducts = snap.topProducts
-                    )
-                }
-                .onFailure { t ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = t
-                    )
-                    _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_stats_load_failed))
-                }
+                runCatching { repository.loadStats() }
+                    .onSuccess { snap ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = null,
+                            lists = snap.lists,
+                            products = snap.products,
+                            recipes = snap.recipes,
+                            favorites = snap.favorites,
+                            totalItems = snap.totalItems,
+                            checkedItems = snap.checkedItems,
+                            listsLast7Days = snap.listsLast7Days,
+                            itemsLast7Days = snap.itemsLast7Days,
+                            topProducts = snap.topProducts
+                        )
+                    }
+                    .onFailure { t ->
+                        _uiState.value = _uiState.value.copy(isLoading = false, error = t)
+                        _events.tryEmit(UiEvent.ShowSnackbar(R.string.snackbar_stats_load_failed))
+                    }
+            }
         }
     }
 }
