@@ -327,7 +327,7 @@ This software is provided for portfolio and evaluation purposes only.
 No permission is granted to copy, modify, distribute, sublicense, or sell any part of this software without explicit written authorization from the author.
 
 👤 Author
-Cristian R. & Rolando O.
+Cristian R.
 Android Developer
 
 Jetpack Compose · Clean Architecture · Offline-First Systems
