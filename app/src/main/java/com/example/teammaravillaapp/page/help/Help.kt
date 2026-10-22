@@ -66,9 +66,21 @@ fun Help(
         }
     }
 
+    fun openManualPdf() {
+        try {
+            context.startActivity(
+                Intent(context, HelpManualActivity::class.java)
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            onUiEvent(UiEvent.ShowSnackbar(R.string.snackbar_action_failed))
+        }
+    }
+
     HelpContent(
         versionName = BuildConfig.VERSION_NAME,
         onSendFeedback = ::sendFeedbackEmail,
+        onOpenManual = ::openManualPdf,
         onBack = onBack
     )
 }

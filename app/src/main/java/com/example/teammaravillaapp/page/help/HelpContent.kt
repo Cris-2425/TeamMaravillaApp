@@ -54,6 +54,7 @@ import com.example.teammaravillaapp.ui.theme.TeamMaravillaAppTheme
 fun HelpContent(
     versionName: String,
     onSendFeedback: () -> Unit,
+    onOpenManual: () -> Unit,
     onBack: () -> Unit
 ) {
     GeneralBackground(overlayAlpha = 0.20f) {
@@ -121,6 +122,24 @@ fun HelpContent(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
+
+            SectionCardHelp(title = stringResource(R.string.help_manual_title)) {
+                Text(
+                    text = stringResource(R.string.help_manual_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+                Button(
+                    onClick = onOpenManual,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 14.dp)
+                ) {
+                    Text(stringResource(R.string.help_manual_button))
+                }
+            }
             //Spacer(Modifier.height(70.dp))
         }
     }
@@ -133,6 +152,7 @@ private fun PreviewHelpContent() {
         HelpContent(
             versionName = "1.2.0",
             onSendFeedback = {},
+            onOpenManual = { },
             onBack = {}
         )
     }

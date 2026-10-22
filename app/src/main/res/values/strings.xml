@@ -260,6 +260,11 @@
     <string name="help_feedback_subject">Feedback TeamMaravillaApp (%1$s)</string>
     <string name="help_feedback_body">Hello!\n\nI want to share this feedback:\n\n\n---\nVersion: %1$s (%2$d)\n</string>
     <string name="help_version_format">v%1$s</string>
+    <string name="help_manual_title">User manual</string>
+    <string name="help_manual_body">Consult the complete application manual in PDF format without an internet connection.</string>
+    <string name="help_manual_button">Open offline manual</string>
+    <string name="help_manual_chooser">Open manual with</string>
+    <string name="help_manual_no_viewer">There is no application installed to open PDF files.</string>
 
     <!-- History -->
     <string name="history_title">Browsing history</string>

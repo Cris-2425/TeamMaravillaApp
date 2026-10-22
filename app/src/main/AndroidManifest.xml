@@ -20,7 +20,15 @@
         android:roundIcon="@mipmap/ic_tm_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TeamMaravillaApp.Splash">
-
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -32,6 +40,9 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:name=".page.help.HelpManualActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
